@@ -75,12 +75,7 @@ class BStaticsViewBody extends StatelessWidget {
 
   Widget _buildStatisticsCards(StatisticsController controller) {
     List<Map<String, dynamic>> stats = [
-      {
-        'title': 'allAppointments'.tr,
-        'value': controller.barberStats.value.totalAppointments.toString(),
-        'unit': 'appointment'.tr,
-        'svgImagePath': AssetsData.calendarIcon,
-      },
+
       {
         'title': 'workingHours'.tr,
         'value': controller.barberStats.value.workingHours.toStringAsFixed(1),
@@ -114,6 +109,12 @@ class BStaticsViewBody extends StatelessWidget {
       {
         'title': 'notComeTotal'.tr,
         'value': controller.barberStats.value.notComeTotal.toString(),
+        'unit': 'appointment'.tr,
+        'svgImagePath': AssetsData.calendarIcon,
+      },
+      {
+        'title': 'allAppointments'.tr,
+        'value': controller.barberStats.value.totalAppointments.toString(),
         'unit': 'appointment'.tr,
         'svgImagePath': AssetsData.calendarIcon,
       },

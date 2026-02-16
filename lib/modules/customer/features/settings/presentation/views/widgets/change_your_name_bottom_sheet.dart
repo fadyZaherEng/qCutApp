@@ -142,7 +142,8 @@ class ChangeYourNameBottomSheet extends StatelessWidget {
 }
 
 class BChangeYourNameBottomSheet extends StatelessWidget {
-    BChangeYourNameBottomSheet({super.key});
+  BChangeYourNameBottomSheet({super.key});
+
   TextEditingController name = TextEditingController();
 
   @override
@@ -196,16 +197,16 @@ class BChangeYourNameBottomSheet extends StatelessWidget {
             CustomBigButton(
               textData: "confirm".tr,
               onPressed: () async {
-                var response = await NetworkAPICall()
-                    .editData("${Variables.baseUrl}authentication", {
-                  "fullName": name.text,
-                });
+                var response = await NetworkAPICall().editData(
+                  "${Variables.baseUrl}authentication",
+                  {"fullName": name.text},
+                );
 
                 response.statusCode == 200
                     ? {
                         SharedPref().setString(PrefKeys.fullName, name.text),
                         fullName = name.text,
-                        Get.back()
+                        Get.back(),
                       }
                     : showDialog(
                         context: context,
