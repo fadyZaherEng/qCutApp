@@ -176,11 +176,12 @@ class _ChangeTimeBottomSheetState extends State<ChangeTimeBottomSheet> {
       print('Response Body: $responseBody');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        ShowToast.showSuccessSnackBar(
-          message: "Request sent successfully".tr,
-        );
         Get.back();
-      } else {
+        ShowToast.showSuccessSnackBar(
+          message: responseBody['message'] ?? "Request sent successfully".tr,
+        );
+        controller.refreshAppointments();
+       } else {
         String errorMsg = responseBody['message'] ?? 'failedToBookAppointment'.tr;
         ShowToast.showError(message: errorMsg);
         // Remove Get.back() to keep the bottom sheet open on failure
