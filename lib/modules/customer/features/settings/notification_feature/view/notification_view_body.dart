@@ -17,11 +17,42 @@ class NotificationViewBody extends StatelessWidget {
     final viewModel = Get.put(NotificationViewModel());
 
     return Obx(() {
-      // Show loading yellow circle while fetching data or if the list is empty
-      if (viewModel.displayedNotifications.isEmpty) {
+      // Show loading spinner only when actively loading
+      if (viewModel.isLoading.value) {
         return Center(
           child: CircularProgressIndicator(
             color: ColorsData.primary,
+          ),
+        );
+      }
+
+      // Show empty state if no notifications
+      if (viewModel.displayedNotifications.isEmpty) {
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.notifications_off_outlined,
+                size: 80.sp,
+                color: ColorsData.primary.withOpacity(0.5),
+              ),
+              SizedBox(height: 16.h),
+              Text(
+                'noNotifications'.tr,
+                style: Styles.textStyleS16W700(
+                  color: ColorsData.primary.withOpacity(0.7),
+                ),
+              ),
+              SizedBox(height: 8.h),
+              Text(
+                'noNotificationsMessage'.tr,
+                style: Styles.textStyleS14W400(
+                  color: ColorsData.primary.withOpacity(0.5),
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
           ),
         );
       }
