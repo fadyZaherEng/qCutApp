@@ -30,18 +30,11 @@ class BarberServicesView extends StatelessWidget {
       barber = arguments['barber'];
       preSelectedServiceIds = arguments['preSelectedServiceIds'];
     } else {
-      // Fallback or error handling
-      barber = Barber(
-          id: "",
-          fullName: "",
-          phoneNumber: "",
-          userType: "",
-          city: "",
-          isFavorite: false,
-          status: "",
-          offDay: [],
-          workingDays: [],
-          instagramPage: ""); // Should handle better
+      // Fallback redirect to home if arguments are missing
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Get.offAllNamed(AppRouter.bottomNavigationBar);
+      });
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     controller.barberId.value = barber.id;

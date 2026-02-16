@@ -72,21 +72,30 @@ class _SettingViewBodyState extends State<SettingViewBody> {
                     ),
                   ),
                   SizedBox(height: 14.h),
-                  buildDrawerItem("changeYourName".tr, AssetsData.profileIcon,
-                      () async {
-                    await showChangeYourNameBottomSheet(context);
-                    profileController.fetchProfileData();
-                  }),
+                  buildDrawerItem(
+                    "changeYourName".tr,
+                    AssetsData.profileIcon,
+                    () async {
+                      await showChangeYourNameBottomSheet(context);
+                      profileController.fetchProfileData();
+                    },
+                  ),
                   buildDivider(),
-                  buildDrawerItem("resetPassword".tr,
-                      AssetsData.resetPasswordBottomSheetIcon, () {
-                    Get.toNamed(AppRouter.resetPasswordPath, arguments: {
-                      "phoneNumber":
-                          profileController.profileData.value?.phoneNumber ??
+                  buildDrawerItem(
+                    "resetPassword".tr,
+                    AssetsData.resetPasswordBottomSheetIcon,
+                    () {
+                      Get.toNamed(
+                        AppRouter.resetPasswordPath,
+                        arguments: {
+                          "phoneNumber": profileController
+                                  .profileData.value?.phoneNumber ??
                               phoneNumber,
-                      "otp": '123456',
-                    });
-                  }),
+                          "otp": '123456',
+                        },
+                      );
+                    },
+                  ),
                   buildDivider(),
                   buildDrawerItem(
                       "changeLanguages".tr, AssetsData.changeLanguagesIcon, () {

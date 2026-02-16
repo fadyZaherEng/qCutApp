@@ -65,7 +65,7 @@ class _HomeViewState extends State<HomeView> {
   @override
   void didChangeDependencies() async {
     super.didChangeDependencies();
-    
+
     // Check if user is authenticated (not a guest)
     if (AuthHelper.isAuthenticated()) {
       await fetchProfileData();
@@ -214,7 +214,7 @@ class _HomeViewState extends State<HomeView> {
                         });
                       },
                     ),
-                    
+
                     // Guest user banner
                     if (!AuthHelper.isAuthenticated()) ...[
                       SizedBox(height: 12.h),
@@ -283,15 +283,19 @@ class _HomeViewState extends State<HomeView> {
                         ),
                       ),
                     ],
-                    
-                    SizedBox(height: 12.h),
+                    if (profileController.profileData.value?.city.isNotEmpty ??
+                        false)
+                      SizedBox(height: 12.h),
                     Row(
                       children: [
-                        SvgPicture.asset(
-                          AssetsData.mapPinIcon,
-                          width: 24.w,
-                          height: 24.h,
-                        ),
+                        if (profileController
+                                .profileData.value?.city.isNotEmpty ??
+                            false)
+                          SvgPicture.asset(
+                            AssetsData.mapPinIcon,
+                            width: 24.w,
+                            height: 24.h,
+                          ),
                         SizedBox(width: 2.w),
                         Flexible(
                           child: Text(
@@ -300,12 +304,6 @@ class _HomeViewState extends State<HomeView> {
                             maxLines: 2,
                             style: Styles.textStyleS12W400(),
                           ),
-                        ),
-                        SizedBox(width: 2.w),
-                        SvgPicture.asset(
-                          AssetsData.downArrowIcon,
-                          width: 24.w,
-                          height: 24.h,
                         ),
                       ],
                     ),

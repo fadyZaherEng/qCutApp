@@ -83,27 +83,34 @@ class BSettingViewBody extends StatelessWidget {
                               color: ColorsData.primary, size: 30)),
                     ),
                   SizedBox(height: 14.h),
-                  buildDrawerItem("changeYourName".tr, AssetsData.profileIcon,
-                      () async {
-                    await Get.bottomSheet(
-                      BChangeYourNameBottomSheet(),
-                      isScrollControlled: true,
-                    );
-                    // Refresh data after bottom sheet closes to be safe
-                    profileController.fetchProfileData();
-                  }),
+                  buildDrawerItem(
+                    "changeYourName".tr,
+                    AssetsData.profileIcon,
+                    () async {
+                      await Get.bottomSheet(
+                        BChangeYourNameBottomSheet(),
+                        isScrollControlled: true,
+                      );
+                      // Refresh data after bottom sheet closes to be safe
+                      profileController.fetchProfileData();
+                    },
+                  ),
                   buildDivider(),
-                  buildDrawerItem("resetPassword".tr,
-                      AssetsData.resetPasswordBottomSheetIcon, () {
-                    Get.toNamed(
-                      AppRouter.resetPasswordPath,
-                      arguments: {
-                        "phoneNumber": profileController.profileData.value?.phoneNumber ??
-                            phoneNumber,
-                        "otp": '123456',
-                      }
-                    );
-                  }),
+                  buildDrawerItem(
+                    "resetPassword".tr,
+                    AssetsData.resetPasswordBottomSheetIcon,
+                    () {
+                      Get.toNamed(
+                        AppRouter.resetPasswordPath,
+                        arguments: {
+                          "phoneNumber": profileController
+                                  .profileData.value?.phoneNumber ??
+                              phoneNumber,
+                          "otp": '123456',
+                        },
+                      );
+                    },
+                  ),
                   buildDivider(),
                   buildDrawerItem(
                       "changeLanguages".tr, AssetsData.changeLanguagesIcon, () {

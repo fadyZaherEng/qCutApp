@@ -240,13 +240,11 @@ class AuthController extends GetxController {
         ShowToast.showSuccessSnackBar(message: "loggedInSuccessfully".tr);
         
         // Check if there's a pending route to return to
-        final pendingRoute = SharedPref().getString(PrefKeys.pendingRoute);
-        if (pendingRoute != null && pendingRoute.isNotEmpty) {
+        // We clear it but navigate to home to prevent crashes due to missing arguments
+        if (SharedPref().getString(PrefKeys.pendingRoute) != null) {
           SharedPref().removePreference(PrefKeys.pendingRoute);
-          Get.offAllNamed(pendingRoute);
-        } else {
-          Get.offAllNamed(AppRouter.bottomNavigationBar);
         }
+        Get.offAllNamed(AppRouter.bottomNavigationBar);
       } else {
         errorMessage.value = responseBody['message'] ?? 'Failed to login';
         ShowToast.showError(message: errorMessage.value);

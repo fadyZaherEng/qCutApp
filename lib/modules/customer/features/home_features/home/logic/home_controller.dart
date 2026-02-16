@@ -363,83 +363,64 @@ class HomeController extends GetxController {
     isSearching.value = true;
     isLoading.value = true; // Show loading immediately
     _searchTimer = Timer(const Duration(milliseconds: 500), () async {
-      await getBarberBySalonName(query);
+      await searchBarberGeneral(query);
     });
   }
 
-  // Fetch barbers data by salon name
-  Future<void> getBarberBySalonName(String salonName) async {
+  // Fetch barbers data by salon name or barber name
+  Future<void> searchBarberGeneral(String query) async {
     isLoading.value = true;
     isError.value = false;
     errorMessage.value = '';
-    print("Searching for: $salonName");
+    print("Searching for: $query");
 
-    final prefs = await SharedPreferences.getInstance();
+    final q = query.toLowerCase();
+    final combinedMap = <String, Barber>{};
 
     try {
-      // 1. Local Search (for immediate and comprehensive results from already loaded data)
-      final q = salonName.toLowerCase();
-      final localResults = <Barber>{};
-
-      // Filter nearby and recommended barbers
+      // 1. Local Search (Full name and Shop name)
       for (var b in [...nearbyBarbers, ...recommendedBarbers]) {
         final nameMatch = b.fullName.toLowerCase().contains(q);
         final shopMatch = b.barberShop?.toLowerCase().contains(q) ?? false;
         if (nameMatch || shopMatch) {
-          localResults.add(b);
+          combinedMap[b.id] = b;
         }
       }
 
-      // 2. API Search
-      final response = await _apiCall
-          .getData("${Variables.SEARCH_BARBER_NAME}?name=$salonName&page=1");
-
-      print("Search response: ${response.body}");
-      if (response.statusCode == 200) {
-        final responseBody = json.decode(response.body);
-        final List<dynamic> results = responseBody['results'] ?? [];
-        final List<Barber> apiBarbers =
-            results.map((e) => Barber.fromJson(e)).toList();
-
-        // 3. Combine results and remove duplicates
-        final combinedMap = <String, Barber>{};
-
-        // Add local results first
-        for (var b in localResults) {
+      // 2. API Search - By Shop Name
+      final shopResponse = await _apiCall.getData("${Variables.SEARCH_BARBER_SHOP}?name=$query&page=1");
+      if (shopResponse.statusCode == 200) {
+        final List<dynamic> results = json.decode(shopResponse.body)['results'] ?? [];
+        for (var data in results) {
+          final b = Barber.fromJson(data);
           combinedMap[b.id] = b;
         }
+      }
 
-        // Add/Overwrite with API results
-        for (var b in apiBarbers) {
-          combinedMap[b.id] = b;
+      // 3. API Search - By Barber Name (Attempt)
+      try {
+        final nameResponse = await _apiCall.getData("${Variables.SEARCH_BARBER_FULL_NAME}?name=$query&page=1");
+        if (nameResponse.statusCode == 200) {
+          final List<dynamic> results = json.decode(nameResponse.body)['results'] ?? [];
+          for (var data in results) {
+            final b = Barber.fromJson(data);
+            combinedMap[b.id] = b;
+          }
         }
+      } catch (e) {
+        print("Optional name search API call failed: $e");
+      }
 
-        searchResults.value = combinedMap.values.toList();
-        totalBarbers.value = searchResults.length;
-      } else {
-        if (localResults.isNotEmpty) {
-          searchResults.value = localResults.toList();
-        } else {
-          isError.value = true;
-          errorMessage.value = json.decode(response.body)['message'] ??
-              'Failed to fetch search results';
-        }
+      searchResults.value = combinedMap.values.toList();
+      totalBarbers.value = searchResults.length;
+
+      if (searchResults.isEmpty && !isError.value) {
+        // No results found anywhere
       }
     } catch (e) {
       print("Search Exception: $e");
-      final q = salonName.toLowerCase();
-      final localResults = [...nearbyBarbers, ...recommendedBarbers].where((b) {
-        final nameMatch = b.fullName.toLowerCase().contains(q);
-        final shopMatch = b.barberShop?.toLowerCase().contains(q) ?? false;
-        return nameMatch || shopMatch;
-      }).toSet().toList();
-
-      if (localResults.isNotEmpty) {
-        searchResults.value = localResults;
-      } else {
-        isError.value = true;
-        errorMessage.value = 'Network error: $e';
-      }
+      isError.value = true;
+      errorMessage.value = 'Network error: $e';
     } finally {
       isLoading.value = false;
     }

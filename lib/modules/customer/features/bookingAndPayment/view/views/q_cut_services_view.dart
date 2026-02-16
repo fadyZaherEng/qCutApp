@@ -16,12 +16,20 @@ class QCutServicesView extends StatelessWidget {
   QCutServicesView({super.key});
 
   final QCutServicesController controller = Get.put(QCutServicesController());
-  final barber = Get.arguments["barber"] as Barber;
-  final isBarber = Get.arguments["isBarber"] as bool? ?? false;
-  final numberofUsers = Get.arguments["isMultiple"] as int;
 
   @override
   Widget build(BuildContext context) {
+    if (Get.arguments == null || Get.arguments is! Map || Get.arguments["barber"] == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Get.offAllNamed(AppRouter.bottomNavigationBar);
+      });
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    final barber = Get.arguments["barber"] as Barber;
+    final isBarber = Get.arguments["isBarber"] as bool? ?? false;
+    final numberofUsers = Get.arguments["isMultiple"] as int? ?? 1;
+
     print("num of users: $numberofUsers");
     controller.barberId.value = barber.id;
     controller.fetchServices(barber.id);

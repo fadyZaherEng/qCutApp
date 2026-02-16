@@ -9,10 +9,8 @@ import 'package:q_cut/core/utils/app_router.dart';
 import 'package:q_cut/core/utils/constants/assets_data.dart';
 import 'package:q_cut/core/utils/constants/colors_data.dart';
 import 'package:q_cut/core/utils/styles.dart';
-import 'package:q_cut/core/utils/widgets/custom_button.dart';
 import 'package:q_cut/main.dart';
 import 'package:q_cut/modules/barber/features/home_features/profile_features/profile_display/views/widgets/show_change_your_picture_dialog.dart';
-import 'package:q_cut/modules/customer/features/home_features/home/views/widgets/custom_home_app_bar.dart';
 import 'package:q_cut/modules/customer/features/home_features/profile_feature/logic/profile_controller.dart';
 import 'package:q_cut/modules/customer/features/home_features/profile_feature/views/widgets/show_change_user_info_bottom_sheet.dart';
 import 'package:q_cut/modules/customer/features/settings/presentation/views/functions/show_log_out_dialog.dart';
@@ -274,7 +272,15 @@ class _MyProfileViewState extends State<MyProfileView> {
                         SizedBox(height: 20.h),
                         buildDrawerItem("resetPassword".tr,
                             AssetsData.resetPasswordBottomSheetIcon, () {
-                          Get.toNamed(AppRouter.resetPasswordPath);
+                          Get.toNamed(
+                            AppRouter.resetPasswordPath,
+                            arguments: {
+                              "phoneNumber": profileController
+                                      .profileData.value?.phoneNumber ??
+                                  phoneNumber,
+                              "otp": '123456',
+                            },
+                          );
                         }),
                         buildDivider(),
                         buildDrawerItem(
@@ -389,7 +395,7 @@ class _MyProfileViewState extends State<MyProfileView> {
   _buildDrawerItem(
       String tr, IconData integrationInstructions, Null Function() param2) {
     bool isClicked = true;
-    return GestureDetector(
+    return InkWell(
       onTap: () async {
         if (isClicked) {
           isClicked = false;

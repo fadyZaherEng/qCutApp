@@ -25,6 +25,13 @@ class BookAppointmentView extends GetView<SelectAppointmentTimeController> {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(SelectAppointmentTimeController());
+    if (Get.arguments == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Get.offAllNamed(AppRouter.bottomNavigationBar);
+      });
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
     final selectedServices =
         Get.arguments["freeTimeRequestModel"] as FreeTimeRequestModel?;
     final barber = Get.arguments["barber"] as Barber;

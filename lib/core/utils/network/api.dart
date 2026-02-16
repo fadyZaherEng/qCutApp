@@ -22,7 +22,9 @@ class Variables {
 
   /// BARBER
   static const String BARBER = "${baseUrl}barber/";
-  static const String SEARCH_BARBER_NAME = "${BARBER}search-by-barberShop";
+  static const String SEARCH_BARBER_SHOP = "${BARBER}search-by-barberShop";
+  static const String SEARCH_BARBER_FULL_NAME = "${BARBER}search-by-name";
+  static const String SEARCH_BARBER_NAME = SEARCH_BARBER_SHOP; 
   static const String GET_BARBERS = "${BARBER}active/";
   static const String GET_BARBERS_FILTER = "${BARBER}search-by-city";
   static const String UPDATE_WALK_IN = "${BARBER}update-walk-in";

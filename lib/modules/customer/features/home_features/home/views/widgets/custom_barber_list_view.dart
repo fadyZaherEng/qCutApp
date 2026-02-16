@@ -24,9 +24,7 @@ class CustomBarberListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final HomeController controller = Get.find<HomeController>();
-    return SizedBox(
-      height: 281 * 3.h,
-      child: Obx(() {
+    return Obx(() {
         if (controller.isLoading.value) {
           return Center(
             child: SpinKitDoubleBounce(color: ColorsData.primary),
@@ -43,9 +41,7 @@ class CustomBarberListView extends StatelessWidget {
         if (displayBarbers.isEmpty) {
           return Center(
             child: Padding(
-              padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).size.height * 0.5,
-              ),
+              padding: EdgeInsets.symmetric(vertical: 5.h), // Reduced from 10.h
               child: Text(
                 "No barbers available".tr,
                 style: TextStyle(
@@ -73,6 +69,7 @@ class CustomBarberListView extends StatelessWidget {
             return SizedBox(
               height: 300.h,
               child: ListView.separated(
+                padding: EdgeInsets.zero,
                 physics: const BouncingScrollPhysics(),
                 scrollDirection: Axis.horizontal,
                 itemBuilder: (context, colIndex) {
@@ -88,7 +85,6 @@ class CustomBarberListView extends StatelessWidget {
             );
           }),
         );
-      }),
-    );
+      });
   }
 }

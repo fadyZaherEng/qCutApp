@@ -24,20 +24,17 @@ Barber? currentBarber;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // 1. Initialize Preferences first
   await SharedPref().instantiatePreferences();
 
   // 2. Initialize variables from preferences
-  profileImage = SharedPref().getString(PrefKeys.profilePic) ??
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQzph4xv23B3sfc8O09BVewi1IeI-FWnHVvyxsnzqa6muN8-XWy08Vu0teNV7zXZrV1h8M&usqp=CAU";
-  coverImage = SharedPref().getString(PrefKeys.coverPic) ??
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQzph4xv23B3sfc8O09BVewi1IeI-FWnHVvyxsnzqa6muN8-XWy08Vu0teNV7zXZrV1h8M&usqp=CAU";
-  fullName = SharedPref().getString(PrefKeys.fullName) ?? "Your Name";
-  phoneNumber = SharedPref().getString(PrefKeys.phoneNumber) ?? "300300";
+  profileImage = SharedPref().getString(PrefKeys.profilePic) ?? " ";
+  coverImage = SharedPref().getString(PrefKeys.coverPic) ?? " ";
+  fullName = SharedPref().getString(PrefKeys.fullName) ?? "";
+  phoneNumber = SharedPref().getString(PrefKeys.phoneNumber) ?? " ";
   currentBarberId = SharedPref().getString(PrefKeys.barberId) ?? "";
-  instagramLink = SharedPref().getString(PrefKeys.instagramLink) ??
-      "https://www.instagram.com/";
+  instagramLink = SharedPref().getString(PrefKeys.instagramLink) ?? "";
 
   String? barberJson = SharedPref().getString(PrefKeys.barber);
   if (barberJson != null) {
