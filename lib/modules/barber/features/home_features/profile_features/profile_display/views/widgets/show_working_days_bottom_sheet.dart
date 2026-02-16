@@ -33,6 +33,15 @@ Future<void> showBWorkingDaysBottomSheet(
     "Saturday",
   ];
 
+  // Try to get controller, but don't fail if it doesn't exist (customer viewing barber profile)
+  BProfileController? controller;
+  try {
+    controller = Get.find<BProfileController>();
+  } catch (e) {
+    // Controller doesn't exist - user is viewing as customer
+    controller = null;
+  }
+
   return await showModalBottomSheet(
     context: context,
     isScrollControlled: true,
@@ -42,7 +51,6 @@ Future<void> showBWorkingDaysBottomSheet(
     isDismissible: isDismissible,
     enableDrag: isDismissible,
     builder: (context) {
-      final controller = Get.find<BProfileController>();
       return Container(
         width: double.infinity,
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
@@ -79,27 +87,69 @@ Future<void> showBWorkingDaysBottomSheet(
               ],
             ),
             SizedBox(height: 16.h),
-            Obx(() {
-              final currentWorkingDays = controller.profileData.value?.workingDays ?? [];
-              return Column(
-                children: dayOrder.map((dayName) {
-                  final day = currentWorkingDays.firstWhere(
-                    (wd) => wd.day == dayName,
-                    orElse: () => WorkingDay(day: dayName, startHour: 0, endHour: 0),
-                  );
-                  final isWorking = currentWorkingDays.any((wd) => wd.day == dayName);
+            // If controller exists, use Obx to listen to changes, otherwise show static list
+            controller != null
+                ? Obx(() {
+                    final currentWorkingDays = controller!.profileData.value?.workingDays ?? [];
+                    return Column(
+                      children: dayOrder.map((dayName) {
+                        final day = currentWorkingDays.firstWhere(
+                          (wd) => wd.day == dayName,
+                          orElse: () => WorkingDay(day: dayName, startHour: 0, endHour: 0),
+                        );
+                        final isWorking = currentWorkingDays.any((wd) => wd.day == dayName);
 
-                  return Padding(
-                    padding: EdgeInsets.symmetric(vertical: 10.h),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          dayName.tr,
-                          style: Styles.textStyleS14W700(color: ColorsData.secondary),
-                        ),
-                        Row(
+                        return Padding(
+                          padding: EdgeInsets.symmetric(vertical: 10.h),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                dayName.tr,
+                                style: Styles.textStyleS14W700(color: ColorsData.secondary),
+                              ),
+                              Row(
+                                children: [
+                                  Text(
+                                    isWorking
+                                        ? "${"Working".tr}: ${day.workingHours}"
+                                        : "Not working".tr,
+                                    style: Styles.textStyleS14W400(
+                                        color: isWorking ? ColorsData.thirty : Colors.red),
+                                  ),
+                                  SizedBox(width: 12.w),
+                                  GestureDetector(
+                                    onTap: () {
+                                      _showEditDayBottomSheet(context, day, isWorking);
+                                    },
+                                    child: Icon(Icons.edit,
+                                        size: 18.sp, color: ColorsData.primary),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                    );
+                  })
+                : Column(
+                    children: dayOrder.map((dayName) {
+                      final day = workingDays.firstWhere(
+                        (wd) => wd.day == dayName,
+                        orElse: () => WorkingDay(day: dayName, startHour: 0, endHour: 0),
+                      );
+                      final isWorking = workingDays.any((wd) => wd.day == dayName);
+
+                      return Padding(
+                        padding: EdgeInsets.symmetric(vertical: 10.h),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
+                            Text(
+                              dayName.tr,
+                              style: Styles.textStyleS14W700(color: ColorsData.secondary),
+                            ),
                             Text(
                               isWorking
                                   ? "${"Working".tr}: ${day.workingHours}"
@@ -107,22 +157,11 @@ Future<void> showBWorkingDaysBottomSheet(
                               style: Styles.textStyleS14W400(
                                   color: isWorking ? ColorsData.thirty : Colors.red),
                             ),
-                            SizedBox(width: 12.w),
-                            GestureDetector(
-                              onTap: () {
-                                _showEditDayBottomSheet(context, day, isWorking);
-                              },
-                              child: Icon(Icons.edit,
-                                  size: 18.sp, color: ColorsData.primary),
-                            ),
                           ],
                         ),
-                      ],
-                    ),
-                  );
-                }).toList(),
-              );
-            }),
+                      );
+                    }).toList(),
+                  ),
           ],
         ),
       );
