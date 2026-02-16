@@ -13,6 +13,8 @@ import 'package:q_cut/core/utils/styles.dart';
 import 'package:q_cut/main.dart';
 import 'package:q_cut/modules/barber/features/home_features/appointment_feature/logic/appointment_controller.dart';
 import 'package:q_cut/modules/barber/features/home_features/appointment_feature/models/appointment_model.dart';
+import '../../../../../../core/services/shared_pref/pref_keys.dart';
+import '../../../../../../core/services/shared_pref/shared_pref.dart';
 
 class ChangeTimeBottomSheet extends StatefulWidget {
   final String? day;
@@ -179,10 +181,9 @@ class _ChangeTimeBottomSheetState extends State<ChangeTimeBottomSheet> {
         );
         Get.back();
       } else {
-        ShowToast.showError(
-          message: responseBody['message'] ?? 'An error occurred',
-        );
-        Get.back();
+        String errorMsg = responseBody['message'] ?? 'failedToBookAppointment'.tr;
+        ShowToast.showError(message: errorMsg);
+        // Remove Get.back() to keep the bottom sheet open on failure
       }
     } catch (e) {
       print('Error decoding response: $e');
@@ -483,7 +484,9 @@ class _ChangeTimeBottomSheetState extends State<ChangeTimeBottomSheet> {
                           ),
                         )
                       : Text(
-                          "request from customer".tr,
+                          (SharedPref().getBool(PrefKeys.userRole) ?? false)
+                              ? "request from customer".tr
+                              : "confirm".tr,
                           style: Styles.textStyleS16W600(color: Colors.white),
                         ),
                 ),
