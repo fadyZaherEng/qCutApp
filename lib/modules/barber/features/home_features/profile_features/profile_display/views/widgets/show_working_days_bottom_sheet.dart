@@ -20,8 +20,8 @@ void showWorkingDaysBottomSheet(BuildContext context) {
   );
 }
 
-void showBWorkingDaysBottomSheet(
-    BuildContext context, List<WorkingDay> workingDays) {
+Future<void> showBWorkingDaysBottomSheet(
+    BuildContext context, List<WorkingDay> workingDays, {bool isDismissible = true, VoidCallback? onClose}) async {
   // ✅ رتب الأيام من الأحد للسبت
   final dayOrder = [
     "Sunday",
@@ -33,92 +33,105 @@ void showBWorkingDaysBottomSheet(
     "Saturday",
   ];
 
-  showModalBottomSheet(
+  return await showModalBottomSheet(
     context: context,
     isScrollControlled: true,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
     ),
-    builder: (context) => Container(
-      width: double.infinity,
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Center(
-            child: Container(
-              width: 40.w,
-              height: 4.h,
-              margin: EdgeInsets.only(bottom: 16.h),
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(2.r),
+    isDismissible: isDismissible,
+    enableDrag: isDismissible,
+    builder: (context) {
+      final controller = Get.find<BProfileController>();
+      return Container(
+        width: double.infinity,
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40.w,
+                height: 4.h,
+                margin: EdgeInsets.only(bottom: 16.h),
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2.r),
+                ),
               ),
             ),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "workingDays".tr,
-                style: Styles.textStyleS14W700(color: ColorsData.primary),
-              ),
-              GestureDetector(
-                onTap: () => Get.back(),
-                child: Icon(Icons.close, size: 24.sp, color: Colors.grey),
-              ),
-            ],
-          ),
-          SizedBox(height: 16.h),
-          ...dayOrder.map((dayName) {
-            final day = workingDays.firstWhere(
-              (wd) => wd.day == dayName,
-              orElse: () => WorkingDay(day: dayName, startHour: 0, endHour: 0),
-            );
-            final isWorking = workingDays.any((wd) => wd.day == dayName);
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "workingDays".tr,
+                  style: Styles.textStyleS14W700(color: ColorsData.primary),
+                ),
+                GestureDetector(
+                  onTap: () => Get.back(),
+                  child: Icon(Icons.close, size: 24.sp, color: Colors.grey),
+                ),
+              ],
+            ),
+            SizedBox(height: 16.h),
+            Obx(() {
+              final currentWorkingDays = controller.profileData.value?.workingDays ?? [];
+              return Column(
+                children: dayOrder.map((dayName) {
+                  final day = currentWorkingDays.firstWhere(
+                    (wd) => wd.day == dayName,
+                    orElse: () => WorkingDay(day: dayName, startHour: 0, endHour: 0),
+                  );
+                  final isWorking = currentWorkingDays.any((wd) => wd.day == dayName);
 
-            return Padding(
-              padding: EdgeInsets.symmetric(vertical: 10.h),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    dayName.tr,
-                    style: Styles.textStyleS14W700(color: ColorsData.secondary),
-                  ),
-                  Row(
-                    children: [
-                      Text(
-                        isWorking
-                            ? "${"Working".tr}: ${day.workingHours}"
-                            : "Not working".tr,
-                        style: Styles.textStyleS14W400(
-                            color: isWorking ? ColorsData.thirty : Colors.red),
-                      ),
-                      SizedBox(width: 12.w),
-                      GestureDetector(
-                        onTap: () {
-                          Get.back(); // Close list BS
-                          _showEditDayBottomSheet(context, day, isWorking);
-                        },
-                        child: Icon(Icons.edit,
-                            size: 18.sp, color: ColorsData.primary),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            );
-          }),
-        ],
-      ),
-    ),
-  );
+                  return Padding(
+                    padding: EdgeInsets.symmetric(vertical: 10.h),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          dayName.tr,
+                          style: Styles.textStyleS14W700(color: ColorsData.secondary),
+                        ),
+                        Row(
+                          children: [
+                            Text(
+                              isWorking
+                                  ? "${"Working".tr}: ${day.workingHours}"
+                                  : "Not working".tr,
+                              style: Styles.textStyleS14W400(
+                                  color: isWorking ? ColorsData.thirty : Colors.red),
+                            ),
+                            SizedBox(width: 12.w),
+                            GestureDetector(
+                              onTap: () {
+                                _showEditDayBottomSheet(context, day, isWorking);
+                              },
+                              child: Icon(Icons.edit,
+                                  size: 18.sp, color: ColorsData.primary),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              );
+            }),
+          ],
+        ),
+      );
+    },
+  ).whenComplete(() {
+    if (onClose != null) {
+      onClose();
+    }
+  });
 }
 
 void _showEditDayBottomSheet(

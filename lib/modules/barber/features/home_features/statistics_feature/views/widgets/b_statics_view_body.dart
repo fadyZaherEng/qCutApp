@@ -55,7 +55,7 @@ class BStaticsViewBody extends StatelessWidget {
                 ),
               ],
             ),
-            SizedBox(height: 10.h),
+            // SizedBox(height: 10.h), removed to raise content up
             Obx(() => controller.isStatsLoading.value
                 ? Center(
                     child: SpinKitDoubleBounce(
@@ -130,7 +130,15 @@ class BStaticsViewBody extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          _buildWideStatCard(
+            stats[6]['title']!,
+            stats[6]['value']!,
+            stats[6]['unit']!,
+            stats[6]['svgImagePath']!,
+          ),
+          SizedBox(height: 20.h),
           GridView.builder(
+            padding: EdgeInsets.zero,
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -162,13 +170,6 @@ class BStaticsViewBody extends StatelessWidget {
                 ),
               );
             },
-          ),
-          SizedBox(height: 8.h),
-          _buildWideStatCard(
-            stats[6]['title']!,
-            stats[6]['value']!,
-            stats[6]['unit']!,
-            stats[6]['svgImagePath']!,
           ),
         ],
       ),

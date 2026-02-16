@@ -115,7 +115,9 @@ class OtpVerificationController extends GetxController {
     try {
       final String formattedPhoneNumber = newPhoneNumber.startsWith('+')
           ? newPhoneNumber
-          : "+972$newPhoneNumber";
+          : (newPhoneNumber.startsWith('972')
+              ? '+$newPhoneNumber'
+              : "+972$newPhoneNumber");
       print("API Endpoint: ${Variables.VERIFY_CHANGE_PHONE}");
 
       print(

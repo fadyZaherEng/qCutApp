@@ -70,26 +70,36 @@ class ResetPhoneNumberView extends StatelessWidget {
                       String successMsg = "OTP is 123456".tr;
 
                       if (_formKey.currentState!.validate()) {
+                        final String phone = _phoneNumberController.text;
+                        final String formattedPhone = phone.startsWith('+')
+                            ? phone
+                            : (phone.startsWith('972')
+                                ? '+$phone'
+                                : "+972$phone");
+
                         // Call API to send OTP
                         print("url: ${Variables.REQUEST_CHANGE_PHONE}");
                         NetworkAPICall().addData({
-                          "newPhoneNumber": "+972${_phoneNumberController.text}",
+                          "newPhoneNumber": formattedPhone,
                         }, Variables.REQUEST_CHANGE_PHONE).then((response) {
                           print("Response status: ${response.statusCode}");
                           print("Response body: ${response.body}");
-                          if (response.statusCode == 200 || response.statusCode == 201) {
+                          if (response.statusCode == 200 ||
+                              response.statusCode == 201) {
                             try {
                               final responseBody = json.decode(response.body);
-                              if (responseBody is Map && responseBody.containsKey('message')) {
+                              if (responseBody is Map &&
+                                  responseBody.containsKey('message')) {
                                 // successMsg = responseBody['message'];
                               }
                             } catch (_) {}
-                            ShowToast.showSuccessSnackBar(message: successMsg.tr);
+                            ShowToast.showSuccessSnackBar(
+                                message: successMsg.tr);
                             Get.toNamed(
                               AppRouter.otpVerificationResetCasePath,
                               arguments: {
                                 "isFromResetPassword": false,
-                                "phoneNumber": "+972${_phoneNumberController.text}",
+                                "phoneNumber": formattedPhone,
                               },
                             );
                           } else {

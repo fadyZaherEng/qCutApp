@@ -128,6 +128,10 @@ class BProfileController extends GetxController {
           // Update form controllers with profile data
           fullNameController.text = profileData.value?.fullName ?? '';
           phoneNumberController.text = profileData.value?.phoneNumber ?? '';
+
+          // Update cache for working days
+          await SharedPref().setBool(PrefKeys.hasWorkingDays,
+              profileData.value!.workingDays.isNotEmpty);
         }
       } else {
         isError.value = true;
@@ -196,6 +200,10 @@ class BProfileController extends GetxController {
           barberServices.clear();
           barberServices.addAll(servicesResponse.data);
         }
+
+        // Update cache for services
+        await SharedPref()
+            .setBool(PrefKeys.hasServices, barberServices.isNotEmpty);
 
         // Force UI update
         update(['barber_services']); // Use named update for better performance
@@ -434,6 +442,9 @@ class BProfileController extends GetxController {
         // Refresh services list after successful creation
         await fetchBarberServices();
 
+        // Update cache
+        await SharedPref().setBool(PrefKeys.hasServices, true);
+
         // Force UI updates with explicit IDs
         update(['barber_services']);
         Get.forceAppUpdate(); // Force GetX to refresh the entire app's state
@@ -594,11 +605,11 @@ class BProfileController extends GetxController {
   }
 
   // Update walk-in ranges
-  Future<void> updateWalkInRanges(List<Map<String, DateTime>> ranges) async {
+  Future<bool> updateWalkInRanges(List<Map<String, DateTime>> ranges) async {
     try {
       if (ranges.isEmpty) {
         ShowToast.showError(message: "Please select at least one range".tr);
-        return;
+        return false;
       }
 
       List<Map<String, dynamic>> walkInRecords = [];
@@ -627,12 +638,15 @@ class BProfileController extends GetxController {
         loadWalkInDaysFromProfile();
         ShowToast.showSuccessSnackBar(message: "Walk-In ranges updated successfully".tr);
         update();
+        return true;
       } else {
         final responseBody = json.decode(response.body);
         ShowToast.showError(message: responseBody['message'] ?? "Failed to update walk-in days".tr);
+        return false;
       }
     } catch (e) {
       ShowToast.showError(message: "${'Error updating walk-in days'.tr}: $e");
+      return false;
     }
   }
 }

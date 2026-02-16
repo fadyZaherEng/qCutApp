@@ -5,12 +5,15 @@ import 'package:q_cut/core/services/notification/notfication.dart';
 import 'package:q_cut/core/services/shared_pref/pref_keys.dart';
 import 'package:q_cut/core/services/shared_pref/shared_pref.dart';
 import 'package:q_cut/core/utils/app_router.dart';
+import 'package:q_cut/core/utils/constants/colors_data.dart';
+import 'package:q_cut/core/utils/styles.dart';
 import 'package:q_cut/core/utils/network/api.dart';
 import 'package:q_cut/modules/barber/features/home_features/appointment_feature/views/b_appointment_view.dart';
 import 'package:q_cut/modules/barber/features/home_features/profile_features/models/barber_profile_model.dart';
 import 'package:q_cut/modules/barber/features/home_features/profile_features/profile_display/logic/b_profile_controller.dart';
 import 'package:q_cut/modules/barber/features/home_features/profile_features/profile_display/views/b_profile_view.dart';
 import 'package:q_cut/modules/barber/features/home_features/profile_features/profile_display/views/widgets/custom_add_new_service_bottom_sheet.dart';
+import 'package:q_cut/modules/barber/features/home_features/profile_features/profile_display/views/widgets/show_working_days_bottom_sheet.dart';
 import 'package:q_cut/modules/barber/features/home_features/statistics_feature/views/b_statics_view.dart';
 import 'package:q_cut/modules/customer/features/home_features/home/views/home_view.dart';
 import 'package:q_cut/modules/customer/features/home_features/appointment_feature/view/my_appointment_view.dart';
@@ -86,6 +89,9 @@ class MainController extends GetxController {
   final Rx<DealResponse?> dealResponse = Rx<DealResponse?>(null);
   final RxBool isLoadingDeal = false.obs;
   final RxString dealError = ''.obs;
+  
+  // Flag to prevent multiple dialogs overlapping
+  bool _isCheckingProfile = false;
 
   final List<Widget> pages = (SharedPref().getBool(PrefKeys.userRole)) == false
       ? [
@@ -104,7 +110,10 @@ class MainController extends GetxController {
   void onInit() async {
     super.onInit();
     if (isCustomer == false) {
-      await fetchDealById();
+      fetchDealById();
+      // Start checking profile enforcement
+      final BProfileController profileController = Get.put(BProfileController());
+      _enforceBarberProfile(profileController);
     }
     await _notificationListener();
   }
@@ -124,6 +133,7 @@ class MainController extends GetxController {
     String? id = SharedPref().getString(PrefKeys.id);
     String? act = SharedPref().getString(PrefKeys.accessToken);
     print(act);
+    final BProfileController profileController = Get.find<BProfileController>();
     try {
       final response = await _apiCall.getData(
         '${Variables.baseUrl}deal/$id',
@@ -148,16 +158,24 @@ class MainController extends GetxController {
             dealResponse.value!.deals.isNotEmpty &&
             dealResponse.value!.deals
                 .any((deal) => deal.status == "accepted")) {
-          // Show waiting dialog when no pending deal is found
+          // Triggered in onInit already
         } else {
           // Show waiting dialog when API call fails
-          showWaitingForOfferDialog();
+          await showWaitingForOfferDialog();
+          // Profile enforcement is already running from onInit
+          // After waiting dialog, enforce profile
+          await _enforceBarberProfile(profileController);
         }
+      } else {
+        // If API call fails (e.g., 404, 500), show waiting dialog and enforce profile
+        await showWaitingForOfferDialog();
+        await _enforceBarberProfile(profileController);
       }
     } catch (e) {
       dealError.value = 'Error fetching deal: $e';
-      // Show waiting dialog when exception occurs
-      showWaitingForOfferDialog();
+      // Show waiting dialog when exception occurs and enforce profile
+      await showWaitingForOfferDialog();
+      await _enforceBarberProfile(profileController);
     } finally {
       isLoadingDeal.value = false;
     }
@@ -441,65 +459,11 @@ class MainController extends GetxController {
 
                           // Step 2: Check if profile was updated
                           if (editProfileResult == true) {
-                            await profileController.fetchProfileData();
-                            final updatedProfileData =
-                                profileController.profileData.value;
-
-                            // Check if working days are set
-                            if (updatedProfileData?.workingDays == null ||
-                                updatedProfileData!.workingDays.isEmpty) {
-                              Get.snackbar(
-                                "Set Working Days".tr,
-                                "Please set your working days to continue".tr,
-                                backgroundColor: Colors.orange,
-                                colorText: Colors.white,
-                                duration: const Duration(seconds: 3),
-                              );
-
-                              await Future.delayed(
-                                  const Duration(milliseconds: 500));
-
-                              final workingDaysResult = await Get.toNamed(
-                                AppRouter.beditProfilePath,
-                                arguments: BarberProfileModel(
-                                    fullName: updatedProfileData?.fullName.trim() ??
-                                        '',
-                                    offDay: updatedProfileData?.offDay ?? [],
-                                    barberShop:
-                                        updatedProfileData?.barberShop ?? '',
-                                    bankAccountNumber:
-                                        updatedProfileData?.bankAccountNumber ??
-                                            '',
-                                    instagramPage:
-                                        updatedProfileData?.instagramPage ?? '',
-                                    profilePic:
-                                        updatedProfileData?.profilePic.trim() ??
-                                            '',
-                                    coverPic: updatedProfileData?.coverPic.trim() ??
-                                        '',
-                                    city: updatedProfileData?.city ?? '',
-                                    workingDays:
-                                        updatedProfileData?.workingDays ?? [],
-                                    barberShopLocation:
-                                        updatedProfileData?.barberShopLocation ??
-                                            BarberShopLocation(
-                                                type: 'Point',
-                                                coordinates: [0, 0]),
-                                    phoneNumber:
-                                        updatedProfileData?.phoneNumber ?? '',
-                                    locationDescription: updatedProfileData
-                                            ?.locationDescription
-                                            .trim() ??
-                                        ''),
-                              );
-
-                              if (workingDaysResult == true) {
-                                await _checkAndForceAddService(
-                                    profileController);
-                              }
-                            } else {
-                              await _checkAndForceAddService(profileController);
-                            }
+                            // After editing profile, run the unified enforcement check
+                            await _enforceBarberProfile(profileController);
+                          } else {
+                            // Even if they cancelled editing, we must enforce the profile requirements
+                            await _enforceBarberProfile(profileController);
                           }
                         } else {
                           // Close loading overlay
@@ -563,7 +527,7 @@ class MainController extends GetxController {
   }
 
   // Method to show waiting for offer dialog
-  void showWaitingForOfferDialog() {
+  Future<void> showWaitingForOfferDialog() async {
     final TextStyle titleStyle = TextStyle(
       fontSize: 18.sp,
       fontWeight: FontWeight.bold,
@@ -575,7 +539,7 @@ class MainController extends GetxController {
       color: Color(0xFF666666),
     );
 
-    Get.dialog(
+    await Get.dialog(
       Dialog(
         backgroundColor: Colors.transparent,
         child: Container(
@@ -709,98 +673,198 @@ class MainController extends GetxController {
     super.onClose();
   }
 
-  // Helper method to check and force service addition
-  Future<void> _checkAndForceAddService(
-      BProfileController profileController) async {
-    await Future.delayed(const Duration(milliseconds: 500));
+  // Consolidated method to ensure barber profile is complete
+  Future<void> _enforceBarberProfile(BProfileController profileController) async {
+    if (_isCheckingProfile) return;
+    _isCheckingProfile = true;
 
-    // Refresh services to get latest data
-    await profileController.fetchBarberServices();
+    try {
+      bool completed = false;
+      while (!completed) {
+        // Step 1: Check and force services
+        bool servicesDone = await _runServiceCheck(profileController);
+        if (!servicesDone) continue;
 
-    if (profileController.barberServices.isEmpty) {
-      // Navigate to profile page first
-      Get.offAll(() => const BProfileView());
+        // Step 2: Check and force working days
+        bool workingDaysDone = await _runWorkingDaysCheck(profileController);
+        if (!workingDaysDone) continue;
 
-      await Future.delayed(const Duration(milliseconds: 500));
+        completed = true;
+      }
+    } catch (e) {
+      print("Error in profile enforcement: $e");
+    } finally {
+      _isCheckingProfile = false;
+    }
+  }
 
-      // Show a dialog explaining they need to add a service
-      await Get.dialog(
-        WillPopScope(
-          onWillPop: () async => false,
-          child: AlertDialog(
-            title: Text("Add Your First Service".tr),
-            content: Text(
-                "You must add at least one service before customers can book appointments with you."
-                    .tr),
-            actions: [
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFD1A439),
-                ),
-                onPressed: () async {
-                  Get.back();
-                  await Future.delayed(const Duration(milliseconds: 300));
+  // Helper method to ensure services are present
+  Future<void> _ensureServices() async {
+    final profileController = Get.find<BProfileController>();
+    await _enforceBarberProfile(profileController);
+  }
 
-                  // Open add service bottom sheet in a non-dismissible way
-                  await Get.bottomSheet(
-                    WillPopScope(
-                      onWillPop: () async {
-                        // Check if at least one service has been added
-                        await profileController.fetchBarberServices();
-                        if (profileController.barberServices.isEmpty) {
-                          Get.snackbar(
-                            "Service Required".tr,
-                            "Please add at least one service to continue".tr,
-                            backgroundColor: Colors.orange,
-                            colorText: Colors.white,
-                          );
-                          return false; // Prevent dismissing
-                        }
-                        return true; // Allow dismissing
-                      },
-                      child: const CustomAddNewServiceBottomSheet(),
-                    ),
-                    isDismissible: false,
-                    enableDrag: false,
-                    isScrollControlled: true,
-                    shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.vertical(top: Radius.circular(20.r)),
-                    ),
-                  );
+  // Returns true if services are present or successfully added
+  Future<bool> _runServiceCheck(BProfileController profileController) async {
+    bool hasServices = SharedPref().getBool(PrefKeys.hasServices) ?? false;
 
-                  // After bottom sheet closes, verify service was added
-                  await profileController.fetchBarberServices();
-                  if (profileController.barberServices.isNotEmpty) {
-                    Get.snackbar(
-                      "Setup Complete".tr,
-                      "Your profile is now ready! Customers can book appointments with you."
-                          .tr,
-                      backgroundColor: Colors.green,
-                      colorText: Colors.white,
-                      duration: const Duration(seconds: 5),
-                    );
-                  }
-                },
-                child: Text("Add Service".tr),
-              ),
-            ],
+    if (!hasServices) {
+      await profileController.fetchBarberServices();
+      if (profileController.barberServices.isNotEmpty) {
+        await SharedPref().setBool(PrefKeys.hasServices, true);
+        hasServices = true;
+      }
+    }
+
+    if (hasServices) return true;
+
+    // Navigate to profile tab
+    if (currentIndex.value != 2) {
+      currentIndex.value = 2;
+    }
+
+    final dialogResult = await Get.dialog(
+      WillPopScope(
+        onWillPop: () async => false,
+        child: Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
+          child: _buildRequirementDialogContent(
+            icon: Icons.add_business_rounded,
+            title: "Add Your First Service".tr,
+            description: "You must add at least one service before customers can book appointments with you.".tr,
+            buttonText: "Add Service".tr,
+            onPressed: () => Get.back(result: 'addService'),
           ),
         ),
-        barrierDismissible: false,
+      ),
+      barrierDismissible: false,
+    );
+
+    if (dialogResult == 'addService') {
+      await Future.delayed(const Duration(milliseconds: 100));
+      await Get.bottomSheet(
+        WillPopScope(
+          onWillPop: () async {
+            await profileController.fetchBarberServices();
+            if (profileController.barberServices.isEmpty) {
+              _showRequirementSnackbar("Service Required".tr, "Please add at least one service to continue".tr);
+              return false;
+            }
+            return true;
+          },
+          child: const CustomAddNewServiceBottomSheet(),
+        ),
+        isDismissible: false,
+        enableDrag: false,
+        isScrollControlled: true,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20.r))),
       );
-    } else {
-      // Services already exist, navigate to profile page and show success
-      Get.offAll(() => const BProfileView());
-      await Future.delayed(const Duration(milliseconds: 500));
-      Get.snackbar(
-        "Welcome!".tr,
-        "Your profile is complete. You're ready to accept appointments!".tr,
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-        duration: const Duration(seconds: 5),
-      );
+
+      await profileController.fetchBarberServices();
+      if (profileController.barberServices.isNotEmpty) {
+        await SharedPref().setBool(PrefKeys.hasServices, true);
+        _showSuccessSnackbar("Setup Complete".tr, "Service added successfully!".tr);
+        return true;
+      }
     }
+    return false;
+  }
+
+  // Returns true if working days are present or successfully added
+  Future<bool> _runWorkingDaysCheck(BProfileController profileController) async {
+    bool hasWorkingDays = SharedPref().getBool(PrefKeys.hasWorkingDays) ?? false;
+
+    if (!hasWorkingDays) {
+      await profileController.fetchProfileData();
+      if (profileController.profileData.value?.workingDays.isNotEmpty ?? false) {
+        await SharedPref().setBool(PrefKeys.hasWorkingDays, true);
+        hasWorkingDays = true;
+      }
+    }
+
+    if (hasWorkingDays) return true;
+
+    final dialogResult = await Get.dialog(
+      WillPopScope(
+        onWillPop: () async => false,
+        child: Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
+          child: _buildRequirementDialogContent(
+            icon: Icons.calendar_month_rounded,
+            title: "Set Working Days".tr,
+            description: "You must set at least one working day so customers know when you are available.".tr,
+            buttonText: "Set Days".tr,
+            onPressed: () => Get.back(result: 'setDays'),
+          ),
+        ),
+      ),
+      barrierDismissible: false,
+    );
+
+    if (dialogResult == 'setDays') {
+      await Future.delayed(const Duration(milliseconds: 100));
+      await showBWorkingDaysBottomSheet(
+        Get.context!,
+        profileController.profileData.value?.workingDays ?? [],
+        isDismissible: false,
+      );
+
+      await profileController.fetchProfileData();
+      if (profileController.profileData.value?.workingDays.isNotEmpty ?? false) {
+        await SharedPref().setBool(PrefKeys.hasWorkingDays, true);
+        _showSuccessSnackbar("Setup Complete".tr, "Working days set successfully!".tr);
+        Get.offAllNamed(AppRouter.bottomNavigationBar);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  Widget _buildRequirementDialogContent({
+    required IconData icon,
+    required String title,
+    required String description,
+    required String buttonText,
+    required VoidCallback onPressed,
+  }) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 32.h),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: EdgeInsets.all(16.w),
+            decoration: const BoxDecoration(color: Color(0xFFFAF6E9), shape: BoxShape.circle),
+            child: Icon(icon, color: ColorsData.primary, size: 32.sp),
+          ),
+          SizedBox(height: 24.h),
+          Text(title, textAlign: TextAlign.center, style: Styles.textStyleS18W700(color: ColorsData.secondary)),
+          SizedBox(height: 12.h),
+          Text(description, textAlign: TextAlign.center, style: Styles.textStyleS14W400(color: ColorsData.thirty)),
+          SizedBox(height: 32.h),
+          SizedBox(
+            width: double.infinity,
+            height: 48.h,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: ColorsData.primary,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+              ),
+              onPressed: onPressed,
+              child: Text(buttonText, style: Styles.textStyleS16W600(color: Colors.white)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showRequirementSnackbar(String title, String message) {
+    Get.snackbar(title, message, backgroundColor: Colors.orange, colorText: Colors.white);
+  }
+
+  void _showSuccessSnackbar(String title, String message) {
+    Get.snackbar(title, message, backgroundColor: Colors.green, colorText: Colors.white, duration: const Duration(seconds: 4));
   }
 
   void _onNotificationClick(event) {

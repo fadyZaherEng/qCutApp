@@ -75,8 +75,15 @@ class _ForgetPasswordViewState extends State<ForgetPasswordView> {
                           // Call API to send OTP
                           print("Sending OTP to: ${_phoneNumberController.text}");
                           print("API Endpoint: ${Variables.FORGET_PASSWORD}");
+                          final String phone = _phoneNumberController.text;
+                          final String formattedPhone = phone.startsWith('+')
+                              ? phone
+                              : (phone.startsWith('972')
+                                  ? '+$phone'
+                                  : "+972$phone");
+
                           NetworkAPICall().postDataAsGuest({
-                            "phoneNumber": _phoneNumberController.text
+                            "phoneNumber": formattedPhone
                           }, Variables.FORGET_PASSWORD).then((response) {
                             print("Response status: ${response.statusCode}");
                             print("Response body: ${response.body}");
@@ -86,7 +93,7 @@ class _ForgetPasswordViewState extends State<ForgetPasswordView> {
                                 AppRouter.otpVerificationResetCasePath, // Navigate to OTP screen
                                 arguments: {
                                   "isFromResetPassword": true,
-                                  "phoneNumber": _phoneNumberController.text,
+                                  "phoneNumber": formattedPhone,
                                 },
                               );
                             } else {

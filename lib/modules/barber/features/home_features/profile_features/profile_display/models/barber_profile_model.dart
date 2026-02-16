@@ -31,6 +31,7 @@ class BarberProfileData {
   BarberShopLocation barberShopLocation;
   String locationDescription;
   List<WalkInRecord>? walkIn;
+  final int? hashtag;
 
   BarberProfileData({
     required this.id,
@@ -52,6 +53,7 @@ class BarberProfileData {
     required this.barberShopLocation,
     required this.locationDescription,
     this.walkIn,
+    this.hashtag,
   });
 
   factory BarberProfileData.fromJson(Map<String, dynamic> json) {
@@ -104,6 +106,7 @@ class BarberProfileData {
           ? List<WalkInRecord>.from(
               json['walkIn'].map((x) => WalkInRecord.fromJson(x)))
           : null,
+      hashtag: json['hashtag'],
     );
   }
 
@@ -126,6 +129,7 @@ class BarberProfileData {
       'profilePic': profilePic,
       'breakTime': breakTime.map((x) => x.toJson()).toList(),
       if (walkIn != null) 'walkIn': walkIn!.map((x) => x.toJson()).toList(), 
+      'hashtag': hashtag,
     };
   }
 }

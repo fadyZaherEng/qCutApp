@@ -330,15 +330,16 @@ class _BEditProfileViewState extends State<BEditProfileView> {
             borderRadius: BorderRadius.circular(8.r),
           ),
         ),
-        onPressed: () {
+        onPressed: () async {
           if (isClicked) {
             isClicked = false;
             setState(() {});
-            controller.updateProfile();
-            Future.delayed(const Duration(seconds: 2), () {
+            try {
+              await controller.updateProfile();
+            } finally {
               isClicked = true;
-              setState(() {});
-            });
+              if (mounted) setState(() {});
+            }
           }
         },
         child: Text("Confirm".tr,

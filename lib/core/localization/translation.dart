@@ -346,6 +346,8 @@ class MyTranslation extends Translations {
           'Jul': 'يوليو',
           "Success": "نجاح",
           'Aug': 'اغسطس',
+          "Password updated Successfully": "تم تحديث كلمة المرور بنجاح",
+          "Ok": "حسناً",
           'Sep': 'سبتمبر',
           "No Working Days": "لا يوجد ايام عمل",
           'Oct': 'اكتوبر',
@@ -643,6 +645,11 @@ class MyTranslation extends Translations {
               "يجب أن يكون وقت البدء قبل وقت الانتهاء",
           "You must have at least one working day":
               "يجب أن يكون لديك يوم عمل واحد على الأقل",
+          "Set Working Days": "تعيين أيام العمل",
+          "Set Days": "تعيين الأيام",
+          "Your profile is now fully ready!": "ملفك الشخصي جاهز بالكامل الآن!",
+          "You must set at least one working day so customers know when you are available.":
+              "يجب عليك تعيين يوم عمل واحد على الأقل ليعرف الزبائن متى تكون متاحًا.",
         },
         "en": {
           "Appointment Day": "Appointment Day",
@@ -1304,6 +1311,11 @@ class MyTranslation extends Translations {
               "Start time must be earlier than end time",
           "You must have at least one working day":
               "You must have at least one working day",
+          "Set Working Days": "Set Working Days",
+          "Set Days": "Set Days",
+          "Your profile is now fully ready!": "Your profile is now fully ready!",
+          "You must set at least one working day so customers know when you are available.":
+              "You must set at least one working day so customers know when you are available.",
         },
         "he": {
           "emailreq": "דרוש אימייל",
@@ -1894,6 +1906,11 @@ class MyTranslation extends Translations {
               "זמן ההתחלה חייב להיות מוקדם מזמן הסיום",
           "You must have at least one working day":
               "חייב להיות לך לפחות יום עבודה אחד",
+          "Set Working Days": "הגדר ימי עבודה",
+          "Set Days": "הגדר ימים",
+          "Your profile is now fully ready!": "הפרופיל שלך מוכן לגמרי כעת!",
+          "You must set at least one working day so customers know when you are available.":
+              "עליך להגדיר יום עבודה אחד לפחות כדי שהלקוחות ידעו מתי אתה זמין.",
         },
       };
 }

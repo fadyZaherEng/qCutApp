@@ -142,11 +142,11 @@ class ChangeYourNameBottomSheet extends StatelessWidget {
 }
 
 class BChangeYourNameBottomSheet extends StatelessWidget {
-  const BChangeYourNameBottomSheet({super.key});
+    BChangeYourNameBottomSheet({super.key});
+  TextEditingController name = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
-    TextEditingController name = TextEditingController();
     return SingleChildScrollView(
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,

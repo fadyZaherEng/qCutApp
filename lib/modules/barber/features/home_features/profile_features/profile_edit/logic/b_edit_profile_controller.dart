@@ -281,6 +281,7 @@ class BEditProfileController extends GetxController {
         SharedPref().removePreference(PrefKeys.coverPic);
         profileImage = profilePicUrl;
         coverImage = coverPicUrl;
+        fullName = nameController.text;
         await SharedPref().setString(PrefKeys.profilePic, profilePicUrl);
         await SharedPref().setString(PrefKeys.coverPic, coverPicUrl);
         try {

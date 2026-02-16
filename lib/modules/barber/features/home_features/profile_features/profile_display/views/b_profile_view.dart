@@ -12,6 +12,7 @@ import 'package:q_cut/core/utils/styles.dart';
 import 'package:q_cut/core/utils/widgets/custom_big_button.dart';
 import 'package:q_cut/modules/barber/features/home_features/appointment_feature/models/appointment_model.dart';
 import 'package:q_cut/modules/barber/features/home_features/appointment_feature/views/custom_b_drawer.dart';
+import 'package:q_cut/modules/barber/features/home_features/profile_features/models/barber_profile_model.dart';
 import 'package:q_cut/modules/barber/features/home_features/statistics_feature/views/widgets/choose_break_days_bottom_sheet.dart';
 import 'package:q_cut/modules/barber/features/home_features/profile_features/profile_display/logic/b_profile_controller.dart';
 import 'package:q_cut/modules/barber/features/home_features/profile_features/profile_display/models/barber_service_model.dart';
@@ -23,7 +24,7 @@ import 'package:q_cut/modules/barber/map_search/map_search_screen.dart';
 import 'package:q_cut/modules/customer/features/home_features/profile_feature/views/my_profile_view.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:table_calendar/table_calendar.dart';
-import '../../models/barber_profile_model.dart';
+import '../models/barber_profile_model.dart';
 
 class BProfileView extends StatefulWidget {
   const BProfileView({super.key});
@@ -345,8 +346,10 @@ class _BProfileViewBodyState extends State<BProfileView>
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Text(
-                                    "NO. 1".tr,
+                                    Text(
+                                    profileData.hashtag != null
+                                        ? "#${profileData.hashtag}"
+                                        : "NO. 1".tr,
                                     style: Styles.textStyleS13W400(
                                       color: ColorsData.primary,
                                     ),
@@ -371,32 +374,32 @@ class _BProfileViewBodyState extends State<BProfileView>
                         SizedBox(height: 8.h),
                         InkWell(
                           onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) {
-                                  return MapSearchScreen(
-                                    initialLatitude: profileData
-                                            .barberShopLocation
-                                            .coordinates
-                                            .isNotEmpty
-                                        ? profileData
-                                            .barberShopLocation.coordinates[1]
-                                        : 31.0461,
-                                    initialLongitude: profileData
-                                            .barberShopLocation
-                                            .coordinates
-                                            .isNotEmpty
-                                        ? profileData
-                                            .barberShopLocation.coordinates[0]
-                                        : 34.8516,
-                                    onLocationSelected: (lat, lng, address) {
-                                      setState(() {});
-                                    },
-                                  );
-                                },
-                              ),
-                            );
+                            // Navigator.push(
+                            //   context,
+                            //   MaterialPageRoute(
+                            //     builder: (context) {
+                            //       return MapSearchScreen(
+                            //         initialLatitude: profileData
+                            //                 .barberShopLocation
+                            //                 .coordinates
+                            //                 .isNotEmpty
+                            //             ? profileData
+                            //                 .barberShopLocation.coordinates[1]
+                            //             : 31.0461,
+                            //         initialLongitude: profileData
+                            //                 .barberShopLocation
+                            //                 .coordinates
+                            //                 .isNotEmpty
+                            //             ? profileData
+                            //                 .barberShopLocation.coordinates[0]
+                            //             : 34.8516,
+                            //         onLocationSelected: (lat, lng, address) {
+                            //           setState(() {});
+                            //         },
+                            //       );
+                            //     },
+                            //   ),
+                            // );
                           },
                           child: _buildInfoRow(
                             AssetsData.mapPinIcon,
@@ -1088,12 +1091,23 @@ class _BProfileViewBodyState extends State<BProfileView>
   Widget _buildWalkInDialog(
       BuildContext context, BProfileController controller) {
     // Range selection state
+
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
 
-    final Rx<DateTime?> rangeStart = Rx<DateTime?>(null);
-    final Rx<DateTime?> rangeEnd = Rx<DateTime?>(null);
-    final Rx<DateTime> focusedDay = today.obs;
+    DateTime? initialStart;
+    DateTime? initialEnd;
+
+    if (controller.profileData.value?.walkIn != null &&
+        controller.profileData.value!.walkIn!.isNotEmpty) {
+      final firstRecord = controller.profileData.value!.walkIn!.first;
+      initialStart = DateTime.fromMillisecondsSinceEpoch(firstRecord.startDate);
+      initialEnd = DateTime.fromMillisecondsSinceEpoch(firstRecord.endDate);
+    }
+
+    final Rx<DateTime?> rangeStart = Rx<DateTime?>(initialStart);
+    final Rx<DateTime?> rangeEnd = Rx<DateTime?>(initialEnd);
+    final Rx<DateTime> focusedDay = (initialStart ?? today).obs;
     final Rx<RangeSelectionMode> rangeSelectionMode =
         RangeSelectionMode.toggledOn.obs;
 
@@ -1317,14 +1331,17 @@ class _BProfileViewBodyState extends State<BProfileView>
                           onPressed: rangeStart.value == null
                               ? null
                               : () async {
-                                  await controller.updateWalkInRanges([
+                                  final success =
+                                      await controller.updateWalkInRanges([
                                     {
                                       "start": rangeStart.value!,
                                       "end":
                                           rangeEnd.value ?? rangeStart.value!,
                                     }
                                   ]);
-                                  Get.back();
+                                  if (success && context.mounted) {
+                                    Navigator.pop(context);
+                                  }
                                 },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: ColorsData.primary,
