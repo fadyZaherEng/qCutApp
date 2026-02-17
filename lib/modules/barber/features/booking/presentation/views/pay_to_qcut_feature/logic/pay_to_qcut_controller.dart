@@ -86,8 +86,7 @@ class PayToQcutController extends GetxController {
     try {
       final response = await _apiCall.getData(Variables.COLLECTION_SCHEDULE);
       print("url ${Variables.COLLECTION_SCHEDULE}");
-      print("Collection schedule response status code: ${response.statusCode}");
-      print("Collection schedule response body ههههههههههههههههههههههههه: ${response.body}");
+       print("Collection schedule response body COLLECTION_SCHEDULE ههههههههههههههههههههههههه: ${response.body}");
       if (response.statusCode == 200) {
         final responseBody = json.decode(response.body);
         final scheduleResponse =
@@ -149,20 +148,20 @@ class PayToQcutController extends GetxController {
 
     try {
       // Define the API URL
-      print("DEBUG: fetchInvoiceData called. URL: ${Variables.OLD_PAYMENTS}");
+      // print("DEBUG: fetchInvoiceData called. URL: ${Variables.OLD_PAYMENTS}");
       final response = await _apiCall.getData(Variables.OLD_PAYMENTS);
 
-      print("API Response status code: ${response.statusCode}");
-      print("API Response body: ${response.body}");
+      // print("API Response status code: ${response.statusCode}");
+      // print("API Response body: ${response.body}");
 
       if (response.statusCode == 200) {
         final responseBody = json.decode(response.body);
-        print("Response body decoded type: ${responseBody.runtimeType}");
+        // print("Response body decoded type: ${responseBody.runtimeType}");
 
         final invoiceResponse = MonthlyInvoiceResponse.fromJson(responseBody);
         invoices.value = invoiceResponse.invoices;
-        print(
-            "DEBUG: Fetched ${invoices.value.length} invoices total from API");
+        // print(
+        //     "DEBUG: Fetched ${invoices.value.length} invoices total from API");
 
         if (invoices.value.isEmpty) {
           isError.value = false;
