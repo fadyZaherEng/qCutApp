@@ -179,7 +179,7 @@ class AuthController extends GetxController {
       }
     } catch (e) {
       errorMessage.value = 'Network error: $e';
-      ShowToast.showError(message: errorMessage.value);
+      ShowToast.showError(message: 'failedToConnectToServer'.tr);
     } finally {
       isLoading.value = false;
     }
@@ -289,8 +289,7 @@ class AuthController extends GetxController {
       }
     } catch (e) {
       errorMessage.value = 'Network error: $e';
-      Get.snackbar('Error', 'Failed to connect to server',
-          backgroundColor: Colors.red, colorText: Colors.white);
+      ShowToast.showError(message: 'failedToConnectToServer'.tr);
     } finally {
       isLoading.value = false;
       update();

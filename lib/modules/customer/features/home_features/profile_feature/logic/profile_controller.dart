@@ -148,8 +148,7 @@ class ProfileController extends GetxController {
     } catch (e) {
       isError.value = true;
       errorMessage.value = 'Network error: $e';
-      Get.snackbar('Error', 'Failed to connect to server',
-          backgroundColor: Colors.red, colorText: Colors.white);
+      ShowToast.showError(message: 'Failed to connect to server'.tr);
     } finally {
       isLoading.value = false;
     }

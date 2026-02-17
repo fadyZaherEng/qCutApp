@@ -110,9 +110,9 @@ class MainController extends GetxController {
   void onInit() async {
     super.onInit();
     if (isCustomer == false) {
+      final BProfileController profileController = Get.put(BProfileController());
       fetchDealById();
       // Start checking profile enforcement
-      final BProfileController profileController = Get.put(BProfileController());
       _enforceBarberProfile(profileController);
     }
     await _notificationListener();
@@ -422,11 +422,8 @@ class MainController extends GetxController {
                           // Close loading overlay
                           Get.back();
 
-                          Get.snackbar(
-                            "Success".tr,
-                            "Offer accepted successfully".tr,
-                            backgroundColor: Colors.green,
-                            colorText: Colors.white,
+                          ShowToast.showSuccessSnackBar(
+                            message: "Offer accepted successfully".tr,
                           );
 
                           final profileData =
@@ -469,11 +466,8 @@ class MainController extends GetxController {
                           // Close loading overlay
                           Get.back();
 
-                          Get.snackbar(
-                            "Error".tr,
-                            "Failed to accept the offer".tr,
-                            backgroundColor: Colors.red,
-                            colorText: Colors.white,
+                          ShowToast.showError(
+                            message: "Failed to accept the offer".tr,
                           );
                         }
                       },
@@ -860,11 +854,11 @@ class MainController extends GetxController {
   }
 
   void _showRequirementSnackbar(String title, String message) {
-    Get.snackbar(title, message, backgroundColor: Colors.orange, colorText: Colors.white);
+    ShowToast.showWarning(message: message);
   }
 
   void _showSuccessSnackbar(String title, String message) {
-    Get.snackbar(title, message, backgroundColor: Colors.green, colorText: Colors.white, duration: const Duration(seconds: 4));
+    ShowToast.showSuccessSnackBar(message: message);
   }
 
   void _onNotificationClick(event) {

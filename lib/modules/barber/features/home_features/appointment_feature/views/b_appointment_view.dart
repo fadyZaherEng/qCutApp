@@ -126,9 +126,9 @@ class _BAppointmentViewState extends State<BAppointmentView> {
                           SizedBox(height: 12.h),
                           CustomDaysPicker(
                             titleSimpleDaysPicker: "myAppointments".tr,
-                            selectedDay: controller.selectedDay.value,
-                            onDaySelected: (day) =>
-                                controller.changeSelectedDay(day),
+                            selectedDate: controller.selectedDate.value,
+                            onDateSelected: (date) =>
+                                controller.changeSelectedDate(date),
                           ),
                           SizedBox(height: 16.h),
                         ],

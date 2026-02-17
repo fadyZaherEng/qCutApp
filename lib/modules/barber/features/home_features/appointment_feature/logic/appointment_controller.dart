@@ -167,8 +167,7 @@ class BAppointmentController extends GetxController {
       print("Exception while fetching appointments: $e");
       isError.value = true;
       errorMessage.value = 'Network error: $e';
-      Get.snackbar('Error', errorMessage.value,
-          backgroundColor: Colors.red, colorText: Colors.white);
+      ShowToast.showError(message: errorMessage.value);
     } finally {
       isLoading.value = false;
       isLoadingMore.value = false;
@@ -257,6 +256,16 @@ class BAppointmentController extends GetxController {
     selectedDate.value = newDate;
     print(
         "Selected date updated to: ${DateFormat('yyyy-MM-dd').format(newDate)}");
+
+    // Refresh appointments for the new date
+    currentPage.value = 1;
+    fetchAppointments();
+  }
+
+  void changeSelectedDate(DateTime date) {
+    print("changeSelectedDate called with date: $date");
+    selectedDate.value = date;
+    selectedDay.value = date.day;
 
     // Refresh appointments for the new date
     currentPage.value = 1;

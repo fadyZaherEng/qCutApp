@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:q_cut/core/utils/app_router.dart';
 import 'package:q_cut/core/utils/network/api.dart';
 import 'package:q_cut/core/utils/network/network_helper.dart';
+import 'package:q_cut/modules/barber/features/booking/presentation/views/pay_to_qcut_feature/models/collection_schedule_model.dart';
 import 'package:q_cut/modules/barber/features/booking/presentation/views/pay_to_qcut_feature/models/monthly_invoice_model.dart';
 
 class PayToQcutController extends GetxController {
@@ -21,6 +22,10 @@ class PayToQcutController extends GetxController {
   final Rx<MonthlyInvoiceModel?> currentInvoice =
       Rx<MonthlyInvoiceModel?>(null);
 
+  // Collection Schedules
+  final RxList<CollectionSchedule> schedules = <CollectionSchedule>[].obs;
+  final RxString selectedScheduleId = "".obs;
+
   // Payment status tracking for UI
   final RxList<bool> isPaidList = <bool>[].obs;
 
@@ -28,6 +33,61 @@ class PayToQcutController extends GetxController {
   void onInit() {
     super.onInit();
     fetchInvoiceData();
+    fetchCollectionSchedule();
+  }
+
+  // Fetch collection schedules
+  Future<void> fetchCollectionSchedule() async {
+    try {
+      final response = await _apiCall.getData(Variables.COLLECTION_SCHEDULE);
+      print("url ${Variables.COLLECTION_SCHEDULE}");
+      print("Collection schedule response status code: ${response.statusCode}");
+      print("Collection schedule response body: ${response.body}");
+      if (response.statusCode == 200) {
+        final responseBody = json.decode(response.body);
+        final scheduleResponse =
+            CollectionScheduleResponse.fromJson(responseBody);
+        schedules.value = scheduleResponse.data;
+        
+        // Select first one by default if available
+        if (schedules.isNotEmpty) {
+          selectedScheduleId.value = schedules[0].id;
+        }
+      }
+    } catch (e) {
+      print("Error fetching collection schedule: $e");
+    }
+  }
+
+  // Select a collection slot
+  Future<void> selectCollectionSlot(String scheduleId) async {
+    isLoading.value = true;
+    try {
+      final response = await _apiCall.addData(
+        {"scheduleId": scheduleId},
+        Variables.SELECT_SLOT,
+      );
+      print("Select slot response status code: ${response.statusCode}");
+      print("Select slot response body: ${response.body}");
+      print("Selected schedule ID: $scheduleId");
+      print("API URL: ${Variables.SELECT_SLOT}");
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        ShowToast.showSuccessSnackBar(
+          message: "Slot selected successfully".tr,
+        );
+        // Refresh invoice data as it might change the status or create a new pending session
+        fetchInvoiceData();
+      } else {
+        final responseBody = json.decode(response.body);
+        ShowToast.showError(
+          message: responseBody['message'] ?? "Failed to select slot".tr,
+        );
+      }
+    } catch (e) {
+      ShowToast.showError(message: "Network error: $e");
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   // Fetch invoice data from API

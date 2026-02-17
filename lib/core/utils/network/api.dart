@@ -51,46 +51,156 @@ class Variables {
   static const String BARBER_COUNT_MOUNTH = "${BARBER_STATS}count-for-month/";
   static const String FAVORITE_FOR_USER = "${baseUrl}favoriteForUser/";
   static const String COUNT_REPORTS = "$REPORT/count/";
+
+  /// COLLECTION
+  static const String COLLECTION = "${baseUrl}collection/";
+  static const String COLLECTION_SCHEDULE = "${COLLECTION}schedule";
+  static const String SELECT_SLOT = "${COLLECTION}select-slot";
 }
 
 class ShowToast {
   const ShowToast._();
-  static showError({required String message}) {
-    Get.snackbar(
-      "Error".tr,
-      message,
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.red.withOpacity(0.9),
-      colorText: Colors.white,
-      icon: const Icon(Icons.error_outline, color: Colors.white),
+
+  static showError({String? title, required String message}) {
+    Get.rawSnackbar(
+      titleText: Text(
+        title ?? "error".tr,
+        style: TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.w700,
+          fontSize: 14.sp,
+          fontFamily: 'Alexandria',
+        ),
+      ),
+      messageText: Text(
+        message,
+        style: TextStyle(
+          color: Colors.white.withOpacity(0.9),
+          fontWeight: FontWeight.w400,
+          fontSize: 13.sp,
+          fontFamily: 'Alexandria',
+        ),
+      ),
+      snackPosition: SnackPosition.TOP,
+      backgroundColor: const Color(0xFFE53935),
+      icon: Container(
+        padding: EdgeInsets.all(8.r),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.2),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(Icons.error_outline_rounded, color: Colors.white, size: 20.sp),
+      ),
       margin: EdgeInsets.all(16.r),
-      borderRadius: 12.r,
-      duration: const Duration(seconds: 3),
+      borderRadius: 16.r,
+      duration: const Duration(seconds: 4),
       forwardAnimationCurve: Curves.easeOutBack,
-      reverseAnimationCurve: Curves.easeIn,
-      animationDuration: const Duration(milliseconds: 500),
-      snackbarStatus: (status) {
-        if (status == SnackbarStatus.OPENING) {
-          // Add custom logic if needed
-        }
-      },
+      isDismissible: true,
+      dismissDirection: DismissDirection.horizontal,
+      boxShadows: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.2),
+          blurRadius: 10,
+          offset: const Offset(0, 4),
+        ),
+      ],
+      shouldIconPulse: false,
     );
   }
 
-  static showSuccessSnackBar({required String message}) {
-    Get.snackbar(
-      "Success".tr,
-      message,
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.green.withOpacity(0.9),
-      colorText: Colors.white,
-      icon: const Icon(Icons.check_circle_outline, color: Colors.white),
+  static showSuccessSnackBar({String? title, required String message}) {
+    Get.rawSnackbar(
+      titleText: Text(
+        title ?? "success".tr,
+        style: TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.w700,
+          fontSize: 14.sp,
+          fontFamily: 'Alexandria',
+        ),
+      ),
+      messageText: Text(
+        message,
+        style: TextStyle(
+          color: Colors.white.withOpacity(0.9),
+          fontWeight: FontWeight.w400,
+          fontSize: 13.sp,
+          fontFamily: 'Alexandria',
+        ),
+      ),
+      snackPosition: SnackPosition.TOP,
+      backgroundColor: const Color(0xFF2E7D32),
+      icon: Container(
+        padding: EdgeInsets.all(8.r),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.2),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(Icons.check_circle_outline_rounded,
+            color: Colors.white, size: 20.sp),
+      ),
       margin: EdgeInsets.all(16.r),
-      borderRadius: 12.r,
-      duration: const Duration(seconds: 3),
+      borderRadius: 16.r,
+      duration: const Duration(seconds: 4),
       forwardAnimationCurve: Curves.easeOutBack,
-      reverseAnimationCurve: Curves.easeIn,
-      animationDuration: const Duration(milliseconds: 500),
+      isDismissible: true,
+      dismissDirection: DismissDirection.horizontal,
+      boxShadows: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.2),
+          blurRadius: 10,
+          offset: const Offset(0, 4),
+        ),
+      ],
+      shouldIconPulse: false,
+    );
+  }
+
+  static showWarning({String? title, required String message}) {
+    Get.rawSnackbar(
+      titleText: Text(
+        title ?? "warning".tr,
+        style: TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.w700,
+          fontSize: 14.sp,
+          fontFamily: 'Alexandria',
+        ),
+      ),
+      messageText: Text(
+        message,
+        style: TextStyle(
+          color: Colors.white.withOpacity(0.9),
+          fontWeight: FontWeight.w400,
+          fontSize: 13.sp,
+          fontFamily: 'Alexandria',
+        ),
+      ),
+      snackPosition: SnackPosition.TOP,
+      backgroundColor: const Color(0xFFF57C00),
+      icon: Container(
+        padding: EdgeInsets.all(8.r),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.2),
+          shape: BoxShape.circle,
+        ),
+        child:
+            Icon(Icons.warning_amber_rounded, color: Colors.white, size: 20.sp),
+      ),
+      margin: EdgeInsets.all(16.r),
+      borderRadius: 16.r,
+      duration: const Duration(seconds: 4),
+      forwardAnimationCurve: Curves.easeOutBack,
+      isDismissible: true,
+      dismissDirection: DismissDirection.horizontal,
+      boxShadows: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.2),
+          blurRadius: 10,
+          offset: const Offset(0, 4),
+        ),
+      ],
+      shouldIconPulse: false,
     );
   }
 }
