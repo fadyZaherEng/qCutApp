@@ -75,7 +75,6 @@ class BStaticsViewBody extends StatelessWidget {
 
   Widget _buildStatisticsCards(StatisticsController controller) {
     List<Map<String, dynamic>> stats = [
-
       {
         'title': 'workingHours'.tr,
         'value': controller.barberStats.value.workingHours.toStringAsFixed(1),
@@ -83,9 +82,9 @@ class BStaticsViewBody extends StatelessWidget {
         'svgImagePath': AssetsData.clockIcon,
       },
       {
-        'title': 'allIncome'.tr,
-        'value': controller.barberStats.value.totalIncome.toStringAsFixed(0),
-        'unit': '\$',
+        'title': 'allAppointments'.tr,
+        'value': controller.barberStats.value.totalAppointments.toString(),
+        'unit': 'appointment'.tr,
         'svgImagePath': AssetsData.calendarIcon,
       },
       {
@@ -113,9 +112,9 @@ class BStaticsViewBody extends StatelessWidget {
         'svgImagePath': AssetsData.calendarIcon,
       },
       {
-        'title': 'allAppointments'.tr,
-        'value': controller.barberStats.value.totalAppointments.toString(),
-        'unit': 'appointment'.tr,
+        'title': 'allIncome'.tr,
+        'value': controller.barberStats.value.totalIncome.toStringAsFixed(0),
+        'unit': '\$',
         'svgImagePath': AssetsData.calendarIcon,
       },
     ];
@@ -208,7 +207,8 @@ class BStaticsViewBody extends StatelessWidget {
               SizedBox(width: 12.w),
               Text(
                 title,
-                style: Styles.textStyleS12W400(color: ColorsData.primary).copyWith(
+                style:
+                    Styles.textStyleS12W400(color: ColorsData.primary).copyWith(
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w600,
                 ),
@@ -435,7 +435,7 @@ class BStaticsViewBody extends StatelessWidget {
                       style: Styles.textStyleS14W600(color: Colors.white),
                     ),
                   ),
-                   Expanded(
+                  Expanded(
                     child: BarChart(
                       BarChartData(
                         alignment: BarChartAlignment.spaceAround,

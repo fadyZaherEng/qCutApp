@@ -16,24 +16,40 @@ class QCutServicesController extends GetxController {
   final RxList<int> serviceQuantities = <int>[].obs;
 
   Future<void> fetchServices(String barberId) async {
+    if (isLoading.value) return;
     isLoading.value = true;
+    errorMessage.value = '';
     try {
-      final response = await _apiCall.getData(Variables.SERVICE + barberId);
+      final String apiUrl = Variables.GET_BARBER_SERVICES;
+      final response = await _apiCall.getData(apiUrl);
+      print("Fetching services for barber ID: $barberId");
+      print("Request URL: $apiUrl");
+      print("Response status: ${response.statusCode}");
+      print("Response body: ${response.body}");
+
       final responseBody = json.decode(response.body);
       if (response.statusCode == 200) {
-        final servicesResponse = BarberServiceResponse.fromJson(responseBody);
-        barberServices.value = servicesResponse.services;
+        if (responseBody is List) {
+          barberServices.value = responseBody
+              .map((service) => BarberServices.fromJson(service))
+              .toList();
+        } else if (responseBody is Map<String, dynamic>) {
+          final servicesResponse = BarberServiceResponse.fromJson(responseBody);
+          barberServices.value = servicesResponse.services;
+        }
+
         selectedServices.value =
             List.generate(barberServices.length, (index) => false);
         serviceQuantities.value =
             List.generate(barberServices.length, (index) => 0);
       } else {
         errorMessage.value =
-            responseBody['message'] ?? 'failedToFetchServices'.tr;
+            (responseBody is Map ? responseBody['message'] : null) ??
+                'failedToFetchServices'.tr;
       }
     } catch (e) {
       errorMessage.value = '${'networkError'.tr}: $e';
-      print(e);
+      print("Error in fetchServices: $e");
     } finally {
       isLoading.value = false;
     }

@@ -23,7 +23,7 @@ class QCutServicesView extends StatelessWidget {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Get.offAllNamed(AppRouter.bottomNavigationBar);
       });
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Scaffold(body: Center(child: SpinKitDoubleBounce(color: ColorsData.primary)));
     }
 
     final barber = Get.arguments["barber"] as Barber;
