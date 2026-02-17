@@ -56,6 +56,11 @@ class Variables {
   static const String COLLECTION = "${baseUrl}collection/";
   static const String COLLECTION_SCHEDULE = "${COLLECTION}schedule";
   static const String SELECT_SLOT = "${COLLECTION}select-slot";
+  static const String MY_COLLECTION_STATUS = "${COLLECTION}my-status";
+
+  /// INVOICES
+  static const String BARBER_INVOICES = "${baseUrl}barber-invoices/";
+  static const String OLD_PAYMENTS = "${BARBER_INVOICES}old-payments";
 }
 
 class ShowToast {

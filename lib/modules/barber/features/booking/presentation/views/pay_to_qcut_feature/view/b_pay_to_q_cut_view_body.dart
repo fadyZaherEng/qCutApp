@@ -159,7 +159,7 @@ class _BPayToQCutViewBodyState extends State<BPayToQCutViewBody> {
           SizedBox(height: 20.h),
           Text(
             "monthlyPayment".trParams({
-              "amount": "200"
+              "amount": _controller.currentInvoice.value?.qcuteSubscription.toInt().toString() ?? "0"
             }),
             style: TextStyle(
               color: ColorsData.primary,
@@ -263,7 +263,7 @@ class _BPayToQCutViewBodyState extends State<BPayToQCutViewBody> {
         padding: EdgeInsets.symmetric(vertical: 20.h),
         child: Center(
           child: Text(
-            "No previous payments found",
+            "noPreviousPaymentsFound".tr,
             style: TextStyle(color: Colors.white70, fontSize: 13.sp),
           ),
         ),
@@ -302,7 +302,7 @@ class _BPayToQCutViewBodyState extends State<BPayToQCutViewBody> {
                     //   ),
                     // ),
                     Text(
-                      "${payment['amount']} LE",
+                      "${payment['amount']} ${'currency'.tr}",
                       style: TextStyle(
                         color: Colors.black,
                         fontSize: 14.sp,
@@ -333,16 +333,19 @@ class _BPayToQCutViewBodyState extends State<BPayToQCutViewBody> {
         );
       }
 
-      return Row(
-        children: _controller.schedules.map((schedule) {
-          bool isSelected = _controller.selectedScheduleId.value == schedule.id;
-          return Expanded(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 4.w),
-              child: _buildCurrentPaymentCard(schedule, isSelected),
-            ),
-          );
-        }).toList(),
+      return IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: _controller.schedules.map((schedule) {
+            bool isSelected = _controller.selectedScheduleId.value == schedule.id;
+            return Expanded(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 4.w),
+                child: _buildCurrentPaymentCard(schedule, isSelected),
+              ),
+            );
+          }).toList(),
+        ),
       );
     });
   }
@@ -383,7 +386,7 @@ class _BPayToQCutViewBodyState extends State<BPayToQCutViewBody> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: 16.h),
+            SizedBox(height: 8.h),
             Text(
               "$startTime - $endTime",
               style: TextStyle(
@@ -391,6 +394,29 @@ class _BPayToQCutViewBodyState extends State<BPayToQCutViewBody> {
                 fontSize: 12.sp,
               ),
             ),
+            if (_controller.myCollectionStatus.value != null &&
+                _controller.myCollectionStatus.value!.selectedDay ==
+                    schedule.dayOfWeek &&
+                _controller.myCollectionStatus.value!.selectedStartTime ==
+                    schedule.startTime)
+              Padding(
+                padding: EdgeInsets.only(top: 8.h),
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
+                  decoration: BoxDecoration(
+                    color: Colors.white24,
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  child: Text(
+                    _controller.myCollectionStatus.value!.status.tr,
+                    style: TextStyle(
+                      color: isSelected ? Colors.white : ColorsData.primary,
+                      fontSize: 10.sp,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
       ),
