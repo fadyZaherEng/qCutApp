@@ -86,7 +86,7 @@ class PayToQcutController extends GetxController {
     try {
       final response = await _apiCall.getData(Variables.COLLECTION_SCHEDULE);
       print("url ${Variables.COLLECTION_SCHEDULE}");
-       print("Collection schedule response body COLLECTION_SCHEDULE ههههههههههههههههههههههههه: ${response.body}");
+       print("Collection schedule response body COLLECTION_SCHEDULE  : ${response.body}");
       if (response.statusCode == 200) {
         final responseBody = json.decode(response.body);
         final scheduleResponse =
