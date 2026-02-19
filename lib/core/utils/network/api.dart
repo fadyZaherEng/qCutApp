@@ -16,8 +16,7 @@ class Variables {
   static const String CHANGE_PASSWORD = "${AUTHENTICATION}change-password"; // Added
   static const String FORGET_PASSWORD = "$baseUrl/authentication/forget-password"; // Added
   static const String GET_PROFILE = "${AUTHENTICATION}profile/";
-  static const String REPORT = "${baseUrl}reports";
-
+  static const String REPORT = "${baseUrl}reports"
   ///
   ///
   static const String BARBER = "${baseUrl}barber/";
