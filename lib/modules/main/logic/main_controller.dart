@@ -183,7 +183,6 @@ class MainController extends GetxController {
 
   // Method to show deal dialog
   void showDealDialog(Deal deal) {
-    // Format dates for display
     String startDate = _formatDate(deal.dealDateStart);
     String endDate = _formatDate(deal.dealDateEnd);
 
@@ -204,23 +203,15 @@ class MainController extends GetxController {
       color: Color(0xFFD1A439),
     );
 
-    // Define the helper function here before using it
     Widget offerDetailRow(IconData icon, String text) {
       return Row(
         children: [
-          Icon(
-            icon,
-            color: Color(0xFF666666),
-            size: 18.sp,
-          ),
+          Icon(icon, color: Color(0xFF666666), size: 18.sp),
           SizedBox(width: 10.w),
           Expanded(
             child: Text(
               text,
-              style: TextStyle(
-                fontSize: 15.sp,
-                color: Color(0xFF444444),
-              ),
+              style: TextStyle(fontSize: 15.sp, color: Color(0xFF444444)),
             ),
           ),
         ],
@@ -244,275 +235,265 @@ class MainController extends GetxController {
               ),
             ],
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Image.asset(
-                AssetsData.dealImage,
-                width: 130.w,
-                height: 130.h,
-              ),
-              SizedBox(height: 16.h),
-              Text(
-                "Thank you for choosing us".tr,
-                style: titleStyle.copyWith(
-                  fontSize: 18.sp,
-                  color: Color(0xFF333333),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Image.asset(
+                  AssetsData.dealImage,
+                  width: 130.w,
+                  height: 130.h,
                 ),
-              ),
-              SizedBox(height: 6.h),
-              Text(
-                "QCut Special Offer".tr,
-                style: subtitleStyle.copyWith(
-                  fontSize: 17.sp,
-                  color: Color(0xFFD1A439),
-                  fontWeight: FontWeight.w600,
+                SizedBox(height: 16.h),
+                Text(
+                  "Thank you for choosing us".tr,
+                  style: titleStyle.copyWith(
+                    fontSize: 18.sp,
+                    color: Color(0xFF333333),
+                  ),
                 ),
-              ),
-              SizedBox(height: 20.h),
-              Container(
-                padding: EdgeInsets.all(16.w),
-                decoration: BoxDecoration(
-                  color: Color(0xFFF9F9F9),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: Color(0xFFEEEEEE)),
+                SizedBox(height: 6.h),
+                Text(
+                  "QCut Special Offer".tr,
+                  style: subtitleStyle.copyWith(
+                    fontSize: 17.sp,
+                    color: Color(0xFFD1A439),
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                SizedBox(height: 20.h),
+                Container(
+                  padding: EdgeInsets.all(16.w),
+                  decoration: BoxDecoration(
+                    color: Color(0xFFF9F9F9),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: Color(0xFFEEEEEE)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.celebration,
+                              color: Color(0xFFD1A439), size: 20.sp),
+                          SizedBox(width: 8.w),
+                          Text("Exclusive Offer".tr, style: boldGoldStyle),
+                        ],
+                      ),
+                      Divider(height: 24.h, color: Color(0xFFEEEEEE)),
+                      offerDetailRow(
+                        Icons.date_range,
+                        "${"Valid Period".tr}: $startDate - $endDate",
+                      ),
+                      SizedBox(height: 10.h),
+                      offerDetailRow(
+                        Icons.money_off,
+                        "${"QCut Tax:".tr} ${deal.qCuteTax}% per booking",
+                      ),
+                      SizedBox(height: 10.h),
+                      offerDetailRow(
+                        Icons.payment,
+                        "${"Subscription".tr}: \$${deal.qCuteSubscription}",
+                      ),
+                      SizedBox(height: 10.h),
+                      offerDetailRow(
+                        Icons.card_giftcard,
+                        "${"Free Trial".tr}: ${deal.freeDaysNumber} days",
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 24.h),
+                Row(
                   children: [
-                    Row(
-                      children: [
-                        Icon(Icons.celebration,
-                            color: Color(0xFFD1A439), size: 20.sp),
-                        SizedBox(width: 8.w),
-                        Text("Exclusive Offer".tr, style: boldGoldStyle),
-                      ],
-                    ),
-                    Divider(height: 24.h, color: Color(0xFFEEEEEE)),
-                    offerDetailRow(
-                      Icons.date_range,
-                      "${"Valid Period".tr}: $startDate - $endDate",
-                    ),
-                    SizedBox(height: 10.h),
-                    offerDetailRow(
-                      Icons.money_off,
-                      "${"QCut Tax:".tr} ${deal.qCuteTax}% per booking",
-                    ),
-                    SizedBox(height: 10.h),
-                    offerDetailRow(
-                      Icons.payment,
-                      "${"Subscription".tr}: \$${deal.qCuteSubscription}",
-                    ),
-                    SizedBox(height: 10.h),
-                    offerDetailRow(
-                      Icons.card_giftcard,
-                      "${"Free Trial".tr}: ${deal.freeDaysNumber} days",
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 24.h),
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        // Close the deal dialog immediately for fast UX
-                        Get.back();
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          Get.back();
 
-                        // Show animated processing overlay
-                        Get.dialog(
-                          Center(
-                            child: TweenAnimationBuilder<double>(
-                              tween: Tween(begin: 0.0, end: 1.0),
-                              duration: const Duration(milliseconds: 350),
-                              curve: Curves.easeOutBack,
-                              builder: (context, value, child) {
-                                return Transform.scale(
-                                  scale: 0.8 + (0.2 * value),
-                                  child: Opacity(
-                                    opacity: value.clamp(0.0, 1.0),
-                                    child: child,
-                                  ),
-                                );
-                              },
-                              child: Container(
-                                padding: EdgeInsets.symmetric(
-                                    vertical: 28.h, horizontal: 32.w),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(16),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Color(0xFFD1A439).withOpacity(0.2),
-                                      blurRadius: 20,
-                                      spreadRadius: 2,
+                          Get.dialog(
+                            Center(
+                              child: TweenAnimationBuilder<double>(
+                                tween: Tween(begin: 0.0, end: 1.0),
+                                duration: const Duration(milliseconds: 350),
+                                curve: Curves.easeOutBack,
+                                builder: (context, value, child) {
+                                  return Transform.scale(
+                                    scale: 0.8 + (0.2 * value),
+                                    child: Opacity(
+                                      opacity: value.clamp(0.0, 1.0),
+                                      child: child,
                                     ),
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.08),
-                                      blurRadius: 10,
-                                      offset: Offset(0, 4),
-                                    ),
-                                  ],
-                                ),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Container(
-                                      width: 56.w,
-                                      height: 56.w,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        gradient: LinearGradient(
-                                          colors: [
-                                            Color(0xFFFAF6E9),
-                                            Color(0xFFF5EDD6),
-                                          ],
-                                        ),
+                                  );
+                                },
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(
+                                      vertical: 28.h, horizontal: 32.w),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(16),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color:
+                                            Color(0xFFD1A439).withOpacity(0.2),
+                                        blurRadius: 20,
+                                        spreadRadius: 2,
                                       ),
-                                      child: Center(
-                                        child: SizedBox(
-                                          width: 28.w,
-                                          height: 28.w,
-                                          child: CircularProgressIndicator(
-                                            color: Color(0xFFD1A439),
-                                            strokeWidth: 3,
+                                      BoxShadow(
+                                        color:
+                                            Colors.black.withOpacity(0.08),
+                                        blurRadius: 10,
+                                        offset: Offset(0, 4),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Container(
+                                        width: 56.w,
+                                        height: 56.w,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          gradient: LinearGradient(
+                                            colors: [
+                                              Color(0xFFFAF6E9),
+                                              Color(0xFFF5EDD6),
+                                            ],
+                                          ),
+                                        ),
+                                        child: Center(
+                                          child: SizedBox(
+                                            width: 28.w,
+                                            height: 28.w,
+                                            child: CircularProgressIndicator(
+                                              color: Color(0xFFD1A439),
+                                              strokeWidth: 3,
+                                            ),
                                           ),
                                         ),
                                       ),
-                                    ),
-                                    SizedBox(height: 18.h),
-                                    Text(
-                                      "Processing...".tr,
-                                      style: TextStyle(
-                                        fontSize: 15.sp,
-                                        fontWeight: FontWeight.w600,
-                                        color: Color(0xFF333333),
+                                      SizedBox(height: 18.h),
+                                      Text(
+                                        "Processing...".tr,
+                                        style: TextStyle(
+                                          fontSize: 15.sp,
+                                          fontWeight: FontWeight.w600,
+                                          color: Color(0xFF333333),
+                                        ),
                                       ),
-                                    ),
-                                    SizedBox(height: 6.h),
-                                    Text(
-                                      "Please wait a moment".tr,
-                                      style: TextStyle(
-                                        fontSize: 12.sp,
-                                        color: Color(0xFF999999),
+                                      SizedBox(height: 6.h),
+                                      Text(
+                                        "Please wait a moment".tr,
+                                        style: TextStyle(
+                                          fontSize: 12.sp,
+                                          color: Color(0xFF999999),
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                          barrierColor: Colors.black.withOpacity(0.3),
-                          barrierDismissible: false,
-                        );
-
-                        var response = await NetworkAPICall().editData(
-                          '${Variables.baseUrl}deal',
-                          {"status": "accepted"},
-                        );
-
-                        if (response.statusCode == 200) {
-                          final BProfileController profileController =
-                              Get.put(BProfileController());
-
-                          // Fetch only profile data (skip services for speed)
-                          await profileController.fetchProfileData();
-
-                          // Close loading overlay
-                          Get.back();
-
-                          ShowToast.showSuccessSnackBar(
-                            message: "Offer accepted successfully".tr,
+                            barrierColor: Colors.black.withOpacity(0.3),
+                            barrierDismissible: false,
                           );
 
-                          final profileData =
-                              profileController.profileData.value;
-
-                          // Navigate to Edit Profile immediately with smooth transition
-                          final editProfileResult = await Get.toNamed(
-                            AppRouter.beditProfilePath,
-                            arguments: BarberProfileModel(
-                                fullName: profileData?.fullName.trim() ?? '',
-                                offDay: profileData?.offDay ?? [],
-                                barberShop: profileData?.barberShop ?? '',
-                                bankAccountNumber:
-                                    profileData?.bankAccountNumber ?? '',
-                                instagramPage: profileData?.instagramPage ?? '',
-                                profilePic:
-                                    profileData?.profilePic.trim() ?? '',
-                                coverPic: profileData?.coverPic.trim() ?? '',
-                                city: profileData?.city ?? 'New City',
-                                workingDays: profileData?.workingDays ?? [],
-                                barberShopLocation:
-                                    profileData?.barberShopLocation ??
-                                        BarberShopLocation(
-                                            type: 'Point', coordinates: [0, 0]),
-                                phoneNumber: profileData?.phoneNumber ?? '',
-                                locationDescription:
-                                    profileData?.locationDescription.trim() ??
-                                        ''),
+                          var response = await NetworkAPICall().editData(
+                            '${Variables.baseUrl}deal',
+                            {"status": "accepted"},
                           );
 
-                          // Step 2: Check if profile was updated
-                          if (editProfileResult == true) {
-                            // After editing profile, run the unified enforcement check
-                            await _enforceBarberProfile(profileController);
+                          if (response.statusCode == 200) {
+                            final BProfileController profileController =
+                                Get.put(BProfileController());
+                            await profileController.fetchProfileData();
+                            Get.back();
+                            ShowToast.showSuccessSnackBar(
+                              message: "Offer accepted successfully".tr,
+                            );
+                            final profileData =
+                                profileController.profileData.value;
+                            final editProfileResult = await Get.toNamed(
+                              AppRouter.beditProfilePath,
+                              arguments: BarberProfileModel(
+                                  fullName: profileData?.fullName.trim() ?? '',
+                                  offDay: profileData?.offDay ?? [],
+                                  barberShop: profileData?.barberShop ?? '',
+                                  bankAccountNumber:
+                                      profileData?.bankAccountNumber ?? '',
+                                  instagramPage:
+                                      profileData?.instagramPage ?? '',
+                                  profilePic:
+                                      profileData?.profilePic.trim() ?? '',
+                                  coverPic: profileData?.coverPic.trim() ?? '',
+                                  city: profileData?.city ?? 'New City',
+                                  workingDays: profileData?.workingDays ?? [],
+                                  barberShopLocation:
+                                      profileData?.barberShopLocation ??
+                                          BarberShopLocation(
+                                              type: 'Point',
+                                              coordinates: [0, 0]),
+                                  phoneNumber: profileData?.phoneNumber ?? '',
+                                  locationDescription:
+                                      profileData?.locationDescription.trim() ??
+                                          ''),
+                            );
+                            if (editProfileResult == true) {
+                              await _enforceBarberProfile(profileController);
+                            } else {
+                              await _enforceBarberProfile(profileController);
+                            }
                           } else {
-                            // Even if they cancelled editing, we must enforce the profile requirements
-                            await _enforceBarberProfile(profileController);
+                            Get.back();
+                            ShowToast.showError(
+                              message: "Failed to accept the offer".tr,
+                            );
                           }
-                        } else {
-                          // Close loading overlay
-                          Get.back();
-
-                          ShowToast.showError(
-                            message: "Failed to accept the offer".tr,
-                          );
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFD1A439),
-                        foregroundColor: Colors.white,
-                        padding: EdgeInsets.symmetric(vertical: 12.h),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFD1A439),
+                          foregroundColor: Colors.white,
+                          padding: EdgeInsets.symmetric(vertical: 12.h),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          elevation: 2,
                         ),
-                        elevation: 2,
-                      ),
-                      child: Text(
-                        "Accept Offer".tr,
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.bold,
+                        child: Text(
+                          "Accept Offer".tr,
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  SizedBox(width: 12.w),
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => {},
-                      style: OutlinedButton.styleFrom(
-                        side: BorderSide(color: Color(0xFF757575)),
-                        padding: EdgeInsets.symmetric(vertical: 12.h),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                    SizedBox(width: 12.w),
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => {},
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(color: Color(0xFF757575)),
+                          padding: EdgeInsets.symmetric(vertical: 12.h),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                         ),
-                      ),
-                      child: Text(
-                        "Contact Us".tr,
-                        style: TextStyle(
-                          color: Color(0xFF757575),
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w500,
+                        child: Text(
+                          "Contact Us".tr,
+                          style: TextStyle(
+                            color: Color(0xFF757575),
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -550,98 +531,97 @@ class MainController extends GetxController {
               ),
             ],
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Waiting icon/illustration
-
-              // Clock or waiting animation
-              Container(
-                width: 130.w,
-                height: 130.h,
-                decoration: BoxDecoration(
-                  color: Color(0xFFFAF6E9),
-                  shape: BoxShape.circle,
-                ),
-                child: Center(
-                  child: Icon(
-                    Icons.access_time,
-                    size: 60.sp,
-                    color: Color(0xFFD1A439),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 130.w,
+                  height: 130.h,
+                  decoration: BoxDecoration(
+                    color: Color(0xFFFAF6E9),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: Icon(
+                      Icons.access_time,
+                      size: 60.sp,
+                      color: Color(0xFFD1A439),
+                    ),
                   ),
                 ),
-              ),
-              SizedBox(height: 24.h),
-              Text(
-                "Please Wait",
-                style: titleStyle,
-              ),
-              SizedBox(height: 10.h),
-              Text(
-                "QCut is preparing a special offer for you",
-                textAlign: TextAlign.center,
-                style: subtitleStyle,
-              ),
-              SizedBox(height: 8.h),
-              Text(
-                "We'll notify you once your offer is ready",
-                textAlign: TextAlign.center,
-                style: subtitleStyle.copyWith(
-                  fontSize: 14.sp,
-                  color: Color(0xFF888888),
+                SizedBox(height: 24.h),
+                Text(
+                  "Please Wait",
+                  style: titleStyle,
                 ),
-              ),
-              SizedBox(height: 24.h),
-              Container(
-                padding: EdgeInsets.all(16.w),
-                decoration: BoxDecoration(
-                  color: Color(0xFFF9F9F9),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: Color(0xFFEEEEEE)),
+                SizedBox(height: 10.h),
+                Text(
+                  "QCut is preparing a special offer for you",
+                  textAlign: TextAlign.center,
+                  style: subtitleStyle,
                 ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.info_outline,
-                      color: Color(0xFFD1A439),
-                      size: 24.sp,
-                    ),
-                    SizedBox(width: 12.w),
-                    Expanded(
-                      child: Text(
-                        "Our team is reviewing your application. You'll receive personalized terms shortly.",
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          color: Color(0xFF555555),
+                SizedBox(height: 8.h),
+                Text(
+                  "We'll notify you once your offer is ready",
+                  textAlign: TextAlign.center,
+                  style: subtitleStyle.copyWith(
+                    fontSize: 14.sp,
+                    color: Color(0xFF888888),
+                  ),
+                ),
+                SizedBox(height: 24.h),
+                Container(
+                  padding: EdgeInsets.all(16.w),
+                  decoration: BoxDecoration(
+                    color: Color(0xFFF9F9F9),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: Color(0xFFEEEEEE)),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.info_outline,
+                        color: Color(0xFFD1A439),
+                        size: 24.sp,
+                      ),
+                      SizedBox(width: 12.w),
+                      Expanded(
+                        child: Text(
+                          "Our team is reviewing your application. You'll receive personalized terms shortly.",
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            color: Color(0xFF555555),
+                          ),
                         ),
                       ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 24.h),
+                ElevatedButton(
+                  onPressed: () => Get.back(),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFFD1A439),
+                    foregroundColor: Colors.white,
+                    padding:
+                        EdgeInsets.symmetric(vertical: 12.h, horizontal: 30.w),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 24.h),
-              ElevatedButton(
-                onPressed: () => Get.back(),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFFD1A439),
-                  foregroundColor: Colors.white,
-                  padding:
-                      EdgeInsets.symmetric(vertical: 12.h, horizontal: 30.w),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    minimumSize: Size(double.infinity, 50.h),
+                    elevation: 2,
                   ),
-                  minimumSize: Size(double.infinity, 50.h),
-                  elevation: 2,
-                ),
-                child: Text(
-                  "Got It",
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.bold,
+                  child: Text(
+                    "Got It",
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -654,7 +634,6 @@ class MainController extends GetxController {
     DateTime date = DateTime.fromMillisecondsSinceEpoch(timestamp);
     return DateFormat('MM/dd/yyyy').format(date);
   }
-
   void changePage(int index) {
     if (index >= 0 && index < pages.length) {
       currentIndex.value = index;
