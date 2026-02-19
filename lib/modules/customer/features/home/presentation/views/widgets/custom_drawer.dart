@@ -7,6 +7,7 @@ import 'package:q_cut/core/utils/constants/assets_data.dart';
 import 'package:q_cut/core/utils/constants/colors_data.dart';
 import 'package:q_cut/core/utils/constants/drawer_constants.dart';
 import 'package:q_cut/core/utils/styles.dart';
+import 'package:q_cut/core/utils/auth/auth_helper.dart';
 import 'drawer_header.dart';
 
 class CustomDrawer extends StatefulWidget {
@@ -46,14 +47,41 @@ class _CustomDrawerState extends State<CustomDrawer> {
       child: Column(
         children: [
           _buildDivider(),
-          _buildMenuItem("appointments".tr, AssetsData.calendarIcon,
-              () => Get.toNamed(AppRouter.myAppointmentPath)),
+          _buildMenuItem(
+            'appointments'.tr,
+            AssetsData.calendarIcon,
+            () {
+              // Check authentication before navigating
+              if (!AuthHelper.requireAuthentication(returnRoute: AppRouter.myAppointmentPath)) {
+                return; // User redirected to login
+              }
+              Get.toNamed(AppRouter.myAppointmentPath);
+            },
+          ),
           _buildDivider(),
-          _buildMenuItem("favorites".tr, AssetsData.favoritesIcon,
-              () => Get.toNamed(AppRouter.favoritePath)),
+          _buildMenuItem(
+            'favorites'.tr,
+            AssetsData.favoritesIcon,
+            () {
+              // Check authentication before navigating
+              if (!AuthHelper.requireAuthentication(returnRoute: AppRouter.favoritePath)) {
+                return; // User redirected to login
+              }
+              Get.toNamed(AppRouter.favoritePath);
+            },
+          ),
           _buildDivider(),
-          _buildMenuItem("history".tr, AssetsData.historyIcon,
-              () => Get.toNamed(AppRouter.historyPath)),
+          _buildMenuItem(
+            'history'.tr,
+            AssetsData.historyIcon,
+            () {
+              // Check authentication before navigating
+              if (!AuthHelper.requireAuthentication(returnRoute: AppRouter.historyPath)) {
+                return; // User redirected to login
+              }
+              Get.toNamed(AppRouter.historyPath);
+            },
+          ),
           _buildDivider(),
           _buildMenuItem("Setting".tr, AssetsData.settingIcon,
               () => Get.toNamed(AppRouter.settingsPath)),

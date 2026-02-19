@@ -5,6 +5,7 @@ import 'package:q_cut/core/utils/app_router.dart';
  import 'package:q_cut/core/utils/constants/colors_data.dart';
 import 'package:q_cut/core/utils/constants/drawer_constants.dart';
 import 'package:q_cut/core/utils/styles.dart';
+import 'package:q_cut/core/utils/auth/auth_helper.dart';
 import 'package:q_cut/main.dart';
 import 'package:get/get.dart';
 
@@ -63,6 +64,10 @@ class CustomDrawerHeader extends StatelessWidget {
   Widget _buildProfileImage() {
     return InkWell(
       onTap: () {
+        // Check authentication before accessing profile
+        if (!AuthHelper.requireAuthentication(returnRoute: AppRouter.myProfilePath)) {
+          return; // User redirected to login
+        }
         Get.toNamed(AppRouter.myProfilePath);
       },
       child: CircleAvatar(

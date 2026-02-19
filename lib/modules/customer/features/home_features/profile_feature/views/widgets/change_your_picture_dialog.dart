@@ -42,10 +42,28 @@ class ChangeYourPictureDialog extends StatelessWidget {
               ),
               controller.isLoading.value
                   ? SpinKitDoubleBounce(color: ColorsData.primary)
-                  : CircleAvatar(
-                      radius: 25.r,
-                      foregroundImage: CachedNetworkImageProvider(profileImage),
-                      backgroundColor: ColorsData.secondary,
+                  : ClipOval(
+                      child: CachedNetworkImage(
+                        imageUrl: profileImage,
+                        width: 50.r,
+                        height: 50.r,
+                        fit: BoxFit.cover,
+                        errorWidget: (context, url, error) => Container(
+                          color: ColorsData.secondary,
+                          child: Icon(
+                            Icons.person,
+                            size: 30.r,
+                            color: Colors.white,
+                          ),
+                        ),
+                        placeholder: (context, url) => Container(
+                          color: ColorsData.secondary,
+                          child: const SpinKitDoubleBounce(
+                            color: ColorsData.primary,
+                            size: 20,
+                          ),
+                        ),
+                      ),
                     ),
               SizedBox(height: 16.h),
               Text(

@@ -8,93 +8,204 @@ class Variables {
   static const address = 'api.qcut.org';
   static const baseUrl = "https://$address/";
 
-  ///
+  /// AUTHENTICATION
   static const String AUTHENTICATION = "${baseUrl}authentication/";
   static const String SIGNUP = "${AUTHENTICATION}signup/";
   static const String LOGIN = "${AUTHENTICATION}login/";
   static const String VERIFY_OTP = "${AUTHENTICATION}verify-otp/";
-  static const String CHANGE_PASSWORD = "${AUTHENTICATION}change-password"; // Added
-  static const String FORGET_PASSWORD = "$baseUrl/authentication/forget-password"; // Added
+  static const String CHANGE_PASSWORD = "${AUTHENTICATION}change-password";
+  static const String FORGET_PASSWORD = "${AUTHENTICATION}forget-password";
+  static const String VERIFY_CHANGE_PHONE = "${AUTHENTICATION}verify-change-phone/";
+  static const String REQUEST_CHANGE_PHONE = "${AUTHENTICATION}request-change-phone";
   static const String GET_PROFILE = "${AUTHENTICATION}profile/";
   static const String REPORT = "${baseUrl}reports";
 
-  ///
-  ///
+  /// BARBER
   static const String BARBER = "${baseUrl}barber/";
-  static const String SEARCH_BARBER_NAME = "${BARBER}search-by-barberShop";
+  static const String SEARCH_BARBER_SHOP = "${BARBER}search-by-barberShop";
+  static const String SEARCH_BARBER_FULL_NAME = "${BARBER}search-by-name";
+  static const String SEARCH_BARBER_NAME = SEARCH_BARBER_SHOP; 
   static const String GET_BARBERS = "${BARBER}active/";
-  static const String GET_BARBERS_FILTER = "${baseUrl}barber/search-by-city";
+  static const String GET_BARBERS_FILTER = "${BARBER}search-by-city";
+  static const String UPDATE_WALK_IN = "${BARBER}update-walk-in";
+  static const String GET_WORKING_HOURS_RANGE = "${BARBER}working-hours-range/";
+  static const String GET_NEXT_WORKING_DAYS = "${BARBER}next-working-days";
+
+  /// SERVICE
   static const String SERVICE = "${baseUrl}service/";
   static const String GET_BARBER_SERVICES = "${SERVICE}forSpecificBarber/";
   static const String UPDATE_BARBER_SERVICE = SERVICE;
   static const String CREATE_BARBER_SERVICE = "${SERVICE}create/";
 
-// service/forSpecificBarber
-  ///
-  ///
+  /// APPOINTMENT
   static const String APPOINTMENT = "${baseUrl}appointment/";
-  static const String GET_BARBER_APPOINTMENTS =
-      "${APPOINTMENT}appointment-by-dat/";
+  static const String GET_BARBER_APPOINTMENTS = "${APPOINTMENT}appointment-by-dat/";
   static const String GET_BARBER_HISTORY = "${APPOINTMENT}barber-history/";
   static const String SET_APPOINTMENT_NOT_COME = "${APPOINTMENT}not-come/";
-  static const String COUNT_REPORTS = "$REPORT/count/";
-  static const String GET_CUSTOMER_HISTORY_APPOINTMENTS =
-      "${APPOINTMENT}previous-currently/";
+  static const String GET_CUSTOMER_HISTORY_APPOINTMENTS = "${APPOINTMENT}previous-currently/";
+
+  /// STATS & OTHERS
   static const String BARBER_STATS = "${baseUrl}barberStats/";
+  static const String BARBER_STATS_RANGE = "${BARBER_STATS}search/date-range/";
   static const String BARBER_PAYMENT_STATS = "${BARBER_STATS}payment/one/";
   static const String BARBER_COUNT_MOUNTH = "${BARBER_STATS}count-for-month/";
   static const String FAVORITE_FOR_USER = "${baseUrl}favoriteForUser/";
+  static const String COUNT_REPORTS = "$REPORT/count/";
+
+  /// COLLECTION
+  static const String COLLECTION = "${baseUrl}collection/";
+  static const String COLLECTION_SCHEDULE = "${COLLECTION}schedule";
+  static const String SELECT_SLOT = "${COLLECTION}select-slot";
+  static const String MY_COLLECTION_STATUS = "${COLLECTION}my-status";
+
+  /// INVOICES
+  static const String BARBER_INVOICES = "${baseUrl}barber-invoices/";
+  static const String OLD_PAYMENTS = "${BARBER_INVOICES}old-payments";
 }
 
 class ShowToast {
   const ShowToast._();
-  static showError({required String message}) {
-    ScaffoldMessenger.of(Get.context!).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.close, color: Colors.white), // Adding an icon
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                style: TextStyle(color: Colors.white, fontSize: 13.sp),
-                message.toString(), // Using the passed parameter
-              ),
-            ),
-          ],
+
+  static showError({String? title, required String message}) {
+    Get.rawSnackbar(
+      titleText: Text(
+        title ?? "error".tr,
+        style: TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.w700,
+          fontSize: 14.sp,
+          fontFamily: 'Alexandria',
         ),
-        backgroundColor: Colors.red, // Changing background color
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10), // Setting the border radius
-        ),
-        behavior:
-            SnackBarBehavior.floating, // Making SnackBar float above content
       ),
+      messageText: Text(
+        message,
+        style: TextStyle(
+          color: Colors.white.withOpacity(0.9),
+          fontWeight: FontWeight.w400,
+          fontSize: 13.sp,
+          fontFamily: 'Alexandria',
+        ),
+      ),
+      snackPosition: SnackPosition.TOP,
+      backgroundColor: const Color(0xFFE53935),
+      icon: Container(
+        padding: EdgeInsets.all(8.r),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.2),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(Icons.error_outline_rounded, color: Colors.white, size: 20.sp),
+      ),
+      margin: EdgeInsets.all(16.r),
+      borderRadius: 16.r,
+      duration: const Duration(seconds: 4),
+      forwardAnimationCurve: Curves.easeOutBack,
+      isDismissible: true,
+      dismissDirection: DismissDirection.horizontal,
+      boxShadows: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.2),
+          blurRadius: 10,
+          offset: const Offset(0, 4),
+        ),
+      ],
+      shouldIconPulse: false,
     );
   }
 
-  static showSuccessSnackBar({required String message}) {
-    ScaffoldMessenger.of(Get.context!).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.close, color: Colors.white), // Adding an icon
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                style: TextStyle(color: Colors.white, fontSize: 13.sp),
-                message.toString(),
-              ),
-            ),
-          ],
+  static showSuccessSnackBar({String? title, required String message}) {
+    Get.rawSnackbar(
+      titleText: Text(
+        title ?? "success".tr,
+        style: TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.w700,
+          fontSize: 14.sp,
+          fontFamily: 'Alexandria',
         ),
-        backgroundColor: Colors.green, // Changing background color
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10), // Setting the border radius
-        ),
-        behavior:
-            SnackBarBehavior.floating, // Making SnackBar float above content
       ),
+      messageText: Text(
+        message,
+        style: TextStyle(
+          color: Colors.white.withOpacity(0.9),
+          fontWeight: FontWeight.w400,
+          fontSize: 13.sp,
+          fontFamily: 'Alexandria',
+        ),
+      ),
+      snackPosition: SnackPosition.TOP,
+      backgroundColor: const Color(0xFF2E7D32),
+      icon: Container(
+        padding: EdgeInsets.all(8.r),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.2),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(Icons.check_circle_outline_rounded,
+            color: Colors.white, size: 20.sp),
+      ),
+      margin: EdgeInsets.all(16.r),
+      borderRadius: 16.r,
+      duration: const Duration(seconds: 4),
+      forwardAnimationCurve: Curves.easeOutBack,
+      isDismissible: true,
+      dismissDirection: DismissDirection.horizontal,
+      boxShadows: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.2),
+          blurRadius: 10,
+          offset: const Offset(0, 4),
+        ),
+      ],
+      shouldIconPulse: false,
+    );
+  }
+
+  static showWarning({String? title, required String message}) {
+    Get.rawSnackbar(
+      titleText: Text(
+        title ?? "warning".tr,
+        style: TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.w700,
+          fontSize: 14.sp,
+          fontFamily: 'Alexandria',
+        ),
+      ),
+      messageText: Text(
+        message,
+        style: TextStyle(
+          color: Colors.white.withOpacity(0.9),
+          fontWeight: FontWeight.w400,
+          fontSize: 13.sp,
+          fontFamily: 'Alexandria',
+        ),
+      ),
+      snackPosition: SnackPosition.TOP,
+      backgroundColor: const Color(0xFFF57C00),
+      icon: Container(
+        padding: EdgeInsets.all(8.r),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.2),
+          shape: BoxShape.circle,
+        ),
+        child:
+            Icon(Icons.warning_amber_rounded, color: Colors.white, size: 20.sp),
+      ),
+      margin: EdgeInsets.all(16.r),
+      borderRadius: 16.r,
+      duration: const Duration(seconds: 4),
+      forwardAnimationCurve: Curves.easeOutBack,
+      isDismissible: true,
+      dismissDirection: DismissDirection.horizontal,
+      boxShadows: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.2),
+          blurRadius: 10,
+          offset: const Offset(0, 4),
+        ),
+      ],
+      shouldIconPulse: false,
     );
   }
 }

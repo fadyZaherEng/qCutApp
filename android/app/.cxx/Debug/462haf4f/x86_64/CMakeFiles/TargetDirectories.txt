@@ -1,2 +1,0 @@
-E:/qcut/q_cut/android/app/.cxx/Debug/462haf4f/x86_64/CMakeFiles/edit_cache.dir
-E:/qcut/q_cut/android/app/.cxx/Debug/462haf4f/x86_64/CMakeFiles/rebuild_cache.dir

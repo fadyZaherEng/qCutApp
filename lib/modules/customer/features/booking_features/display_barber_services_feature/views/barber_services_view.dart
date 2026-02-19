@@ -18,12 +18,27 @@ class BarberServicesView extends StatelessWidget {
 
   final BarberServicesController controller =
       Get.put(BarberServicesController());
-  final barber = Get.arguments as Barber;
+  final dynamic arguments = Get.arguments;
+  late final Barber barber;
+  List<String>? preSelectedServiceIds;
 
   @override
   Widget build(BuildContext context) {
+    if (arguments is Barber) {
+      barber = arguments;
+    } else if (arguments is Map) {
+      barber = arguments['barber'];
+      preSelectedServiceIds = arguments['preSelectedServiceIds'];
+    } else {
+      // Fallback redirect to home if arguments are missing
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Get.offAllNamed(AppRouter.bottomNavigationBar);
+      });
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
     controller.barberId.value = barber.id;
-    controller.fetchServices(barber.id);
+    controller.fetchServices(barber.id, preSelectedServiceIds: preSelectedServiceIds);
 
     return Scaffold(
       appBar: CustomAppBar(title: "barberServices".tr),
@@ -110,6 +125,7 @@ class BarberServicesView extends StatelessWidget {
                   );
                 },
               ),
+              SizedBox(height: 10.h),
             ],
           );
         }),

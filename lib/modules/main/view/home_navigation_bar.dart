@@ -15,13 +15,28 @@ class HomeNavigationBar extends StatelessWidget {
       extendBody: true,
       body: SafeArea(
         bottom: false,
-        child: PageView(
-          physics: const NeverScrollableScrollPhysics(),
-          controller: controller.pageController,
-          onPageChanged: (index) {
-            controller.currentIndex.value = index;
-          },
-          children: controller.pages,
+        child: Obx(
+          () => AnimatedSwitcher(
+            duration: const Duration(milliseconds: 400),
+            switchInCurve: Curves.easeOutCubic,
+            switchOutCurve: Curves.easeInCubic,
+            transitionBuilder: (Widget child, Animation<double> animation) {
+              return FadeTransition(
+                opacity: animation,
+                child: SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(0.0, 0.05),
+                    end: Offset.zero,
+                  ).animate(animation),
+                  child: child,
+                ),
+              );
+            },
+            child: KeyedSubtree(
+              key: ValueKey<int>(controller.currentIndex.value),
+              child: controller.pages[controller.currentIndex.value],
+            ),
+          ),
         ),
       ),
       bottomNavigationBar: Obx(

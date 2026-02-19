@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -28,6 +29,7 @@ class NearestBarberResponse {
 
 class HomeController extends GetxController {
   final NetworkAPICall _apiCall = NetworkAPICall();
+  Timer? _searchTimer;
 
   // Form Controllers
   final TextEditingController fullNameController = TextEditingController();
@@ -49,7 +51,7 @@ class HomeController extends GetxController {
   final RxBool isSearching = false.obs;
 
   // UI States
-  final RxBool isLoading = false.obs;
+  final RxBool isLoading = true.obs;
   final RxBool isError = false.obs;
   final RxString errorMessage = ''.obs;
 
@@ -67,6 +69,7 @@ class HomeController extends GetxController {
     passwordController.dispose();
     confirmPasswordController.dispose();
     searchBarberController.dispose(); // Dispose search controller
+    _searchTimer?.cancel(); // Cancel timer on close
     super.onClose();
   }
 
@@ -346,67 +349,81 @@ class HomeController extends GetxController {
   }
 
   // Search barbers by salon name
+  // Search barbers by salon name
   Future<void> searchBarbers(String query) async {
+    _searchTimer?.cancel(); // Cancel any previous timer
+
     if (query.isEmpty) {
       searchResults.clear();
       isSearching.value = false;
-      update();
+      isLoading.value = false;
       return;
     }
 
     isSearching.value = true;
-    await getBarberBySalonName(query);
+    isLoading.value = true; // Show loading immediately
+    _searchTimer = Timer(const Duration(milliseconds: 500), () async {
+      await searchBarberGeneral(query);
+    });
   }
 
-  // Fetch barbers data by salon name
-  Future<void> getBarberBySalonName(String salonName) async {
+  // Fetch barbers data by salon name or barber name
+  Future<void> searchBarberGeneral(String query) async {
     isLoading.value = true;
     isError.value = false;
     errorMessage.value = '';
-    print("Searching for: $salonName");
+    print("Searching for: $query");
 
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setStringList("selectedCities", []);
+    final q = query.toLowerCase();
+    final combinedMap = <String, Barber>{};
 
     try {
-      final response = await _apiCall
-          .getData("${Variables.SEARCH_BARBER_NAME}?name=$salonName&page=1");
+      // 1. Local Search (Full name and Shop name)
+      for (var b in [...nearbyBarbers, ...recommendedBarbers]) {
+        final nameMatch = b.fullName.toLowerCase().contains(q);
+        final shopMatch = b.barberShop?.toLowerCase().contains(q) ?? false;
+        if (nameMatch || shopMatch) {
+          combinedMap[b.id] = b;
+        }
+      }
 
-      print("${Variables.SEARCH_BARBER_NAME}?name=$salonName&page=1");
-      final responseBody = json.decode(response.body);
-      print("Search response: ${response.body}");
-      if (response.statusCode == 200) {
-        // Handle the specific response format for search
-        final int page = responseBody['page'] ?? 1;
-        final int total = responseBody['total'] ?? 0;
-        final List<dynamic> results = responseBody['results'] ?? [];
+      // 2. API Search - By Shop Name
+      final shopResponse = await _apiCall.getData("${Variables.SEARCH_BARBER_SHOP}?name=$query&page=1");
+      if (shopResponse.statusCode == 200) {
+        final List<dynamic> results = json.decode(shopResponse.body)['results'] ?? [];
+        for (var data in results) {
+          final b = Barber.fromJson(data);
+          combinedMap[b.id] = b;
+        }
+      }
 
-        // Convert results to Barber objects
-        final List<Barber> barbers = results.map((barberJson) {
-          return Barber.fromJson(barberJson);
-        }).toList();
+      // 3. API Search - By Barber Name (Attempt)
+      try {
+        final nameResponse = await _apiCall.getData("${Variables.SEARCH_BARBER_FULL_NAME}?name=$query&page=1");
+        if (nameResponse.statusCode == 200) {
+          final List<dynamic> results = json.decode(nameResponse.body)['results'] ?? [];
+          for (var data in results) {
+            final b = Barber.fromJson(data);
+            combinedMap[b.id] = b;
+          }
+        }
+      } catch (e) {
+        print("Optional name search API call failed: $e");
+      }
 
-        // Update search results
-        searchResults.value = barbers;
-        totalBarbers.value = total;
-        currentPage.value = page;
-      } else {
-        isError.value = true;
-        errorMessage.value =
-            responseBody['message'] ?? 'Failed to fetch barbers data';
-        // ShowToast.showError(message: errorMessage.value);
-        searchResults.clear();
+      searchResults.value = combinedMap.values.toList();
+      totalBarbers.value = searchResults.length;
+
+      if (searchResults.isEmpty && !isError.value) {
+        // No results found anywhere
       }
     } catch (e) {
+      print("Search Exception: $e");
       isError.value = true;
       errorMessage.value = 'Network error: $e';
-      // Get.snackbar('Error', 'Failed to connect to server',
-      //     backgroundColor: Colors.red, colorText: Colors.white);
-      searchResults.clear();
     } finally {
       isLoading.value = false;
     }
-    update(); // لتحديث الواجهة
   }
 
   // Helper method to get working days as formatted string

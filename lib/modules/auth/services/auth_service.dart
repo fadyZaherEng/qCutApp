@@ -10,7 +10,7 @@ class AuthService {
     required String otp,
     required String newPassword,
   }) async {
-    final String url = '${Variables.baseUrl}authentication/change-password';
+    const String url = '${Variables.baseUrl}authentication/change-password';
 
     final Map<String, dynamic> body = {
       'phoneNumber': phoneNumber,

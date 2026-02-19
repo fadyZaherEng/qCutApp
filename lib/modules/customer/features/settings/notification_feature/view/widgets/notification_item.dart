@@ -6,6 +6,8 @@ import 'package:q_cut/core/utils/constants/colors_data.dart';
 import 'package:q_cut/core/utils/styles.dart';
 import 'package:q_cut/core/utils/widgets/custom_button.dart';
 import 'package:q_cut/modules/customer/features/settings/notification_feature/models/notification_model.dart';
+import 'package:get/get.dart';
+import 'package:q_cut/modules/customer/features/settings/notification_feature/logic/notification_controller.dart';
 
 class NotificationItem extends StatelessWidget {
   final NotificationModel notification;
@@ -69,22 +71,37 @@ class NotificationItem extends StatelessWidget {
           ),
           Padding(
             padding: EdgeInsets.only(top: 16.h),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
+            child: Column(
               children: [
-                CustomButton(
-                  width: 138.w,
-                  text: "Yes",
-                  onPressed: () {
-                    // Handle appointment confirmation
-                  },
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    CustomButton(
+                      width: 138.w,
+                      text: "Yes",
+                      onPressed: () {
+                        // Handle appointment confirmation
+                      },
+                    ),
+                    CustomButton(
+                      backgroundColor: ColorsData.cardStrock,
+                      width: 138.w,
+                      text: "No",
+                      onPressed: () {
+                        // Handle appointment rejection
+                      },
+                    ),
+                  ],
                 ),
+                SizedBox(height: 10.h),
                 CustomButton(
-                  backgroundColor: ColorsData.cardStrock,
-                  width: 138.w,
-                  text: "No",
+                  width: double.infinity,
+                  text: "See details",
+                  backgroundColor: Colors.blueGrey, // Distinct color
                   onPressed: () {
-                    // Handle appointment rejection
+                    // Fetch and show details
+                    Get.find<NotificationController>()
+                        .fetchAndShowAppointmentDetails(notification.processId);
                   },
                 ),
               ],
@@ -130,37 +147,56 @@ class NotificationItem extends StatelessWidget {
         borderRadius: BorderRadius.circular(8.r),
         color: ColorsData.cardColor,
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CircleAvatar(
-            radius: 26.r,
-            foregroundImage: notification.user.profilePic.isNotEmpty
-                ? CachedNetworkImageProvider(notification.user.profilePic)
-                : const AssetImage(AssetsData.circleQCutImage) as ImageProvider,
-            backgroundColor: ColorsData.secondary,
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 26.r,
+                foregroundImage: notification.user.profilePic.isNotEmpty
+                    ? CachedNetworkImageProvider(notification.user.profilePic)
+                    : const AssetImage(AssetsData.circleQCutImage)
+                        as ImageProvider,
+                backgroundColor: ColorsData.secondary,
+              ),
+              SizedBox(width: 7.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      notification.user.fullName.isNotEmpty
+                          ? notification.user.fullName
+                          : "QCUT",
+                      style: Styles.textStyleS14W700(),
+                    ),
+                    Text(
+                      notification.message,
+                      style: Styles.textStyleS10W400(),
+                    ),
+                    Text(
+                      relativeTime,
+                      style: Styles.textStyleS8W400().copyWith(color: Colors.grey),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          SizedBox(width: 7.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  notification.user.fullName.isNotEmpty
-                      ? notification.user.fullName
-                      : "QCUT",
-                  style: Styles.textStyleS14W700(),
-                ),
-                Text(
-                  notification.message,
-                  style: Styles.textStyleS10W400(),
-                ),
-                Text(
-                  relativeTime,
-                  style: Styles.textStyleS8W400().copyWith(color: Colors.grey),
-                ),
-              ],
+          if (notification.processId.isNotEmpty)
+            Padding(
+              padding: EdgeInsets.only(top: 12.h),
+              child: CustomButton(
+                width: double.infinity,
+                text: "See details",
+                backgroundColor: Colors.blueGrey,
+                onPressed: () {
+                  Get.find<NotificationController>()
+                      .fetchAndShowAppointmentDetails(notification.processId);
+                },
+              ),
             ),
-          ),
         ],
       ),
     );

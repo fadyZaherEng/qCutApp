@@ -108,6 +108,7 @@ class _LoginViewState extends State<LoginView> {
             ),
             Form(
               key: _authController.loginFormKey,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16.w),
                 child: Column(

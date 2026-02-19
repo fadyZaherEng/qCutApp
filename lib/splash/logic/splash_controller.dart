@@ -4,6 +4,8 @@ import 'package:get/get.dart';
 import 'package:q_cut/core/utils/app_router.dart';
 import 'package:q_cut/core/utils/constants/constants.dart';
 import 'package:q_cut/core/utils/navigation_helper.dart';
+import 'package:q_cut/core/services/shared_pref/pref_keys.dart';
+import 'package:q_cut/core/services/shared_pref/shared_pref.dart';
 
 class SplashController extends GetxController
     with GetSingleTickerProviderStateMixin {
@@ -53,9 +55,15 @@ class SplashController extends GetxController
     }
   }
 
+
   void _navigateAfterDelay() {
     Future.delayed(const Duration(seconds: kSplashDelay), () {
-      NavigationHelper.navigateToAndRemoveUntil(AppRouter.selectServicesPath);
+      String? token = SharedPref().getString(PrefKeys.accessToken);
+      if (token != null && token.isNotEmpty) {
+        NavigationHelper.navigateToAndRemoveUntil(AppRouter.bottomNavigationBar);
+      } else {
+        NavigationHelper.navigateToAndRemoveUntil(AppRouter.selectServicesPath);
+      }
     });
   }
 }

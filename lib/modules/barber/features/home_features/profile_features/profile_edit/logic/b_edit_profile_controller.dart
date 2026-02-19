@@ -63,6 +63,7 @@ class BEditProfileController extends GetxController {
   final cityController = TextEditingController();
   // final bankAccountController = TextEditingController();
   final instagramController = TextEditingController();
+  final locationDescriptionController = TextEditingController();
   double locationLatitude = 0.0;
   double locationLongitude = 0.0;
 
@@ -100,6 +101,7 @@ class BEditProfileController extends GetxController {
     cityController.text = initialData.city;
     // bankAccountController.text = initialData.bankAccountNumber;
     instagramController.text = initialData.instagramPage;
+    locationDescriptionController.text = initialData.locationDescription;
     if (initialData.barberShopLocation.coordinates.length == 2) {
       locationLongitude = initialData.barberShopLocation.coordinates[0];
       locationLatitude = initialData.barberShopLocation.coordinates[1];
@@ -182,6 +184,15 @@ class BEditProfileController extends GetxController {
 
   // Remove a working day at the given index
   void removeWorkingDay(int index) {
+    if (workingDays.length <= 1) {
+      Get.snackbar(
+        'Action Denied',
+        'You must have at least one working day',
+        backgroundColor: Colors.orange,
+        colorText: Colors.white,
+      );
+      return;
+    }
     if (index >= 0 && index < workingDays.length) {
       workingDays.removeAt(index);
     }
@@ -224,13 +235,16 @@ class BEditProfileController extends GetxController {
         'barberShop': saloonController.text,
         'city': cityController.text,
         'instagramPage': instagramController.text,
+        'locationDescription': locationDescriptionController.text,
         'bankAccountNumber': "123456", // bankAccountController.text,
         'offDay': offDays,
         'workingDays': workingDays
             .map((day) => {
                   "day": day.day,
                   "startHour": day.startHour,
+                  "startMinute": day.startMinute,
                   "endHour": day.endHour,
+                  "endMinute": day.endMinute,
                 })
             .toList(),
         'profilePic': profilePicUrl,
@@ -249,10 +263,12 @@ class BEditProfileController extends GetxController {
         // Also update working days in a separate call
         final workingDaysPayload = {
           'workingDays': workingDays
-              .map((day) => {
+                  .map((day) => {
                     "day": day.day,
                     "startHour": day.startHour,
+                    "startMinute": day.startMinute,
                     "endHour": day.endHour,
+                    "endMinute": day.endMinute,
                   })
               .toList(),
         };
@@ -265,6 +281,7 @@ class BEditProfileController extends GetxController {
         SharedPref().removePreference(PrefKeys.coverPic);
         profileImage = profilePicUrl;
         coverImage = coverPicUrl;
+        fullName = nameController.text;
         await SharedPref().setString(PrefKeys.profilePic, profilePicUrl);
         await SharedPref().setString(PrefKeys.coverPic, coverPicUrl);
         try {
@@ -300,6 +317,7 @@ class BEditProfileController extends GetxController {
     cityController.dispose();
     // bankAccountController.dispose();
     instagramController.dispose();
+    locationDescriptionController.dispose();
     super.onClose();
   }
 }

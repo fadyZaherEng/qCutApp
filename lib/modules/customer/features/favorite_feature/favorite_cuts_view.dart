@@ -158,30 +158,26 @@ class _FavoriteCutsViewState extends State<FavoriteCutsView> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  if (favoriteCuts.isEmpty)
-                    Text(
-                      "noFavoriteCutsYet".tr,
-                      style: Styles.textStyleS14W400(),
-                    ),
-                  if (favoriteCuts.isNotEmpty)
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Text(
-                          "youHave".tr,
-                          style: Styles.textStyleS14W400(),
-                        ),
-                        Text(
-                          " ${favoriteCuts.length} ",
-                          style: Styles.textStyleS20W700(
-                              color: ColorsData.primary),
-                        ),
-                        Text(
-                          "favoriteCuts".tr,
-                          style: Styles.textStyleS14W400(),
-                        ),
-                      ],
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Text(
+                        "youHave".tr,
+                        style: Styles.textStyleS14W400(),
+                      ),
+                      Text(
+                        " ${favoriteCuts.length} ",
+                        style: Styles.textStyleS20W700(
+                            color: ColorsData.primary),
+                      ),
+                      Text(
+                        favoriteCuts.length == 1
+                            ? "favoriteCut".tr
+                            : "favoriteCuts".tr,
+                        style: Styles.textStyleS14W400(),
+                      ),
+                    ],
+                  ),
                   InkWell(
                     onTap: isUploadingPhotos ? null : addPhotosToFavorites,
                     child: Container(

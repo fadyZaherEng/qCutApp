@@ -33,6 +33,7 @@ class NotificationResponse {
 
 class NotificationModel {
   final String id;
+  final String appointmentId;
   final UserModel user;
   final String message;
   final String messageEn;
@@ -58,6 +59,7 @@ class NotificationModel {
     required this.messageEn,
     required this.messageAr,
     required this.messageHe,
+    required this.appointmentId,
   });
 
   factory NotificationModel.fromJson(Map<String, dynamic> json) {
@@ -76,6 +78,7 @@ class NotificationModel {
       messageEn: json['messageEn'] ?? '',
       messageAr: json['messageAr'] ?? '',
       messageHe: json['messageHe'] ?? '',
+      appointmentId: json['appointmentId'] ?? '',
     );
   }
 }

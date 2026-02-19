@@ -77,21 +77,6 @@ class _ChangeUserInfoBottomSheetState extends State<ChangeUserInfoBottomSheet> {
                   hintText: "enterYourName".tr,
                   keyboardType: TextInputType.name,
                 ),
-                SizedBox(height: 12.h),
-                Text(
-                  "changeYourEmail".tr,
-                  style: Styles.textStyleS14W700(color: ColorsData.secondary),
-                ),
-                SizedBox(height: 8.h),
-                CustomTextFormField(
-                  style: TextStyle(color: Colors.black, fontSize: 12.sp),
-                  controller: widget.profileController!.emailController,
-                  fillColor: ColorsData.font,
-                  hintText:
-                      widget.profileController!.emailController.text.isEmpty
-                          ? "(optional)"
-                          : "enterYourPhoneNumber".tr,
-                ),
                 SizedBox(height: 20.h),
                 CustomBigButton(
                   textData: widget.profileController!.isLoading.value
@@ -191,30 +176,30 @@ class _ChangeUserLocationBottomSheetState
                   keyboardType: TextInputType.name,
                   suffixIcon: InkWell(
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) {
-                            return MapSearchScreen(
-                              initialLatitude: 32.0853,
-                              initialLongitude: 34.7818,
-                              onLocationSelected: (lat, lng, address) {
-                                // Navigator.pop(context, address); // رجّع العنوان مع الـ pop
-                                print(address);
-                                widget.profileController!.cityController.text =
-                                    address;
-                              },
-                            );
-                          },
-                        ),
-                      ).then((selectedAddress) {
-                        if (selectedAddress != null) {
-                          print(selectedAddress);
-                          widget.profileController!.cityController.text =
-                              selectedAddress;
-                          setState(() {}); // يحدث الـ TextField
-                        }
-                      });
+                      // Navigator.push(
+                      //   context,
+                      //   MaterialPageRoute(
+                      //     builder: (context) {
+                      //       return MapSearchScreen(
+                      //         initialLatitude: 32.0853,
+                      //         initialLongitude: 34.7818,
+                      //         onLocationSelected: (lat, lng, address) {
+                      //           // Navigator.pop(context, address); // رجّع العنوان مع الـ pop
+                      //           print(address);
+                      //           widget.profileController!.cityController.text =
+                      //               address;
+                      //         },
+                      //       );
+                      //     },
+                      //   ),
+                      // ).then((selectedAddress) {
+                      //   if (selectedAddress != null) {
+                      //     print(selectedAddress);
+                      //     widget.profileController!.cityController.text =
+                      //         selectedAddress;
+                      //     setState(() {}); // يحدث الـ TextField
+                      //   }
+                      // });
                     },
                     child: const Icon(
                       Icons.location_on,

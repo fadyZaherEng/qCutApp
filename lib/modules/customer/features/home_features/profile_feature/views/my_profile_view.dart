@@ -9,10 +9,8 @@ import 'package:q_cut/core/utils/app_router.dart';
 import 'package:q_cut/core/utils/constants/assets_data.dart';
 import 'package:q_cut/core/utils/constants/colors_data.dart';
 import 'package:q_cut/core/utils/styles.dart';
-import 'package:q_cut/core/utils/widgets/custom_button.dart';
 import 'package:q_cut/main.dart';
 import 'package:q_cut/modules/barber/features/home_features/profile_features/profile_display/views/widgets/show_change_your_picture_dialog.dart';
-import 'package:q_cut/modules/customer/features/home_features/home/views/widgets/custom_home_app_bar.dart';
 import 'package:q_cut/modules/customer/features/home_features/profile_feature/logic/profile_controller.dart';
 import 'package:q_cut/modules/customer/features/home_features/profile_feature/views/widgets/show_change_user_info_bottom_sheet.dart';
 import 'package:q_cut/modules/customer/features/settings/presentation/views/functions/show_log_out_dialog.dart';
@@ -94,16 +92,8 @@ class _MyProfileViewState extends State<MyProfileView> {
                                 Get.locale?.languageCode == "he"
                             ? 20.w
                             : null,
-                        child: CustomButton(
-                          width: 200.w,
-                          text: "editYourProfile".tr,
-                          onPressed: () {
-                            showChangeUserInfoBottomSheet(
-                              context,
-                              profileController,
-                            );
-                          },
-                        ),
+                        child: SizedBox(),
+                        // editYourProfile button removed
                       ),
                       Positioned(
                         bottom: 0.h,
@@ -225,11 +215,29 @@ class _MyProfileViewState extends State<MyProfileView> {
                             mainAxisSize: MainAxisSize.min,
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
-                              Text(
-                                fullName,
-                                style: Styles.textStyleS16W700(),
+                              Row(
+                                children: [
+                                  Text(
+                                    fullName,
+                                    style: Styles.textStyleS16W700(),
+                                  ),
+                                  SizedBox(width: 8.w),
+                                  GestureDetector(
+                                    onTap: () {
+                                      showChangeUserInfoBottomSheet(
+                                        context,
+                                        profileController,
+                                      );
+                                    },
+                                    child: Icon(
+                                      Icons.edit,
+                                      size: 26.sp,
+                                      color: ColorsData.primary,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              SizedBox(height: 10.h),
+                              SizedBox(height: 16.h),
                               Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
@@ -264,7 +272,15 @@ class _MyProfileViewState extends State<MyProfileView> {
                         SizedBox(height: 20.h),
                         buildDrawerItem("resetPassword".tr,
                             AssetsData.resetPasswordBottomSheetIcon, () {
-                          Get.toNamed(AppRouter.resetPasswordPath);
+                          Get.toNamed(
+                            AppRouter.resetPasswordPath,
+                            arguments: {
+                              "phoneNumber": profileController
+                                      .profileData.value?.phoneNumber ??
+                                  phoneNumber,
+                              "otp": '123456',
+                            },
+                          );
                         }),
                         buildDivider(),
                         buildDrawerItem(
@@ -273,11 +289,8 @@ class _MyProfileViewState extends State<MyProfileView> {
                           Get.toNamed(AppRouter.changeLangugesPath);
                         }),
                         buildDivider(),
-                        buildDrawerItem(
-                            "changePhoneNumber".tr, AssetsData.callIcon, () {
-                          Get.toNamed(AppRouter.resetPhoneNumberPath);
-                        }),
-                        buildDivider(),
+                        // changePhoneNumber removed
+
                         buildDrawerItem(
                             "changeYourLocation".tr, AssetsData.mapPinIcon,
                             () async {
@@ -297,13 +310,13 @@ class _MyProfileViewState extends State<MyProfileView> {
                         buildDivider(),
                         _buildDrawerItem("Terms and Conditions".tr,
                             Icons.integration_instructions_outlined, () {
-                              Get.toNamed(AppRouter.termsPath);
-                            }),
+                          Get.toNamed(AppRouter.termsPath);
+                        }),
                         buildDivider(),
                         _buildDrawerItem(
                             "privacyPolicy".tr, Icons.policy_outlined, () {
-                              Get.toNamed(AppRouter.privacyPolicyPath);
-                            }),
+                          Get.toNamed(AppRouter.privacyPolicyPath);
+                        }),
                         buildDivider(),
                         buildDrawerItem(
                           "contact_qcut".tr,
@@ -382,7 +395,7 @@ class _MyProfileViewState extends State<MyProfileView> {
   _buildDrawerItem(
       String tr, IconData integrationInstructions, Null Function() param2) {
     bool isClicked = true;
-    return GestureDetector(
+    return InkWell(
       onTap: () async {
         if (isClicked) {
           isClicked = false;

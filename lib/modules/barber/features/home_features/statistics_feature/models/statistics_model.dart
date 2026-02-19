@@ -1,10 +1,10 @@
 class BarberStats {
   final int totalAppointments;
   final double totalIncome;
-  final int workingHours;
+  final double workingHours;
   final int newConsumers;
   final int returningConsumers;
-  final double notComeTotal;
+  final int notComeTotal;
 
   BarberStats({
     required this.totalAppointments,
@@ -16,13 +16,18 @@ class BarberStats {
   });
 
   factory BarberStats.fromJson(Map<String, dynamic> json) {
+    double hours = (json['workingHours'] ?? 0).toDouble();
+    // Convert milliseconds to hours if value is large
+    if (hours > 10000) {
+      hours = hours / (1000 * 60 * 60);
+    }
     return BarberStats(
       totalAppointments: json['totalAppointments'] ?? 0,
       totalIncome: (json['totalIncome'] ?? 0).toDouble(),
-      workingHours: json['workingHours'] ?? 0,
+      workingHours: hours,
       newConsumers: json['newConsumers'] ?? 0,
       returningConsumers: json['returningConsumers'] ?? 0,
-      notComeTotal: (json['notComeTotal'] ?? 0).toDouble(),
+      notComeTotal: (json['notComeTotal'] ?? 0).toInt(),
     );
   }
 

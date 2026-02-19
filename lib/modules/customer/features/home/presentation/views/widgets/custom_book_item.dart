@@ -88,7 +88,7 @@ class CustomBookItem extends StatelessWidget {
                   ),
                   _buildInfoRow(
                     "qty".tr,
-                    "${appointment?.services.fold(0, (sum, service) => sum + service.numberOfUsers)} ${'consumer'.tr}(s)",
+                    "${(appointment?.services ?? []).fold(0, (sum, service) => (sum as int) + service.numberOfUsers)} ${'consumer'.tr}(s)",
                   ),
                   _buildInfoRow(
                     "bookingDay".tr,

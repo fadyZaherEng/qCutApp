@@ -14,63 +14,79 @@ import 'package:intl/date_symbol_data_local.dart';
 
 import 'firebase_options.dart';
 
-String profileImage = SharedPref().getString(PrefKeys.profilePic) ??
-    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQzph4xv23B3sfc8O09BVewi1IeI-FWnHVvyxsnzqa6muN8-XWy08Vu0teNV7zXZrV1h8M&usqp=CAU";
-String coverImage = SharedPref().getString(PrefKeys.coverPic) ??
-    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQzph4xv23B3sfc8O09BVewi1IeI-FWnHVvyxsnzqa6muN8-XWy08Vu0teNV7zXZrV1h8M&usqp=CAU";
-
-String fullName = SharedPref().getString(PrefKeys.fullName) ?? "Your Name";
-String phoneNumber = SharedPref().getString(PrefKeys.phoneNumber) ?? "300300";
-String currentBarberId = SharedPref().getString(PrefKeys.barberId) ?? "";
-String instagramLink = SharedPref().getString(PrefKeys.instagramLink) ??
-    "https://www.instagram.com/";
-
-String? barberJson = SharedPref().getString(PrefKeys.barber);
-
-Barber currentBarber = barberJson != null
-    ? Barber.fromJson(
-        jsonDecode(SharedPref().getString(PrefKeys.barber) ?? "{}"))
-    : Barber(
-        id: currentBarberId,
-        fullName: fullName,
-        phoneNumber: phoneNumber,
-        userType: "barber",
-        coverPic: coverImage,
-        instagramPage: instagramLink,
-        profilePic: profileImage,
-        city: "",
-        isFavorite: false,
-        status: "active",
-        offDay: [],
-        workingDays: [],
-      );
+String profileImage = "";
+String coverImage = "";
+String fullName = "";
+String phoneNumber = "";
+String currentBarberId = "";
+String instagramLink = "";
+Barber? currentBarber;
 
 void main() async {
-  // Ensure Flutter is initialized
   WidgetsFlutterBinding.ensureInitialized();
+
+  // 1. Initialize Preferences first
   await SharedPref().instantiatePreferences();
 
-  // Initialize all supported locales (e.g., 'ar', 'en')
+  // 2. Initialize variables from preferences
+  profileImage = SharedPref().getString(PrefKeys.profilePic) ?? " ";
+  coverImage = SharedPref().getString(PrefKeys.coverPic) ?? " ";
+  fullName = SharedPref().getString(PrefKeys.fullName) ?? "";
+  phoneNumber = SharedPref().getString(PrefKeys.phoneNumber) ?? " ";
+  currentBarberId = SharedPref().getString(PrefKeys.barberId) ?? "";
+  instagramLink = SharedPref().getString(PrefKeys.instagramLink) ?? "";
+
+  String? barberJson = SharedPref().getString(PrefKeys.barber);
+  if (barberJson != null) {
+    try {
+      currentBarber = Barber.fromJson(jsonDecode(barberJson));
+    } catch (e) {
+      debugPrint("Error decoding barberJson: $e");
+      currentBarber = _getDefaultBarber();
+    }
+  } else {
+    currentBarber = _getDefaultBarber();
+  }
+
+  // 3. Date Formatting
   await initializeDateFormatting();
 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  ).then((value) async {
-    // Setup services after Firebase has initialized
+  // 4. Firebase & Notifications
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
     await FirebaseCloudMessaging().init();
     await LocalNotificationService.init();
-  }).catchError((error) {
-    print('Failed to initialize Firebase: $error');
-  });
 
-  // Initialize the LocaleController after SharedPreferences
+    // Listen for notification clicks AFTER init
+    onNotificationClick?.stream.listen((event) {
+      if (event != null && event.isNotEmpty) {
+        Get.toNamed(AppRouter.notificationPath);
+      }
+    });
+  } catch (error) {
+    debugPrint('Firebase/Notification Init Error: $error');
+  }
+
+  // 5. Initialize Locale & Run
   Get.put(LocaleController(), permanent: true);
-  onNotificationClick?.stream.listen((event) {
-    if (event.isNotEmpty) {
-      print("event11111111111111111111 $event");
-      Get.toNamed(AppRouter.notificationPath);
-    }
-  });
-  // Run app
   runApp(const QCut());
+}
+
+Barber _getDefaultBarber() {
+  return Barber(
+    id: currentBarberId,
+    fullName: fullName,
+    phoneNumber: phoneNumber,
+    userType: "barber",
+    coverPic: coverImage,
+    instagramPage: instagramLink,
+    profilePic: profileImage,
+    city: "",
+    isFavorite: false,
+    status: "active",
+    offDay: [],
+    workingDays: [],
+  );
 }

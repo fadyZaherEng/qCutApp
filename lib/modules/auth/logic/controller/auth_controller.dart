@@ -10,6 +10,7 @@ import 'package:q_cut/core/utils/network/network_helper.dart';
 import 'package:q_cut/modules/auth/models/auth_response_model.dart';
 import 'package:q_cut/modules/auth/models/user_model.dart';
 import 'package:q_cut/modules/auth/views/otp_verification_view.dart';
+import 'package:q_cut/modules/auth/views/password_reset_success_view.dart';
 import 'package:q_cut/modules/customer/features/home_features/home/models/barber_model.dart';
 
 class AuthController extends GetxController {
@@ -25,6 +26,8 @@ class AuthController extends GetxController {
   final TextEditingController confirmPasswordController =
       TextEditingController();
   final TextEditingController otpController = TextEditingController();
+  final TextEditingController barberShopNameController = TextEditingController();
+  final TextEditingController locationDescriptionController = TextEditingController();
 
   // Form Keys
   final GlobalKey<FormState> loginFormKey = GlobalKey<FormState>();
@@ -47,10 +50,10 @@ class AuthController extends GetxController {
 
   @override
   void onClose() {
-    fullNameController.dispose();
+    // fullNameController.dispose();
     // phoneNumberController.dispose();
     // passwordController.dispose();
-    confirmPasswordController.dispose();
+    // confirmPasswordController.dispose();
     super.onClose();
   }
 
@@ -65,8 +68,9 @@ class AuthController extends GetxController {
     try {
       final userData = UserModel(
         fullName: fullNameController.text.trim(),
-        phoneNumber:
-            "+972${phoneNumberController.text.trim().replaceAll('\u200E', '')}",
+        phoneNumber: phoneNumberController.text.trim().startsWith("+")
+            ? phoneNumberController.text.trim().replaceAll('\u200E', '')
+            : "+972${phoneNumberController.text.trim().replaceAll('\u200E', '')}",
         password: passwordController.text,
         city: city.text.trim(),
       );
@@ -78,6 +82,8 @@ class AuthController extends GetxController {
             ? userData.toJson()
             : {
                 ...userData.toJson(),
+                'barberShop': barberShopNameController.text.trim(),
+                'locationDescription': locationDescriptionController.text.trim(),
                 "location": {
                   "type": "Point",
                   "coordinates": [locationLongitude, locationLatitude]
@@ -87,9 +93,18 @@ class AuthController extends GetxController {
 
       final response =
           await _apiCall.postDataAsGuest(requestData, Variables.SIGNUP);
-      print(userData.toJson());
+      print({
+        ...userData.toJson(),
+        'barberShop': barberShopNameController.text.trim(),
+        'locationDescription': locationDescriptionController.text.trim(),
+        "location": {
+          "type": "Point",
+          "coordinates": [locationLongitude, locationLatitude]
+        }
+      });
 
       final responseBody = json.decode(response.body);
+      print("response ${json.decode(response.body)}");
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         signupResponse.value = SignUpResponse.fromJson(responseBody);
@@ -104,7 +119,7 @@ class AuthController extends GetxController {
         }
 
         ShowToast.showSuccessSnackBar(
-            message: 'Account created successfully'.tr);
+            message: 'Account created successfully ِAnd OTP Verification is 123456'.tr);
 
         Get.to(() => OtpVerificationView(userId: userId.value));
       } else {
@@ -137,6 +152,55 @@ class AuthController extends GetxController {
     return fcmToken ?? '';
   }
 
+  Future<void> forgetPassword(String phoneNumber) async {
+    isLoading.value = true;
+    errorMessage.value = '';
+    try {
+      final String formattedPhone = phoneNumber.startsWith("+")
+          ? phoneNumber
+          : "+972$phoneNumber";
+
+      final response = await _apiCall.postDataAsGuest(
+          {"phoneNumber": formattedPhone}, Variables.FORGET_PASSWORD);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        ShowToast.showSuccessSnackBar(message: "OTP is 123456".tr);
+        Get.toNamed(
+          AppRouter.otpVerificationResetCasePath,
+          arguments: {
+            "isFromResetPassword": true,
+            "phoneNumber": formattedPhone,
+          },
+        );
+      } else {
+        final responseBody = json.decode(response.body);
+        errorMessage.value = responseBody['message'] ?? 'Failed to send OTP'.tr;
+        ShowToast.showError(message: errorMessage.value);
+      }
+    } catch (e) {
+      errorMessage.value = 'Network error: $e';
+      ShowToast.showError(message: 'failedToConnectToServer'.tr);
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> saveLoginData(dynamic responseBody, LoginResponse loginResponse, bool isChecked) async {
+    await SharedPref().setString(PrefKeys.id, loginResponse.id);
+    await SharedPref().setString(PrefKeys.barberId, loginResponse.id);
+    await SharedPref().setString(PrefKeys.accessToken, loginResponse.accessToken);
+    await SharedPref().setString(PrefKeys.profilePic, loginResponse.profilePic);
+    await SharedPref().setString(PrefKeys.coverPic, loginResponse.coverPic);
+    await SharedPref().setString(PrefKeys.phoneNumber, loginResponse.phoneNumber);
+    await SharedPref().setString(PrefKeys.fullName, loginResponse.fullName);
+    await SharedPref().setBool(PrefKeys.saveMe, isChecked);
+
+    if ((SharedPref().getBool(PrefKeys.userRole)) == false) {
+      Barber barber = Barber.fromJson(responseBody);
+      await SharedPref().setString(PrefKeys.barber, jsonEncode(barber.toJson()));
+    }
+  }
+
   Future<void> login(BuildContext context, bool isChecked) async {
     if (!loginFormKey.currentState!.validate()) {
       return;
@@ -150,8 +214,9 @@ class AuthController extends GetxController {
       final fcmToken = await getFCMToken();
 
       final requestData = {
-        'phoneNumber':
-            "+972${phoneNumberController.text.trim().replaceAll('\u200E', '')}",
+        'phoneNumber': phoneNumberController.text.trim().startsWith("+")
+            ? phoneNumberController.text.trim().replaceAll('\u200E', '')
+            : "+972${phoneNumberController.text.trim().replaceAll('\u200E', '')}",
         'password': passwordController.text,
         "fcmToken": fcmToken,
         "userType":
@@ -168,28 +233,17 @@ class AuthController extends GetxController {
       if (response.statusCode == 200) {
         loginResponse.value = LoginResponse.fromJson(responseBody);
         isLoginSuccess.value = true;
-        print("=============== ${loginResponse.value!.id} ==================");
-        await SharedPref().setString(PrefKeys.id, loginResponse.value!.id);
-        await SharedPref()
-            .setString(PrefKeys.barberId, loginResponse.value!.id);
-        await SharedPref()
-            .setString(PrefKeys.accessToken, loginResponse.value!.accessToken);
-        await SharedPref()
-            .setString(PrefKeys.profilePic, loginResponse.value!.profilePic);
-        await SharedPref()
-            .setString(PrefKeys.coverPic, loginResponse.value!.coverPic);
-        await SharedPref()
-            .setString(PrefKeys.phoneNumber, loginResponse.value!.phoneNumber);
-        await SharedPref()
-            .setString(PrefKeys.fullName, loginResponse.value!.fullName);
-        await SharedPref().setBool(PrefKeys.saveMe, isChecked);
-        if ((SharedPref().getBool(PrefKeys.userRole)) == false) {
-          Barber barber = Barber.fromJson(responseBody);
-          await SharedPref()
-              .setString(PrefKeys.barber, jsonEncode(barber.toJson()));
-        }
+        
+        await saveLoginData(responseBody, loginResponse.value!, isChecked);
+
         // You might want to show a success message
         ShowToast.showSuccessSnackBar(message: "loggedInSuccessfully".tr);
+        
+        // Check if there's a pending route to return to
+        // We clear it but navigate to home to prevent crashes due to missing arguments
+        if (SharedPref().getString(PrefKeys.pendingRoute) != null) {
+          SharedPref().removePreference(PrefKeys.pendingRoute);
+        }
         Get.offAllNamed(AppRouter.bottomNavigationBar);
       } else {
         errorMessage.value = responseBody['message'] ?? 'Failed to login';
@@ -235,8 +289,7 @@ class AuthController extends GetxController {
       }
     } catch (e) {
       errorMessage.value = 'Network error: $e';
-      Get.snackbar('Error', 'Failed to connect to server',
-          backgroundColor: Colors.red, colorText: Colors.white);
+      ShowToast.showError(message: 'failedToConnectToServer'.tr);
     } finally {
       isLoading.value = false;
       update();
@@ -278,12 +331,82 @@ class AuthController extends GetxController {
     }
   }
 
+  Future<void> resetPassword({
+    required String phoneNumber,
+    required String otp,
+    required String newPassword,
+  }) async {
+    isLoading.value = true;
+    errorMessage.value = '';
+    try {
+      final requestData = {
+        "phoneNumber": phoneNumber,
+        "otp": otp,
+        "newPassword": newPassword,
+      };
+
+      final response = await _apiCall.postDataAsGuest(
+          requestData, Variables.CHANGE_PASSWORD);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        String successMsg = "resetPasswordSuccess".tr;
+        try {
+          final responseBody = json.decode(response.body);
+          if (responseBody is Map && responseBody.containsKey('message')) {
+            successMsg = responseBody['message'];
+          }
+        } catch (_) {}
+        ShowToast.showSuccessSnackBar(message: successMsg.tr);
+
+        // Auto login after password reset
+        await autoLoginAfterReset(phoneNumber, newPassword);
+      } else {
+        final errorData = json.decode(response.body);
+        errorMessage.value = errorData['message'] ?? "failedToResetPassword".tr;
+        ShowToast.showError(message: errorMessage.value);
+      }
+    } catch (e) {
+      errorMessage.value = "networkError".tr + ": $e";
+      ShowToast.showError(message: errorMessage.value);
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> autoLoginAfterReset(String phoneNumber, String password) async {
+    try {
+      final fcmToken = await getFCMToken();
+      final loginData = {
+        'phoneNumber': phoneNumber,
+        'password': password,
+        "fcmToken": fcmToken,
+        "userType": SharedPref().getBool(PrefKeys.userRole) == true ? "user" : "barber",
+      };
+
+      final response = await _apiCall.postDataAsGuest(loginData, Variables.LOGIN);
+      if (response.statusCode == 200) {
+        final responseBody = json.decode(response.body);
+        final loginRes = LoginResponse.fromJson(responseBody);
+        
+        await saveLoginData(responseBody, loginRes, true);
+        
+        Get.to(() => const PasswordResetSuccessView());
+      } else {
+        Get.offAllNamed(AppRouter.loginPath);
+      }
+    } catch (e) {
+      Get.offAllNamed(AppRouter.loginPath);
+    }
+  }
+
   // Update the clearForm method to be safer
   void clearForm() {
     // Only clear controllers that are definitely not in use
     fullNameController.clear();
     city.clear();
     confirmPasswordController.clear();
+    barberShopNameController.clear();
+    locationDescriptionController.clear();
     // Don't reference otpController here since it might be disposed
     errorMessage.value = '';
   }

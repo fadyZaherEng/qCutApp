@@ -16,12 +16,21 @@ class QCutServicesView extends StatelessWidget {
   QCutServicesView({super.key});
 
   final QCutServicesController controller = Get.put(QCutServicesController());
-  final barber = Get.arguments["barber"] as Barber;
-  final isBarber = Get.arguments["isBarber"] as bool? ?? false;
-  final numberofUsers = Get.arguments["isMultiple"] as int;
 
   @override
   Widget build(BuildContext context) {
+    if (Get.arguments == null || Get.arguments is! Map || Get.arguments["barber"] == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Get.offAllNamed(AppRouter.bottomNavigationBar);
+      });
+      return const Scaffold(body: Center(child: SpinKitDoubleBounce(color: ColorsData.primary)));
+    }
+
+    final barber = Get.arguments["barber"] as Barber;
+    final isBarber = Get.arguments["isBarber"] as bool? ?? false;
+    final numberofUsers = Get.arguments["isMultiple"] as int? ?? 1;
+
+    print("num of users: $numberofUsers");
     controller.barberId.value = barber.id;
     controller.fetchServices(barber.id);
     return Scaffold(
@@ -65,63 +74,25 @@ class QCutServicesView extends StatelessWidget {
                       service: service,
                       isSelected: controller.selectedServices[index],
                       onPressed: () => controller.toggleService(index),
+                      numberofUsers: numberofUsers,
                       onQuantityChanged: (quantity) {
+                        if(quantity>numberofUsers) {
+                          Get.snackbar(
+                            "warning".tr,
+                            "${'youCannotSelectMoreThan'.tr} $numberofUsers ${'services'.tr}",
+                            backgroundColor: Colors.red.withOpacity(0.8),
+                            colorText: Colors.white,
+                            snackPosition: SnackPosition.BOTTOM,
+                          );
+                          return;
+                        }
                         controller.updateServiceQuantity(index, quantity);
                       },
                     );
                   },
                 ),
               ),
-              SizedBox(height: 10.h),
-              // CustomBigButton(
-              //   textData: "confirm".tr,
-              //   onPressed: () async {
-              //     final selectedIndices = controller.selectedServices
-              //         .asMap()
-              //         .entries
-              //         .where((entry) => entry.value)
-              //         .map((entry) => entry.key)
-              //         .toList();
-              //
-              //     final selectedServicesList = selectedIndices
-              //         .map((index) => controller.barberServices[index])
-              //         .toList();
-              //
-              //     final List<int> quantities = selectedIndices
-              //         .map((index) => controller.serviceQuantities[index])
-              //         .toList();
-              //
-              //     // ✅ اجمالي الكمية المختارة
-              //     final int totalSelectedQuantity =
-              //         quantities.fold(0, (a, b) => a + b);
-              //
-              //     // ✅ تحقق ديناميكي حسب عدد الأشخاص
-              //     if (numberofUsers > 1 &&
-              //         totalSelectedQuantity < numberofUsers) {
-              //       Get.snackbar(
-              //         "warning".tr,
-              //         "${'youMustSelectAtLeast'.tr} $numberofUsers ${'services'.tr}",
-              //         backgroundColor: Colors.red.withOpacity(0.8),
-              //         colorText: Colors.white,
-              //         snackPosition: SnackPosition.BOTTOM,
-              //       );
-              //       return;
-              //     }
-              //
-              //     final freeTimeRequestModel =
-              //         FreeTimeRequestModel.fromServices(
-              //       barber.id,
-              //       selectedServicesList,
-              //       serviceQuantities: quantities,
-              //       onHolding: false,
-              //     );
-              //
-              //     Get.toNamed(AppRouter.bookAppointmentPath,
-              //         arguments: freeTimeRequestModel);
-              //   },
-              // ),
-              // SizedBox(height: 64.h),
-
+              SizedBox(height: 16.h),
               CustomBigButton(
                 textData: "confirm".tr,
                 onPressed: () async {
@@ -179,10 +150,13 @@ class QCutServicesView extends StatelessWidget {
                     arguments: {
                       "freeTimeRequestModel": freeTimeRequestModel,
                       "barber": barber,
+                      "isBarber": isBarber,
                     },
                   );
                 },
               ),
+              SizedBox(height: 48.h),
+
             ],
           );
         }),

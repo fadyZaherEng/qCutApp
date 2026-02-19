@@ -322,7 +322,7 @@ class _CustomAddNewServiceBottomSheetState
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Enter Min Time'.tr,
+                            'From'.tr,
                             style: TextStyle(
                               fontSize: 12.sp,
                               color: Colors.grey,
@@ -357,7 +357,7 @@ class _CustomAddNewServiceBottomSheetState
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                       content: Text(
-                                        'Minimum time must be less than maximum time'
+                                        'From time must be less than To time'
                                             .tr,
                                         style: const TextStyle(
                                             color: Colors.white),
@@ -401,7 +401,7 @@ class _CustomAddNewServiceBottomSheetState
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Enter Max Time'.tr,
+                            'To'.tr,
                             style: TextStyle(
                               fontSize: 12.sp,
                               color: Colors.grey,
@@ -436,7 +436,7 @@ class _CustomAddNewServiceBottomSheetState
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                       content: Text(
-                                        'Maximum time must be greater than minimum time'
+                                        'To time must be greater than From time'
                                             .tr,
                                         style: const TextStyle(
                                           color: Colors.white,

@@ -11,6 +11,7 @@ class QCutServiceCard extends StatefulWidget {
   final bool? isSelected;
   final Function(int)? onQuantityChanged;
   final VoidCallback? onPressed;
+  final int numberofUsers;
 
   const QCutServiceCard({
     super.key,
@@ -18,6 +19,7 @@ class QCutServiceCard extends StatefulWidget {
     this.isSelected,
     this.onPressed,
     this.onQuantityChanged,
+    this.numberofUsers = 1,
   });
 
   @override
@@ -134,6 +136,9 @@ class _QCutServiceCardState extends State<QCutServiceCard> {
                             ),
                             InkWell(
                               onTap: () {
+                                if (serviceCount > widget.numberofUsers - 1) {
+                                  return;
+                                }
                                 setState(() {
                                   serviceCount++;
                                   widget.onQuantityChanged?.call(serviceCount);

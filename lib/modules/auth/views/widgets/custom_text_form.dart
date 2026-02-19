@@ -22,6 +22,8 @@ class CustomTextFormField extends StatelessWidget {
   final Color? fillColor;
   final bool readOnly;
   final VoidCallback? onTap;
+  final List<TextInputFormatter>? inputFormatters;
+  final TextDirection ?textDirection;
 
   CustomTextFormField({
     super.key,
@@ -41,6 +43,8 @@ class CustomTextFormField extends StatelessWidget {
     this.onChanged,
     this.readOnly = false,
     this.onTap,
+    this.inputFormatters,
+    this.textDirection,
   });
 
   @override
@@ -50,11 +54,12 @@ class CustomTextFormField extends StatelessWidget {
     if (keyboardType == TextInputType.phone ||
         keyboardType == TextInputType.number) {
       return Directionality(
-        textDirection: TextDirection.ltr,
+        textDirection: textDirection ??
+            (languageCode == 'ar' ? TextDirection.rtl : TextDirection.ltr),
         child: TextFormField(
           controller: controller,
           keyboardType: TextInputType.number,
-          inputFormatters: [
+          inputFormatters:inputFormatters?? [
             FilteringTextInputFormatter.digitsOnly,
             LengthLimitingTextInputFormatter(9), // allow only 9 digits
           ],

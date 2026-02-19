@@ -27,6 +27,7 @@ class ResetPasswordView extends StatefulWidget {
 
 class _ResetPasswordViewState extends State<ResetPasswordView> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
   // final TextEditingController _otpController = TextEditingController(); // Removed
   final TextEditingController _newPasswordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
@@ -42,9 +43,21 @@ class _ResetPasswordViewState extends State<ResetPasswordView> {
   @override
   void initState() {
     super.initState();
-    final args = Get.arguments as Map<String, dynamic>;
-    phoneNumber = args['phoneNumber'];
-    otp = args['otp']; // Restored
+    final args = Get.arguments;
+    if (args is Map<String, dynamic>) {
+      phoneNumber = args['phoneNumber'] ?? "";
+      otp = args['otp'] ?? "";
+    } else {
+      phoneNumber = "";
+      otp = "";
+      // Use scheduleMicrotask or Future.delayed to pop after build
+      Future.microtask(() {
+        if (mounted) {
+          Get.back();
+          ShowToast.showError(message: "Invalid session. Please try again.".tr);
+        }
+      });
+    }
   }
 
   @override
@@ -64,76 +77,114 @@ class _ResetPasswordViewState extends State<ResetPasswordView> {
       _isLoading.value = true;
       final NetworkAPICall apiCall = NetworkAPICall();
 
+      final String formattedPhone = phoneNumber.startsWith('+')
+          ? phoneNumber
+          : (phoneNumber.startsWith('972')
+              ? '+$phoneNumber'
+              : "+972$phoneNumber");
+
       final requestData = {
-        "phoneNumber": "+972$phoneNumber",
+        "phoneNumber": formattedPhone,
         "otp": otp, // Used variable
         "newPassword": _newPasswordController.text
       };
       print("Reset Password Data: $requestData");
-
-      apiCall
-          .postDataAsGuest(requestData, Variables.CHANGE_PASSWORD)
-          .then((response) async {
-            print("Reset Password Response: ${response.body}");
+      apiCall.postDataAsGuest({
+        "phoneNumber": formattedPhone,
+      }, Variables.FORGET_PASSWORD).then((response) {
+        print("Forget Password Response: ${response.body}");
         if (response.statusCode == 200 || response.statusCode == 201) {
-          // Password reset successful, now login
-          
-          // Get FCM token first (optional, or pass empty/dummy if not critical for immediate login here, 
-          // but better to try getting it or reuse AuthController logic if accessible. 
-          // For simplicity and stability, we'll try to get it efficiently or pass null/empty if handled by backend gracefuly)
-          String? fcmToken = "";
-          try{
-             // fcmToken = await FirebaseMessaging.instance.getToken(); // Uncomment if import available or handled
-          }catch(e){}
-
-          final loginData = {
-            'phoneNumber': phoneNumber,
-            'password': _newPasswordController.text,
-            "fcmToken": fcmToken,
-             // Assumption: Role is consumer/user unless specified otherwise. 
-             // Ideally we should know the role. AuthController uses SharedPref(PrefKeys.userRole).
-            "userType": SharedPref().getBool(PrefKeys.userRole) == true ? "user" : "barber",
-          };
-
-          apiCall.postDataAsGuest(loginData, Variables.LOGIN).then((loginRes) async {
-             _isLoading.value = false;
-             if(loginRes.statusCode == 200){
-                final responseBody = json.decode(loginRes.body);
-                final loginResponse = LoginResponse.fromJson(responseBody);
-                
-                await SharedPref().setString(PrefKeys.id, loginResponse.id);
-                await SharedPref().setString(PrefKeys.barberId, loginResponse.id);
-                await SharedPref().setString(PrefKeys.accessToken, loginResponse.accessToken);
-                await SharedPref().setString(PrefKeys.profilePic, loginResponse.profilePic);
-                await SharedPref().setString(PrefKeys.coverPic, loginResponse.coverPic);
-                await SharedPref().setString(PrefKeys.phoneNumber, loginResponse.phoneNumber);
-                await SharedPref().setString(PrefKeys.fullName, loginResponse.fullName);
-                await SharedPref().setBool(PrefKeys.saveMe, true);
-
-                if ((SharedPref().getBool(PrefKeys.userRole)) == false) {
-                   Barber barber = Barber.fromJson(responseBody);
-                   await SharedPref().setString(PrefKeys.barber, jsonEncode(barber.toJson()));
+          // OTP sent successfully, now proceed to change password
+          apiCall
+              .postDataAsGuest(requestData, Variables.CHANGE_PASSWORD)
+              .then((response) async {
+            print("Reset Password Response: ${response.body}");
+            if (response.statusCode == 200 || response.statusCode == 201) {
+              // Extract success message
+              String successMsg = "resetPasswordSuccess".tr;
+              try {
+                final responseBody = json.decode(response.body);
+                if (responseBody is Map &&
+                    responseBody.containsKey('message')) {
+                  successMsg = responseBody['message'];
                 }
-                
-                Get.to(() => const PasswordResetSuccessView());
+              } catch (_) {}
+              ShowToast.showSuccessSnackBar(message: successMsg.tr);
 
-             } else {
-                 Get.offAllNamed(AppRouter.loginPath); 
-             }
+              // Password reset successful, now login
+              String? fcmToken = "";
+              // try {
+              //   fcmToken = await FirebaseMessaging.instance.getToken();
+              // } catch (e) {}
+
+              final loginData = {
+                'phoneNumber': formattedPhone,
+                'password': _newPasswordController.text,
+                "fcmToken": fcmToken,
+                "userType": SharedPref().getBool(PrefKeys.userRole) == true
+                    ? "user"
+                    : "barber",
+              };
+
+              apiCall
+                  .postDataAsGuest(loginData, Variables.LOGIN)
+                  .then((loginRes) async {
+                _isLoading.value = false;
+                if (loginRes.statusCode == 200) {
+                  final responseBody = json.decode(loginRes.body);
+                  final loginResponse = LoginResponse.fromJson(responseBody);
+
+                  await SharedPref().setString(PrefKeys.id, loginResponse.id);
+                  await SharedPref()
+                      .setString(PrefKeys.barberId, loginResponse.id);
+                  await SharedPref().setString(
+                      PrefKeys.accessToken, loginResponse.accessToken);
+                  await SharedPref()
+                      .setString(PrefKeys.profilePic, loginResponse.profilePic);
+                  await SharedPref()
+                      .setString(PrefKeys.coverPic, loginResponse.coverPic);
+                  await SharedPref().setString(
+                      PrefKeys.phoneNumber, loginResponse.phoneNumber);
+                  await SharedPref()
+                      .setString(PrefKeys.fullName, loginResponse.fullName);
+                  await SharedPref().setBool(PrefKeys.saveMe, true);
+
+                  if ((SharedPref().getBool(PrefKeys.userRole)) == false) {
+                    Barber barber = Barber.fromJson(responseBody);
+                    await SharedPref().setString(
+                        PrefKeys.barber, jsonEncode(barber.toJson()));
+                  }
+
+                  Get.to(() => const PasswordResetSuccessView());
+                } else {
+                  Get.offAllNamed(AppRouter.loginPath);
+                }
+              });
+            } else {
+              _isLoading.value = false;
+              // Error
+              String errorMessage = "Failed to reset password".tr;
+              try {
+                final errorData = json.decode(response.body);
+                if (errorData['message'] != null) {
+                  errorMessage = errorData['message'];
+                }
+              } catch (e) {}
+              ShowToast.showError(message: errorMessage);
+            }
+          }).catchError((error) {
+            _isLoading.value = false;
+            ShowToast.showError(message: "Network Error: $error");
           });
-
         } else {
           _isLoading.value = false;
-          // Error
-          String errorMessage = "Failed to reset password".tr;
+          String errorMessage = "Failed to send OTP".tr;
           try {
             final errorData = json.decode(response.body);
             if (errorData['message'] != null) {
               errorMessage = errorData['message'];
             }
-          } catch (e) {
-            // keep default error
-          }
+          } catch (e) {}
           ShowToast.showError(message: errorMessage);
         }
       }).catchError((error) {
@@ -154,6 +205,7 @@ class _ResetPasswordViewState extends State<ResetPasswordView> {
           child: Center(
             child: Form(
               key: _formKey,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
               child: Column(
                 children: [
                   SizedBox(height: 30.h),
@@ -169,7 +221,7 @@ class _ResetPasswordViewState extends State<ResetPasswordView> {
                     style: Styles.textStyleS14W400(),
                   ),
                   SizedBox(height: 50.h),
-                  
+
                   // New Password Field
                   Obx(() => CustomTextFormField(
                         controller: _newPasswordController,
@@ -199,7 +251,7 @@ class _ResetPasswordViewState extends State<ResetPasswordView> {
                         },
                       )),
                   SizedBox(height: 16.h),
-                  
+
                   // Confirm Password Field
                   Obx(() => CustomTextFormField(
                         controller: _confirmPasswordController,
@@ -226,7 +278,7 @@ class _ResetPasswordViewState extends State<ResetPasswordView> {
                         },
                       )),
                   SizedBox(height: 100.h),
-                  
+
                   // Reset Button
                   Obx(() => CustomBigButton(
                         textData: _isLoading.value
@@ -234,7 +286,7 @@ class _ResetPasswordViewState extends State<ResetPasswordView> {
                             : "resetPassword".tr,
                         onPressed: _isLoading.value ? null : _resetPassword,
                       )),
-                   SizedBox(height: 20.h),
+                  SizedBox(height: 20.h),
                 ],
               ),
             ),

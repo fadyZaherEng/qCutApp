@@ -29,20 +29,21 @@ class CustomerHistoryAppointment {
 
   factory CustomerHistoryAppointment.fromJson(Map<String, dynamic> json) {
     return CustomerHistoryAppointment(
-      id: json['_id'],
-      barber: BarberInfo.fromJson(json['barber']),
-      userId: json['user'],
-      userName: json['userName'],
-      services: (json['service'] as List)
-          .map((service) => ServiceInfo.fromJson(service))
-          .toList(),
-      price: json['price'].toDouble(),
-      duration: json['duration'],
-      status: json['status'],
-      startDate: DateTime.fromMillisecondsSinceEpoch(json['startDate']),
-      endDate: DateTime.fromMillisecondsSinceEpoch(json['endDate']),
-      createdAt: DateTime.fromMillisecondsSinceEpoch(json['createdAt']),
-      paymentMethod: json['paymentMethod'],
+      id: json['_id'] ?? "",
+      barber: BarberInfo.fromJson(json['barber'] ?? {}),
+      userId: json['user'] ?? "",
+      userName: json['userName'] ?? "",
+      services: (json['service'] as List?)
+              ?.map((service) => ServiceInfo.fromJson(service))
+              .toList() ??
+          [],
+      price: (json['price'] ?? 0).toDouble(),
+      duration: json['duration'] ?? 0,
+      status: json['status'] ?? "",
+      startDate: DateTime.fromMillisecondsSinceEpoch(json['startDate'] ?? 0),
+      endDate: DateTime.fromMillisecondsSinceEpoch(json['endDate'] ?? 0),
+      createdAt: DateTime.fromMillisecondsSinceEpoch(json['createdAt'] ?? 0),
+      paymentMethod: json['paymentMethod'] ?? "",
     );
   }
 }
@@ -64,11 +65,11 @@ class BarberInfo {
 
   factory BarberInfo.fromJson(Map<String, dynamic> json) {
     return BarberInfo(
-      id: json['_id'],
-      fullName: json['fullName'],
-      userType: json['userType'],
-      barberShop: json['barberShop'],
-      profilePic: json['profilePic'],
+      id: json['_id'] ?? "",
+      fullName: json['fullName'] ?? "",
+      userType: json['userType'] ?? "",
+      barberShop: json['barberShop'] ?? json['fullName'] ?? "",
+      profilePic: json['profilePic'] ?? "",
     );
   }
 }
@@ -88,10 +89,10 @@ class ServiceInfo {
 
   factory ServiceInfo.fromJson(Map<String, dynamic> json) {
     return ServiceInfo(
-      service: ServiceDetails.fromJson(json['service']),
-      numberOfUsers: json['numberOfUsers'],
-      price: json['price'].toDouble(),
-      id: json['_id'],
+      service: ServiceDetails.fromJson(json['service'] ?? {}),
+      numberOfUsers: json['numberOfUsers'] ?? 0,
+      price: (json['price'] ?? 0).toDouble(),
+      id: json['_id'] ?? "",
     );
   }
 }
@@ -109,9 +110,9 @@ class ServiceDetails {
 
   factory ServiceDetails.fromJson(Map<String, dynamic> json) {
     return ServiceDetails(
-      id: json['_id'],
-      name: json['name'],
-      price: json['price'].toDouble(),
+      id: json['_id'] ?? "",
+      name: json['name'] ?? "",
+      price: (json['price'] ?? 0).toDouble(),
     );
   }
 }

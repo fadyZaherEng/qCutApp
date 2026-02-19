@@ -1,298 +1,13 @@
-// import 'dart:convert';
-//
-// import 'package:flutter/material.dart';
-// import 'package:flutter_screenutil/flutter_screenutil.dart';
-// import 'package:get/get.dart';
-// import 'package:q_cut/core/utils/network/api.dart';
-// import 'package:q_cut/core/utils/network/network_helper.dart';
-//
-// class ChooseBreakDaysBottomSheet extends StatefulWidget {
-//   const ChooseBreakDaysBottomSheet({super.key});
-//
-//   @override
-//   State<ChooseBreakDaysBottomSheet> createState() =>
-//       _ChooseBreakDaysBottomSheetState();
-// }
-//
-// class _ChooseBreakDaysBottomSheetState
-//     extends State<ChooseBreakDaysBottomSheet> {
-//   int? _selectedDay;
-//   List<DateTime> _breakDays = [];
-//   bool isClicked = true;
-//
-//   @override
-//   void initState() {
-//     super.initState();
-//     _fetchBreaks();
-//   }
-//
-//   Future<void> _fetchBreaks() async {
-//     try {
-//       final response =
-//           await NetworkAPICall().getData("${Variables.BARBER}get-break-time");
-//
-//       print("Fetch breaks response: $response");
-//
-//       if (response.statusCode == 200 && response.body != null) {
-//         // Decode JSON string
-//         final data =
-//             response.body is String ? jsonDecode(response.body) : response.body;
-//
-//         print("Breaks response: $data");
-//
-//         final List breaks = data["breakTime"] ?? [];
-//
-//         setState(() {
-//           _breakDays = breaks.map<DateTime>((b) {
-//             int start = b["startDate"]; // already int in your API
-//             return DateTime.fromMillisecondsSinceEpoch(start * 1000);
-//           }).toList();
-//         });
-//       }
-//     } catch (e, st) {
-//       debugPrint("Error fetching breaks: $e\n$st");
-//     }
-//   }
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Container(
-//       padding: const EdgeInsets.all(16),
-//       decoration: const BoxDecoration(
-//         color: Colors.white,
-//         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-//       ),
-//       child: Column(
-//         mainAxisSize: MainAxisSize.min,
-//         children: [
-//           // Header
-//           Row(
-//             children: [
-//               IconButton(
-//                 icon: const Icon(Icons.arrow_back, color: Colors.black),
-//                 onPressed: () => Navigator.pop(context),
-//               ),
-//               const Spacer(),
-//             ],
-//           ),
-//
-//           // Clock Icon and Title
-//           Icon(Icons.access_time_rounded, size: 36.h, color: Colors.black87),
-//           SizedBox(height: 8.h),
-//           Text(
-//             "Choose break days".tr,
-//             style: TextStyle(
-//               fontSize: 16.sp,
-//               fontWeight: FontWeight.w600,
-//               color: const Color(0xFFC49A58),
-//             ),
-//           ),
-//           SizedBox(height: 24.h),
-//
-//           // Custom Calendar
-//           Column(
-//             children: [
-//               Text(
-//                 "Select the days you want to take a break".tr,
-//                 style: TextStyle(
-//                   fontSize: 16.sp,
-//                   fontWeight: FontWeight.w500,
-//                   color: Colors.black87,
-//                 ),
-//               ),
-//               SizedBox(height: 16.h),
-//               _buildCalendarHeader(),
-//               _buildCalendarGrid(),
-//             ],
-//           ),
-//           SizedBox(height: 24.h),
-//
-//           // Confirm Button
-//           Container(
-//             width: double.infinity,
-//             height: 48.h,
-//             decoration: BoxDecoration(
-//               borderRadius: BorderRadius.circular(8),
-//             ),
-//             child: ElevatedButton(
-//               style: ElevatedButton.styleFrom(
-//                 backgroundColor: const Color(0xFFC49A58),
-//                 shape: RoundedRectangleBorder(
-//                   borderRadius: BorderRadius.circular(8),
-//                 ),
-//                 elevation: 0,
-//               ),
-//               onPressed: _addBreak,
-//               child: Text(
-//                 "Confirm".tr,
-//                 style: TextStyle(
-//                   fontSize: 16.sp,
-//                   fontWeight: FontWeight.w600,
-//                   color: Colors.white,
-//                 ),
-//               ),
-//             ),
-//           ),
-//           SizedBox(height: 64.h),
-//         ],
-//       ),
-//     );
-//   }
-//
-//   Widget _buildCalendarHeader() {
-//     final days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
-//     return Row(
-//       mainAxisAlignment: MainAxisAlignment.spaceAround,
-//       children: days
-//           .map((day) => SizedBox(
-//                 width: 40,
-//                 child: Text(
-//                   day.toLowerCase().tr,
-//                   style: TextStyle(
-//                     fontSize: 12.sp,
-//                     color: Colors.grey,
-//                     fontWeight: FontWeight.w500,
-//                   ),
-//                   textAlign: TextAlign.center,
-//                 ),
-//               ))
-//           .toList(),
-//     );
-//   }
-//
-//   Widget _buildCalendarGrid() {
-//     return GridView.builder(
-//       shrinkWrap: true,
-//       physics: const NeverScrollableScrollPhysics(),
-//       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-//         crossAxisCount: 7,
-//         childAspectRatio: 1,
-//       ),
-//       itemCount: 30,
-//       itemBuilder: (context, index) {
-//         final day = index + 1;
-//         final now = DateTime.now();
-//         final currentDate = DateTime(now.year, now.month, day);
-//
-//         final isSelected = _selectedDay == day;
-//         final isHighlighted = _breakDays.any((d) =>
-//             d.year == currentDate.year &&
-//             d.month == currentDate.month &&
-//             d.day == currentDate.day);
-//
-//         return GestureDetector(
-//           onTap: () => setState(() => _selectedDay = day),
-//           child: Container(
-//             margin: const EdgeInsets.all(4),
-//             decoration: BoxDecoration(
-//               shape: BoxShape.circle,
-//               color: isSelected
-//                   ? const Color(0xFFC49A58)
-//                   : isHighlighted
-//                       ? const Color(0xFFFDF5E6)
-//                       : Colors.transparent,
-//             ),
-//             child: Center(
-//               child: Text(
-//                 day.toString(),
-//                 style: TextStyle(
-//                   fontSize: 14.sp,
-//                   fontWeight:
-//                       isHighlighted ? FontWeight.w600 : FontWeight.normal,
-//                   color: isSelected
-//                       ? Colors.white
-//                       : isHighlighted
-//                           ? const Color(0xFFC49A58)
-//                           : Colors.black87,
-//                 ),
-//               ),
-//             ),
-//           ),
-//         );
-//       },
-//     );
-//   }
-//
-//
-//   Future<void> _addBreak() async {
-//     if (isClicked) {
-//       isClicked = false;
-//
-//       if (_selectedDay == null) {
-//         Get.snackbar(
-//           "Error",
-//           "Please select a day first",
-//           backgroundColor: Colors.red,
-//           colorText: Colors.white,
-//         );
-//         return;
-//       }
-//
-//       try {
-//         DateTime start = DateTime(
-//             DateTime.now().year, DateTime.now().month, _selectedDay!, 8, 0);
-//         DateTime end = DateTime(
-//             DateTime.now().year, DateTime.now().month, _selectedDay!, 9, 0);
-//
-//         int startTimestamp = (start.millisecondsSinceEpoch / 1000).round();
-//         int endTimestamp = (end.millisecondsSinceEpoch / 1000).round();
-//
-//         final body = {
-//           "breaks": [
-//             {"startDate": startTimestamp, "endDate": endTimestamp}
-//           ]
-//         };
-//
-//         final response = await NetworkAPICall().putData(
-//           "${Variables.BARBER}take-break",
-//           body,
-//         );
-//
-//         if (response.statusCode == 200) {
-//           Get.back();
-//           Get.snackbar(
-//             "Success".tr,
-//             "Break added successfully".tr,
-//             backgroundColor: Colors.green,
-//             colorText: Colors.white,
-//           );
-//         } else {
-//           // Get.snackbar(
-//           //   "Error",
-//           //   "Failed to add break: ${response.body}",
-//           //   backgroundColor: Colors.red,
-//           //   colorText: Colors.white,
-//           // );
-//         }
-//       } catch (e) {
-//         // Get.snackbar(
-//         //   "Error",
-//         //   "Something went wrong: $e",
-//         //   backgroundColor: Colors.red,
-//         //   colorText: Colors.white,
-//         // );
-//       }
-//     }
-//     await Future.delayed(const Duration(seconds: 2));
-//     isClicked = true;
-//   }
-// }
-//
-// void showChooseBreakDaysBottomSheet(BuildContext context) {
-//   showModalBottomSheet(
-//     context: context,
-//     isScrollControlled: true,
-//     backgroundColor: Colors.transparent,
-//     builder: (context) => const ChooseBreakDaysBottomSheet(),
-//   );
-// }
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
+import 'package:table_calendar/table_calendar.dart';
 import 'package:q_cut/core/utils/network/api.dart';
 import 'package:q_cut/core/utils/network/network_helper.dart';
+import 'package:q_cut/core/utils/constants/colors_data.dart';
+import 'package:q_cut/core/utils/styles.dart';
 
 class ChooseBreakDaysBottomSheet extends StatefulWidget {
   const ChooseBreakDaysBottomSheet({super.key});
@@ -304,11 +19,11 @@ class ChooseBreakDaysBottomSheet extends StatefulWidget {
 
 class _ChooseBreakDaysBottomSheetState
     extends State<ChooseBreakDaysBottomSheet> {
-  int? _selectedDay;
-  final List<DateTime> _breakDays = [];
   bool isClicked = true;
   DateTime? _rangeStart;
   DateTime? _rangeEnd;
+  DateTime _focusedDay = DateTime.now();
+  RangeSelectionMode _rangeSelectionMode = RangeSelectionMode.toggledOn;
   List<Map<String, DateTime>> _breakRanges = [];
 
   @override
@@ -322,15 +37,9 @@ class _ChooseBreakDaysBottomSheetState
       final response =
           await NetworkAPICall().getData("${Variables.BARBER}get-break-time");
 
-      print("Fetch breaks response: $response");
-
       if (response.statusCode == 200 && response.body != null) {
-        // Decode JSON string
         final data =
             response.body is String ? jsonDecode(response.body) : response.body;
-
-        print("Breaks response: $data");
-
         final List breaks = data["breakTime"] ?? [];
 
         setState(() {
@@ -344,261 +53,239 @@ class _ChooseBreakDaysBottomSheetState
             };
           }).toList();
         });
-
-        // setState(() {
-        //   _breakDays = breaks.map<DateTime>((b) {
-        //     int start = b["startDate"]; // already int in your API
-        //     return DateTime.fromMillisecondsSinceEpoch(start * 1000);
-        //   }).toList();
-        // });
       }
-    } catch (e, st) {
-      debugPrint("Error fetching breaks: $e\n$st");
+    } catch (e) {
+      debugPrint("Error fetching breaks: $e");
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
       decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Header
-          Row(
+      child: SafeArea(
+        bottom: true,
+        top: false,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 16.h),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              IconButton(
-                icon: const Icon(Icons.arrow_back, color: Colors.black),
-                onPressed: () => Navigator.pop(context),
-              ),
-              const Spacer(),
-            ],
-          ),
-
-          // Clock Icon and Title
-          Icon(Icons.access_time_rounded, size: 36.h, color: Colors.black87),
-          SizedBox(height: 8.h),
-          Text(
-            "Choose break days".tr,
-            style: TextStyle(
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w600,
-              color: const Color(0xFFC49A58),
-            ),
-          ),
-          SizedBox(height: 24.h),
-
-          // Custom Calendar
-          Column(
-            children: [
-              Text(
-                "Select the days you want to take a break".tr,
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.black87,
+              // Handle bar
+              Container(
+                width: 40.w,
+                height: 4.h,
+                margin: EdgeInsets.only(bottom: 16.h),
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              SizedBox(height: 16.h),
-              _buildCalendarHeader(),
-              _buildCalendarGrid(),
-            ],
-          ),
-          SizedBox(height: 24.h),
-
-          // Confirm Button
-          Container(
-            width: double.infinity,
-            height: 48.h,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFC49A58),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                elevation: 0,
-              ),
-              onPressed: _addBreak,
-              child: Text(
-                "Confirm".tr,
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          ),
-          SizedBox(height: 64.h),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCalendarHeader() {
-    final days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: days
-          .map((day) => SizedBox(
-                child: Text(
-                  day.toLowerCase().tr,
-                  style: TextStyle(
-                    fontSize: 12.sp,
-                    color: Colors.grey,
-                    fontWeight: FontWeight.w500,
+              
+              // Header
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Choose break days".tr,
+                    style: Styles.textStyleS18W700(color: ColorsData.primary),
                   ),
-                  textAlign: TextAlign.center,
-                ),
-              ))
-          .toList(),
-    );
-  }
+                  IconButton(
+                    icon: const Icon(Icons.close, color: Colors.grey),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+              
+              Flexible(
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(height: 8.h),
+                      Icon(Icons.access_time_rounded, size: 40.h, color: ColorsData.primary),
+                      SizedBox(height: 8.h),
+                      Text(
+                        "Select the days you want to take a break".tr,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      SizedBox(height: 16.h),
 
-  Widget _buildCalendarGrid() {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 7,
-        childAspectRatio: 1,
-      ),
-      itemCount: 30,
-      itemBuilder: (context, index) {
-        final day = index + 1;
-        final now = DateTime.now();
-        final currentDate = DateTime(now.year, now.month, day);
-
-        final isInRange = _rangeStart != null &&
-            _rangeEnd != null &&
-            currentDate
-                .isAfter(_rangeStart!.subtract(const Duration(days: 1))) &&
-            currentDate.isBefore(_rangeEnd!.add(const Duration(days: 1)));
-
-        final isStart = _rangeStart != null &&
-            currentDate.year == _rangeStart!.year &&
-            currentDate.month == _rangeStart!.month &&
-            currentDate.day == _rangeStart!.day;
-
-        final isEnd = _rangeEnd != null &&
-            currentDate.year == _rangeEnd!.year &&
-            currentDate.month == _rangeEnd!.month &&
-            currentDate.day == _rangeEnd!.day;
-
-        // final isHighlighted = _breakDays.any((d) =>
-        //     d.year == currentDate.year &&
-        //     d.month == currentDate.month &&
-        //     d.day == currentDate.day);
-        final isHighlighted = _breakRanges.any((range) {
-          final start = range["start"];
-          final end = range["end"];
-          return !currentDate.isBefore(start!) && !currentDate.isAfter(end!);
-        });
-
-        return GestureDetector(
-          onTap: () {
-            setState(() {
-              if (_rangeStart == null ||
-                  (_rangeStart != null && _rangeEnd != null)) {
-                // reset and set new start
-                _rangeStart = currentDate;
-                _rangeEnd = null;
-              } else if (_rangeStart != null && _rangeEnd == null) {
-                if (currentDate.isBefore(_rangeStart!)) {
-                  // if tapped before start → reset
-                  _rangeStart = currentDate;
-                } else {
-                  _rangeEnd = currentDate;
-                }
-              }
-            });
-          },
-          child: Container(
-            margin: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: isStart || isEnd
-                  ? const Color(0xFFC49A58)
-                  : isInRange
-                      ? const Color(0xFFFDF5E6)
-                      : Colors.transparent,
-            ),
-            child: Center(
-              child: Text(
-                day.toString(),
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  fontWeight: (isStart || isEnd || isHighlighted)
-                      ? FontWeight.w600
-                      : FontWeight.normal,
-                  color: isStart || isEnd
-                      ? Colors.white
-                      : isInRange || isHighlighted
-                          ? const Color(0xFFC49A58)
-                          : Colors.black87,
+                      TableCalendar(
+                        firstDay: DateTime.now().subtract(const Duration(days: 0)),
+                        lastDay: DateTime.now().add(const Duration(days: 365)),
+                        focusedDay: _focusedDay,
+                        rangeStartDay: _rangeStart,
+                        rangeEndDay: _rangeEnd,
+                        rangeSelectionMode: _rangeSelectionMode,
+                        rowHeight: 52.h,
+                        daysOfWeekHeight: 40.h,
+                        onRangeSelected: (start, end, focused) {
+                          setState(() {
+                            _rangeStart = start;
+                            _rangeEnd = end;
+                            _focusedDay = focused;
+                            _rangeSelectionMode = RangeSelectionMode.toggledOn;
+                          });
+                        },
+                        onPageChanged: (focused) {
+                          _focusedDay = focused;
+                        },
+                        calendarStyle: CalendarStyle(
+                          defaultTextStyle: TextStyle(color: Colors.black, fontSize: 13.sp),
+                          weekendTextStyle: TextStyle(color: Colors.black, fontSize: 13.sp),
+                          outsideTextStyle: TextStyle(color: Colors.grey, fontSize: 11.sp),
+                          todayDecoration: BoxDecoration(
+                            color: ColorsData.primary.withOpacity(0.2),
+                            shape: BoxShape.circle,
+                          ),
+                          todayTextStyle: TextStyle(
+                            color: ColorsData.primary,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13.sp
+                          ),
+                          rangeStartDecoration: const BoxDecoration(
+                            color: ColorsData.primary,
+                            shape: BoxShape.circle,
+                          ),
+                          rangeEndDecoration: const BoxDecoration(
+                            color: ColorsData.primary,
+                            shape: BoxShape.circle,
+                          ),
+                          rangeHighlightColor: ColorsData.primary.withOpacity(0.15),
+                          withinRangeTextStyle: const TextStyle(
+                            color: Colors.black, 
+                            fontWeight: FontWeight.bold
+                          ),
+                        ),
+                        headerStyle: HeaderStyle(
+                          formatButtonVisible: false,
+                          titleCentered: true,
+                          headerPadding: EdgeInsets.symmetric(vertical: 8.h),
+                          headerMargin: EdgeInsets.only(bottom: 8.h),
+                          titleTextStyle: Styles.textStyleS16W700(color: Colors.black),
+                          leftChevronIcon: const Icon(Icons.chevron_left, color: ColorsData.primary),
+                          rightChevronIcon: const Icon(Icons.chevron_right, color: ColorsData.primary),
+                        ),
+                      ),
+                      
+                      if (_rangeStart != null) ...[
+                        SizedBox(height: 16.h),
+                        Container(
+                          padding: EdgeInsets.all(12.r),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[100],
+                            borderRadius: BorderRadius.circular(12.r),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(Icons.info_outline, color: ColorsData.primary, size: 18.sp),
+                              SizedBox(width: 8.w),
+                              Expanded(
+                                child: Text(
+                                  _rangeEnd != null
+                                    ? "${DateFormat.yMMMd().format(_rangeStart!)} - ${DateFormat.yMMMd().format(_rangeEnd!)}"
+                                    : DateFormat.yMMMd().format(_rangeStart!),
+                                  style: Styles.textStyleS14W600(color: Colors.black),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                      SizedBox(height: 16.h),
+                    ],
+                  ),
                 ),
               ),
-            ),
+
+              // Confirm Button
+              SizedBox(
+                width: double.infinity,
+                height: 50.h,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: ColorsData.primary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 0,
+                  ),
+                  onPressed: _addBreak,
+                  child: Text(
+                    "Confirm".tr,
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(height: 8.h),
+            ],
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 
   Future<void> _addBreak() async {
-    if (isClicked) {
-      isClicked = false;
-
-      if (_rangeStart == null) {
-        Get.snackbar(
-          "Error",
-          "Please select a start and end date",
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
-        return;
-      }
-
-      try {
-        int startTimestamp =
-            (_rangeStart!.millisecondsSinceEpoch / 1000).round();
-        int endTimestamp = _rangeEnd == null
-            ? DateTime.now().millisecondsSinceEpoch.round()
-            : (_rangeEnd!.millisecondsSinceEpoch / 1000).round();
-
-        final body = {
-          "breaks": [
-            {"startDate": startTimestamp, "endDate": endTimestamp}
-          ]
-        };
-
-        final response = await NetworkAPICall().putData(
-          "${Variables.BARBER}take-break",
-          body,
-        );
-
-        if (response.statusCode == 200) {
-          Get.back();
-          Get.snackbar(
-            "Success".tr,
-            "Break added successfully".tr,
-            backgroundColor: Colors.green,
-            colorText: Colors.white,
-          );
-        }
-      } catch (e) {
-        debugPrint("Error: $e");
-      }
+    if (!isClicked) return;
+    
+    if (_rangeStart == null) {
+      Get.snackbar("Error".tr, "Please select at least one day".tr,
+          backgroundColor: Colors.red, colorText: Colors.white);
+      return;
     }
-    await Future.delayed(const Duration(seconds: 2));
-    isClicked = true;
+
+    setState(() => isClicked = false);
+
+    try {
+      // Normalize dates to start/end of day
+      final start = DateTime(_rangeStart!.year, _rangeStart!.month, _rangeStart!.day, 0, 0, 0);
+      final end = _rangeEnd != null 
+          ? DateTime(_rangeEnd!.year, _rangeEnd!.month, _rangeEnd!.day, 23, 59, 59)
+          : DateTime(_rangeStart!.year, _rangeStart!.month, _rangeStart!.day, 23, 59, 59);
+
+      final body = {
+        "breaks": [
+          {
+            "startDate": (start.millisecondsSinceEpoch / 1000).round(),
+            "endDate": (end.millisecondsSinceEpoch / 1000).round(),
+          }
+        ]
+      };
+
+      final response = await NetworkAPICall().putData(
+        "${Variables.BARBER}take-break",
+        body,
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        Get.back();
+        Get.snackbar("Success".tr, "Break added successfully".tr,
+            backgroundColor: Colors.green, colorText: Colors.white);
+      } else {
+        final errorData = jsonDecode(response.body);
+        Get.snackbar("Error".tr, errorData['message'] ?? "Failed to add break".tr,
+            backgroundColor: Colors.red, colorText: Colors.white);
+      }
+    } catch (e) {
+      debugPrint("Error: $e");
+      Get.snackbar("Error".tr, "An unexpected error occurred".tr,
+          backgroundColor: Colors.red, colorText: Colors.white);
+    } finally {
+      setState(() => isClicked = true);
+    }
   }
 }
 

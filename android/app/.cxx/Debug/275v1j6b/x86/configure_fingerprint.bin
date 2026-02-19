@@ -2,6 +2,7 @@ C/C++ Structured Logm
 k
 iC:\src\flutter_windows_3.29.3-stable\flutter\packages\flutter_tools\gradle\src\main\groovy\CMakeLists.txtC
 A
+<<<<<<< HEAD
 ?com.android.build.gradle.internal.cxx.io.EncodedFileFingerPrint	‘â ™Ä3§ ËÐ‹ªã2O
 M
 KE:\QCutApp\android\app\.cxx\Debug\275v1j6b\x86\additional_project_files.txt	‘â ™Ä3 þá ™Ä3L
@@ -26,3 +27,29 @@ C
 AE:\QCutApp\android\app\.cxx\Debug\275v1j6b\x86\prefab_config.json	‘â ™Ä3( â ™Ä3J
 H
 FE:\QCutApp\android\app\.cxx\Debug\275v1j6b\x86\symbol_folder_index.txt	‘â ™Ä3= â ™Ä3
+=======
+?com.android.build.gradle.internal.cxx.io.EncodedFileFingerPrint	ëçÐðÄ3§ ËÐ‹ªã2O
+M
+KE:\QCutApp\android\app\.cxx\Debug\275v1j6b\x86\additional_project_files.txt	ëçÐðÄ3 ðˆƒ¿Ä3L
+J
+HE:\QCutApp\android\app\.cxx\Debug\275v1j6b\x86\android_gradle_build.json	ëçÐðÄ3’ óˆƒ¿Ä3Q
+O
+ME:\QCutApp\android\app\.cxx\Debug\275v1j6b\x86\android_gradle_build_mini.json	ëçÐðÄ3í üˆƒ¿Ä3>
+<
+:E:\QCutApp\android\app\.cxx\Debug\275v1j6b\x86\build.ninja	ëçÐðÄ3äÓ ©ˆƒ¿Ä3B
+@
+>E:\QCutApp\android\app\.cxx\Debug\275v1j6b\x86\build.ninja.txt	ëçÐðÄ3G
+E
+CE:\QCutApp\android\app\.cxx\Debug\275v1j6b\x86\build_file_index.txt	ëçÐðÄ3i ýˆƒ¿Ä3H
+F
+DE:\QCutApp\android\app\.cxx\Debug\275v1j6b\x86\compile_commands.json	ëçÐðÄ3	L
+J
+HE:\QCutApp\android\app\.cxx\Debug\275v1j6b\x86\compile_commands.json.bin	ëçÐðÄ3
+R
+P
+NE:\QCutApp\android\app\.cxx\Debug\275v1j6b\x86\metadata_generation_command.txt	ëçÐðÄ3 üˆƒ¿Ä3E
+C
+AE:\QCutApp\android\app\.cxx\Debug\275v1j6b\x86\prefab_config.json	ëçÐðÄ3( ýˆƒ¿Ä3J
+H
+FE:\QCutApp\android\app\.cxx\Debug\275v1j6b\x86\symbol_folder_index.txt	ëçÐðÄ3= ýˆƒ¿Ä3
+>>>>>>> development

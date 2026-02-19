@@ -1,0 +1,2 @@
+E:/QCutApp/android/app/.cxx/Debug/4a42k5po/armeabi-v7a/CMakeFiles/edit_cache.dir
+E:/QCutApp/android/app/.cxx/Debug/4a42k5po/armeabi-v7a/CMakeFiles/rebuild_cache.dir

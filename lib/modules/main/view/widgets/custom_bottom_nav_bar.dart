@@ -49,7 +49,7 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
           top: BorderSide(color: Color(0xFFAAAAAA), width: 1),
         ),
       ),
-      padding: EdgeInsets.only(top: 8.h, right: 0.w, bottom: 20.h, left: 0.w),
+      padding: EdgeInsets.only(top: 8.h, right: 0.w, bottom: 40.h, left: 0.w),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: SharedPref().getBool(PrefKeys.userRole) == false
@@ -83,27 +83,48 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
 
     return GestureDetector(
       onTap: () => _onItemTapped(index),
+      behavior: HitTestBehavior.opaque,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          SvgPicture.asset(
-            assetPath,
-            height: 24.h,
-            colorFilter: ColorFilter.mode(
-              isSelected ? ColorsData.primary : ColorsData.font,
-              BlendMode.srcIn,
+          AnimatedScale(
+            scale: isSelected ? 1.2 : 1.0,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOutBack,
+            child: SvgPicture.asset(
+              assetPath,
+              height: 24.h,
+              colorFilter: ColorFilter.mode(
+                isSelected ? ColorsData.primary : ColorsData.font,
+                BlendMode.srcIn,
+              ),
             ),
           ),
-          SizedBox(height: 4.h),
-          Text(
-            label,
+          SizedBox(height: 6.h),
+          AnimatedDefaultTextStyle(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
             style: TextStyle(
               color: isSelected ? ColorsData.primary : ColorsData.font,
-              fontSize: 13.sp,
+              fontSize: isSelected ? 13.sp : 12.sp,
               fontFamily: 'Alexandria',
-              fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
             ),
+            child: Text(label),
           ),
+          if (isSelected)
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              margin: EdgeInsets.only(top: 4.h),
+              height: 3.h,
+              width: 16.w,
+              decoration: BoxDecoration(
+                color: ColorsData.primary,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            )
+          else
+            SizedBox(height: 7.h),
         ],
       ),
     );

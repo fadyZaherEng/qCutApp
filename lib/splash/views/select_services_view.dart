@@ -25,9 +25,12 @@ class SelectServicesView extends StatelessWidget {
               width: 12.w,
               height: 12.h,
               child: buildDrawerItem(
-                  "changeLanguages".tr, AssetsData.changeLanguagesIcon, () {
-                Get.toNamed(AppRouter.changeLangugesPath);
-              }),
+                "changeLanguages".tr,
+                AssetsData.changeLanguagesIcon,
+                () {
+                  Get.toNamed(AppRouter.changeLangugesPath);
+                },
+              ),
             ),
           ),
         ),
@@ -94,13 +97,9 @@ class SelectServicesView extends StatelessWidget {
                 CustomBigButton(
                   textData: 'customer'.tr,
                   onPressed: () async {
-                    try {
-                      await SharedPref().setBool(PrefKeys.userRole, true);
-
-                      Get.offAllNamed(AppRouter.loginPath);
-                    } catch (e) {
-                      print('Error setting customer role: $e');
-                    }
+                    await SharedPref().setBool(PrefKeys.userRole, true);
+                    // Navigate customers directly to home (guest mode)
+                    Get.offAllNamed(AppRouter.homPath);
                   },
                 ),
                 const SizedBox(height: 20),

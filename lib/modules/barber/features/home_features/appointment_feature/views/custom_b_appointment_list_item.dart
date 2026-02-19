@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:intl/intl.dart';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -87,7 +89,7 @@ class _CustomBAppointmentListItemState extends State<CustomBAppointmentListItem>
   Widget build(BuildContext context) {
     final appointmentStart = widget.appointment.startDate;
     final canDelete =
-        now.isBefore(appointmentStart.subtract(const Duration(minutes: 30)));
+        now.isBefore(appointmentStart.subtract(const Duration(minutes: 20)));
     final canMarkDidntCome =
         now.isAfter(appointmentStart.add(const Duration(minutes: 5)));
 
@@ -107,6 +109,21 @@ class _CustomBAppointmentListItemState extends State<CustomBAppointmentListItem>
                 foregroundImage: CachedNetworkImageProvider(widget.imageUrl),
                 backgroundColor: ColorsData.secondary,
               ),
+              SizedBox(width: 12.w),
+              if (widget.appointment.user.phoneNumber.isNotEmpty)
+                IconButton(
+                  onPressed: () => _showCallDialog(
+                      context, widget.appointment.user.phoneNumber),
+                  icon: SvgPicture.asset(
+                    AssetsData.callIcon,
+                    height: 24.h,
+                    width: 24.w,
+                    colorFilter: const ColorFilter.mode(
+                      Colors.green,
+                      BlendMode.srcIn,
+                    ),
+                  ),
+                ),
               const Spacer(),
               Container(
                 padding: EdgeInsets.symmetric(vertical: 4.h, horizontal: 12.w),
@@ -147,61 +164,47 @@ class _CustomBAppointmentListItemState extends State<CustomBAppointmentListItem>
               fontWeight: FontWeight.bold,
             ),
           ),
+          _infoRow(
+              "Appointment Day".tr,
+              DateFormat('EEEE', Get.locale?.languageCode)
+                  .format(widget.appointment.startDate)),
+          _infoRow(
+              "Appointment Time".tr, widget.appointment.formattedTimeRange),
+          _infoRow("Customers Quantity".tr,
+              widget.appointment.totalUsers.toString()),
+          _infoRow("Services Quantity".tr,
+              widget.appointment.totalServices.toString()),
+
           SizedBox(height: 8.h),
-
-          // **Location**
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              SvgPicture.asset(
-                height: 16.h,
-                width: 16.w,
-                AssetsData.mapPinIcon,
-                colorFilter: const ColorFilter.mode(
-                  ColorsData.primary,
-                  BlendMode.srcIn,
-                ),
-              ),
-              SizedBox(width: 4.w),
-              Expanded(
-                  child: FutureBuilder<String>(
-                future: widget.appointment.barber.location
-                    ?.getAddress(Get.locale?.languageCode ?? "en"),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Text("Loading address...");
-                  }
-                  if (snapshot.hasError) {
-                    return Text("Error loading address");
-                  }
-                  return Text(
-                    snapshot.data ?? "Address not available",
-                    style: Styles.textStyleS12W400(),
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 2,
-                  );
-                },
-              )),
-            ],
+          Text(
+            "Services:".tr,
+            style: Styles.textStyleS12W400(color: ColorsData.primary),
           ),
-          SizedBox(height: 12.h),
-
-          // **Details in Rows**
-          _infoRow("service".tr, widget.service),
-          _infoRow("Qty".tr, widget.qty),
-          _infoRow("bookingDay".tr, widget.bookingDay),
-          _infoRow("bookingTime".tr, widget.bookingTime),
-          _infoRow("type".tr, widget.type),
+          SizedBox(height: 4.h),
+          ...widget.appointment.services.map((item) => Padding(
+                padding: EdgeInsets.only(left: 8.w, bottom: 4.h),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "${item.service.name} *X${item.numberOfUsers}",
+                      style: Styles.textStyleS12W400(color: Colors.white),
+                    ),
+                    Text(
+                      "\$ ${item.price.toStringAsFixed(2)}",
+                      style: Styles.textStyleS12W400(color: Colors.white70),
+                    ),
+                  ],
+                ),
+              )),
 
           SizedBox(height: 12.h),
 
           // **Price Details**
           Divider(color: Colors.white.withOpacity(0.3)),
           SizedBox(height: 8.h),
-          _infoRow("price".tr, "\$ ${widget.price.toStringAsFixed(2)}"),
-          _infoRow(
-              "finalPrice".tr, "\$ ${widget.finalPrice.toStringAsFixed(2)}",
+          _infoRow("Total Price".tr,
+              "\$ ${widget.appointment.price.toStringAsFixed(2)}",
               color: ColorsData.primary),
           SizedBox(height: 12.h),
 
@@ -247,50 +250,6 @@ class _CustomBAppointmentListItemState extends State<CustomBAppointmentListItem>
               ),
             ],
           ),
-          // Row(
-          //   children: [
-          //     if (DateTime.now().isBefore(widget.appointment.startDate
-          //         .subtract(const Duration(minutes: 30))))
-          //       Expanded(
-          //         child: _customButton(
-          //           "delete".tr,
-          //           Colors.red,
-          //           () => showDeleteAppointmentDialog(
-          //             context: context,
-          //             onYes: () => widget.controller
-          //                 .deleteAppointment(widget.appointment.id),
-          //             onNo: () {},
-          //           ),
-          //         ),
-          //       ),
-          //     if (DateTime.now().isAfter(
-          //         widget.appointment.startDate.add(const Duration(minutes: 5))))
-          //       Expanded(
-          //         child: _customButton(
-          //           "Didn’t come".tr,
-          //           Colors.orange,
-          //           () => showDidNotComeDialog(
-          //             context: context,
-          //             onYes: () => widget.controller
-          //                 .didntComeAppointment(widget.appointment.id),
-          //           ),
-          //         ),
-          //       ),
-          //     SizedBox(width: 12.w),
-          //     Expanded(
-          //       child: _customButton(
-          //         "change".tr,
-          //         ColorsData.primary,
-          //         () => showChangeTimeBottomSheet(
-          //           context,
-          //           widget.bookingDay,
-          //           widget.id,
-          //           widget.services,
-          //         ),
-          //       ),
-          //     ),
-          //   ],
-          // )
         ],
       ),
     );
@@ -303,20 +262,71 @@ class _CustomBAppointmentListItemState extends State<CustomBAppointmentListItem>
     return showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text("Confirmation".tr),
+        backgroundColor: ColorsData.secondary,
+        title: Text("Confirmation".tr,
+            style: Styles.textStyleS16W700(color: Colors.white)),
         content: Text("Are you sure the customer didn’t come?".tr,
-            style: TextStyle(fontSize: 16, color: Colors.black)),
+            style: Styles.textStyleS14W400(color: Colors.white70)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: Text("No".tr),
+            child: Text("No".tr, style: const TextStyle(color: Colors.red)),
           ),
           ElevatedButton(
+            style:
+                ElevatedButton.styleFrom(backgroundColor: ColorsData.primary),
             onPressed: () async {
               await onYes();
               Navigator.of(ctx).pop();
             },
-            child: Text("Yes".tr),
+            child: Text("Yes".tr, style: const TextStyle(color: Colors.black)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showCallDialog(BuildContext context, String phoneNumber) async {
+    return showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: ColorsData.secondary,
+        title: Text("Customer Phone".tr,
+            style: Styles.textStyleS16W700(color: Colors.white)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(phoneNumber,
+                style: Styles.textStyleS18W700(color: ColorsData.primary)),
+            SizedBox(height: 16.h),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text("Cancel".tr,
+                style: const TextStyle(color: Colors.white70)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+            onPressed: () async {
+              final Uri launchUri = Uri(
+                scheme: 'tel',
+                path: phoneNumber,
+              );
+              if (await canLaunchUrl(launchUri)) {
+                await launchUrl(launchUri);
+              }
+              Navigator.of(ctx).pop();
+            },
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.call, color: Colors.white, size: 18),
+                SizedBox(width: 8.w),
+                Text("Call".tr, style: const TextStyle(color: Colors.white)),
+              ],
+            ),
           ),
         ],
       ),

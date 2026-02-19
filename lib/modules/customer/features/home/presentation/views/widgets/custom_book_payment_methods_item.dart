@@ -6,17 +6,23 @@ import 'package:q_cut/core/utils/constants/assets_data.dart';
 import 'package:q_cut/core/utils/constants/colors_data.dart';
 import 'package:q_cut/core/utils/styles.dart';
 import 'package:q_cut/modules/customer/features/home_features/home/models/barber_model.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class BookPaymentItemModel {
   final String? imageUrl;
   final String? shopName;
   final String? location;
-  final String? service;
+  final String? service; // Kept for backward compatibility if needed, using servicesList mainly
   final double? price;
   final int? quantity;
   final String? bookingDay;
   final String? bookingTime;
   final String? type;
+  
+  // New fields for detailed view
+  final List<dynamic>? servicesList;
+  final int? totalServicesQty;
+  final int? totalConsumersQty;
 
   BookPaymentItemModel({
     this.imageUrl,
@@ -28,12 +34,15 @@ class BookPaymentItemModel {
     this.bookingDay,
     this.bookingTime,
     this.type,
+    this.servicesList,
+    this.totalServicesQty,
+    this.totalConsumersQty,
   });
 }
 
 class CustomBookPaymentMethodsItem extends StatelessWidget {
   final BookPaymentItemModel? model;
-  final Barber ? barber;
+  final Barber? barber;
 
   const CustomBookPaymentMethodsItem({
     super.key,
@@ -45,94 +54,55 @@ class CustomBookPaymentMethodsItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool isRTL = Directionality.of(context) == TextDirection.rtl;
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: [
-        if (!isRTL) _buildImageContainer(context, isRTL),
-        Expanded(
-          child: Padding(
-            padding: EdgeInsets.only(
-              left: !isRTL ? 4.w : 0,
-              right: isRTL ? 4.w : 0,
-              bottom: 4.h,
-              top: 4.h,
-            ),
-            child: Container(
-              width: double.infinity,
-              height: 220.h,
-              padding: EdgeInsets.all(8.w),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.only(
-                  topRight: Radius.circular(16.r),
-                  bottomRight: Radius.circular(16.r),
-                ),
-                color: ColorsData.cardColor,
-              ),
-              child: Padding(
-                padding: EdgeInsets.all(12.w),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Text(
-                          model?.shopName ?? "barberShop".tr,
-                          style: Styles.textStyleS12W600(),
-                        ),
-                        const Spacer(),
-                      ],
-                    ),
-                    SizedBox(height: 3.h),
-                    Row(
-                      children: [
-                        SvgPicture.asset(
-                          AssetsData.mapPinIcon,
-                          width: 12.w,
-                          height: 12.h,
-                          colorFilter: const ColorFilter.mode(
-                            ColorsData.primary,
-                            BlendMode.srcIn,
-                          ),
-                        ),
-                        Text(
-                          barber?.city ?? 'yourLocation'.tr,
-                          style: Styles.textStyleS12W400(),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 6.h),
-                    _buildInfoRow("service".tr, model!.service!),
-                    _buildInfoRow("servicePrice".tr, "\$ ${model?.price!}"),
-                    _buildInfoRow(
-                        "qty".tr, "${model?.quantity ?? 1} ${"consumer".tr}"),
-                    _buildInfoRow("bookingDay".tr, model!.bookingDay!),
-                    _buildInfoRow("bookingTime".tr, model!.bookingTime!),
-                    _buildInfoRow("booking".tr, model?.type ?? "booking".tr),
-                  ],
+    return Container(
+      decoration: BoxDecoration(
+        color: ColorsData.cardColor,
+        borderRadius: BorderRadius.circular(16.r),
+      ),
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (!isRTL) ...[
+              _buildImageContainer(context, isRTL),
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.all(12.w),
+                  child: _buildContent(),
                 ),
               ),
-            ),
-          ),
+            ] else ...[
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.all(12.w),
+                  child: _buildContent(),
+                ),
+              ),
+              _buildImageContainer(context, isRTL),
+            ],
+          ],
         ),
-        if (isRTL) _buildImageContainer(context, isRTL),
-      ],
+      ),
     );
   }
 
   Widget _buildImageContainer(BuildContext context, bool isRTL) {
     return Container(
       width: 126.w,
-      height: 194.h,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.only(
-          topRight: Radius.circular(16.r),
-          bottomRight: Radius.circular(16.r),
+          topLeft: isRTL ? Radius.zero : Radius.circular(16.r),
+          bottomLeft: isRTL ? Radius.zero : Radius.circular(16.r),
+          topRight: isRTL ? Radius.circular(16.r) : Radius.zero,
+          bottomRight: isRTL ? Radius.circular(16.r) : Radius.zero,
         ),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(16.r),
-          bottomLeft: Radius.circular(16.r),
+           topLeft: isRTL ? Radius.zero : Radius.circular(16.r),
+          bottomLeft: isRTL ? Radius.zero : Radius.circular(16.r),
+          topRight: isRTL ? Radius.circular(16.r) : Radius.zero,
+          bottomRight: isRTL ? Radius.circular(16.r) : Radius.zero,
         ),
         child: Image.asset(
           model?.imageUrl ?? AssetsData.myAppointmentImage,
@@ -142,19 +112,143 @@ class CustomBookPaymentMethodsItem extends StatelessWidget {
     );
   }
 
+  Widget _buildContent() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Shop Name
+        Text(
+          model?.shopName ?? "barberShop".tr,
+          style: Styles.textStyleS14W700(color: Colors.white),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        SizedBox(height: 4.h),
+
+        // Barber Name
+        if (barber != null)
+           Text(
+            barber!.fullName,
+            style: Styles.textStyleS14W400(color: ColorsData.primary),
+          ),
+        
+        SizedBox(height: 8.h),
+        
+        // Location
+        GestureDetector(
+          onTap: () async {
+            if (barber == null) return;
+            
+            double? lat;
+            double? lng;
+            if (barber!.barberShopLocation != null && 
+                barber!.barberShopLocation!.coordinates.length >= 2) {
+               lat = barber!.barberShopLocation!.coordinates[1];
+               lng = barber!.barberShopLocation!.coordinates[0];
+            }
+            
+            Uri googleMapsUrl;
+            if (lat != null && lng != null) {
+              googleMapsUrl = Uri.parse("https://www.google.com/maps/search/?api=1&query=$lat,$lng");
+            } else {
+              final query = Uri.encodeComponent(barber!.city);
+              googleMapsUrl = Uri.parse("https://www.google.com/maps/search/?api=1&query=$query");
+            }
+
+            try {
+              if (await canLaunchUrl(googleMapsUrl)) {
+                await launchUrl(googleMapsUrl, mode: LaunchMode.externalApplication);
+              }
+            } catch (e) {
+              debugPrint("Error launching map: $e");
+            }
+          },
+          child: Row(
+            children: [
+              SvgPicture.asset(
+                AssetsData.mapPinIcon,
+                width: 12.w,
+                height: 12.h,
+                colorFilter: const ColorFilter.mode(
+                  ColorsData.primary,
+                  BlendMode.srcIn,
+                ),
+              ),
+               SizedBox(width: 4.w),
+              Expanded(
+                child: Text(
+                  barber?.city ?? 'yourLocation'.tr,
+                  style: Styles.textStyleS12W400().copyWith(decoration: TextDecoration.underline),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        SizedBox(height: 8.h),
+        
+        // Appointment Day & Time
+        _buildInfoRow("Appointment Day".tr, model?.bookingDay ?? ""),
+        _buildInfoRow("Appointment Time".tr, model?.bookingTime ?? ""),
+        
+        SizedBox(height: 8.h),
+
+        // Quantity Info
+        _buildInfoRow("Customers Quantity".tr, "${model?.totalConsumersQty ?? 1}"),
+        _buildInfoRow("Services Quantity".tr, "${model?.totalServicesQty ?? 1}"),
+
+        SizedBox(height: 8.h),
+
+        // Services List breakdown
+        if (model?.servicesList != null)
+          ...model!.servicesList!.map((item) {
+             final name = item['name'] ?? '';
+             final qty = item['numberOfUsers'] ?? 1;
+             final price = item['total'] ?? item['price'] ?? 0;
+             return _buildInfoRow("($name) *X$qty", "\$${price}");
+          }),
+
+         Divider(
+            color: Colors.grey.withOpacity(0.5),
+            thickness: 0.5,
+            height: 16.h,
+          ),
+
+        // Total Price (Yellow)
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              "Total Price".tr,
+              style: Styles.textStyleS12W700(color: Colors.white),
+            ),
+             Text(
+              "\$${model?.price ?? 0}",
+              style: Styles.textStyleS12W700(color: ColorsData.primary), // Yellow/Primary
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
   Widget _buildInfoRow(String label, String value) {
     return Padding(
-      padding: EdgeInsets.only(bottom: 6.h),
+      padding: EdgeInsets.only(bottom: 4.h),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            label,
-            style: Styles.textStyleS10W400(),
+          Expanded(
+            child: Text(
+              label,
+              style: Styles.textStyleS12W400(color: Colors.white),
+            ),
           ),
-          const Spacer(),
           Text(
             value,
-            style: Styles.textStyleS10W400(),
+            style: Styles.textStyleS12W700(),
           ),
         ],
       ),

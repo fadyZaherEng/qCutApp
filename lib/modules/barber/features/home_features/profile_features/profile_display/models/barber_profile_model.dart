@@ -29,6 +29,9 @@ class BarberProfileData {
   String bankAccountNumber;
   String instagramPage;
   BarberShopLocation barberShopLocation;
+  String locationDescription;
+  List<WalkInRecord>? walkIn;
+  final int? hashtag;
 
   BarberProfileData({
     required this.id,
@@ -48,6 +51,9 @@ class BarberProfileData {
     required this.bankAccountNumber,
     required this.instagramPage,
     required this.barberShopLocation,
+    required this.locationDescription,
+    this.walkIn,
+    this.hashtag,
   });
 
   factory BarberProfileData.fromJson(Map<String, dynamic> json) {
@@ -95,6 +101,12 @@ class BarberProfileData {
       barberShop: json['barberShop'] ?? '',
       bankAccountNumber: json['bankAccountNumber'] ?? '',
       instagramPage: json['instagramPage'] ?? '',
+      locationDescription: json['locationDescription'] ?? '',
+      walkIn: json['walkIn'] != null
+          ? List<WalkInRecord>.from(
+              json['walkIn'].map((x) => WalkInRecord.fromJson(x)))
+          : null,
+      hashtag: json['hashtag'],
     );
   }
 
@@ -112,9 +124,12 @@ class BarberProfileData {
       'barberShop': barberShop,
       'coverPic': coverPic,
       'instagramPage': instagramPage,
+      'locationDescription': locationDescription,
       'offDay': offDay,
       'profilePic': profilePic,
       'breakTime': breakTime.map((x) => x.toJson()).toList(),
+      if (walkIn != null) 'walkIn': walkIn!.map((x) => x.toJson()).toList(), 
+      'hashtag': hashtag,
     };
   }
 }
@@ -146,19 +161,25 @@ class Otp {
 class WorkingDay {
   final String day;
   final int startHour;
+  final int startMinute;
   final int endHour;
+  final int endMinute;
 
   WorkingDay({
     required this.day,
     required this.startHour,
+    this.startMinute = 0,
     required this.endHour,
+    this.endMinute = 0,
   });
 
   factory WorkingDay.fromJson(Map<String, dynamic> json) {
     return WorkingDay(
       day: json['day'] as String,
       startHour: json['startHour'] as int,
+      startMinute: json['startMinute'] as int? ?? 0,
       endHour: json['endHour'] as int,
+      endMinute: json['endMinute'] as int? ?? 0,
     );
   }
 
@@ -167,11 +188,14 @@ class WorkingDay {
     return {
       'day': day,
       'startHour': startHour,
+      'startMinute': startMinute,
       'endHour': endHour,
+      'endMinute': endMinute,
     };
   }
 
-  String get workingHours => '$startHour:00 - $endHour:00';
+  String get workingHours =>
+      '${startHour.toString().padLeft(2, '0')}:${startMinute.toString().padLeft(2, '0')} - ${endHour.toString().padLeft(2, '0')}:${endMinute.toString().padLeft(2, '0')}';
 }
 
 class BreakTime {
@@ -214,3 +238,45 @@ class BreakTime {
     return '${date.day}/${date.month}/${date.year}';
   }
 }
+
+class WalkInRecord {
+  final int startDate; // timestamp in milliseconds
+  final int endDate;   // timestamp in milliseconds
+  final String? id;
+
+  WalkInRecord({
+    required this.startDate,
+    required this.endDate,
+    this.id,
+  });
+
+  factory WalkInRecord.fromJson(Map<String, dynamic> json) {
+    return WalkInRecord(
+      startDate: json['startDate'] ?? 0,
+      endDate: json['endDate'] ?? 0,
+      id: json['_id'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'startDate': startDate,
+      'endDate': endDate,
+      if (id != null) '_id': id,
+    };
+  }
+
+  // Check if a date falls within this walk-in range
+  bool containsDate(DateTime date) {
+    final dateTimestamp = date.millisecondsSinceEpoch;
+    return dateTimestamp >= startDate && dateTimestamp <= endDate;
+  }
+
+  // Get formatted date range
+  String get formattedRange {
+    final start = DateTime.fromMillisecondsSinceEpoch(startDate);
+    final end = DateTime.fromMillisecondsSinceEpoch(endDate);
+    return '${start.day}/${start.month}/${start.year} - ${end.day}/${end.month}/${end.year}';
+  }
+}
+

@@ -1,17 +1,21 @@
 import 'dart:convert';
 import 'package:flutter/scheduler.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:q_cut/core/utils/network/network_helper.dart';
 import 'package:q_cut/modules/customer/features/booking_features/select_appointment_time/model/time_slot_model.dart';
 
 import '../../../../../../core/utils/network/api.dart';
 import '../../display_barber_services_feature/models/free_time_request_model.dart';
+import '../../../home_features/home/models/working_hours_range_model.dart';
 
 class SelectAppointmentTimeController extends GetxController {
   final NetworkAPICall _apiCall = NetworkAPICall();
   final RxList<TimeSlot> timeSlots = <TimeSlot>[].obs;
 
   final RxList<int> availableDaysTimestamps = <int>[].obs;
+  final RxList<WalkInRecord> walkInRanges = <WalkInRecord>[].obs;
+  final RxList<WorkingHourDay> workingHoursRange = <WorkingHourDay>[].obs;
 
   Future<void> getAvailableDays(FreeTimeRequestModel request) async {
     SchedulerBinding.instance.addPostFrameCallback((_) {
@@ -197,16 +201,25 @@ class SelectAppointmentTimeController extends GetxController {
   }
 
   void _onDayChanged() {
-    final now = DateTime.now();
+    // 1. Try to find the exact date from availableDays
+    final matchingDay = availableDays.firstWhereOrNull(
+      (d) => d['dayNumber'] == selectedDay.value,
+    );
 
     DateTime newDate;
-    if (selectedDay.value < now.day &&
-        now.month == selectedDate.value.month &&
-        now.day > 25) {
-      final nextMonth = DateTime(now.year, now.month + 1, 1);
-      newDate = DateTime(nextMonth.year, nextMonth.month, selectedDay.value);
+    if (matchingDay != null) {
+      newDate = matchingDay['fullDate'];
     } else {
-      newDate = DateTime(now.year, now.month, selectedDay.value);
+      // Fallback to current month/year logic if not found in availableDays
+      final now = DateTime.now();
+      if (selectedDay.value < now.day &&
+          now.month == selectedDate.value.month &&
+          now.day > 25) {
+        final nextMonth = DateTime(now.year, now.month + 1, 1);
+        newDate = DateTime(nextMonth.year, nextMonth.month, selectedDay.value);
+      } else {
+        newDate = DateTime(now.year, now.month, selectedDay.value);
+      }
     }
 
     selectedDate.value = newDate;
@@ -259,6 +272,85 @@ class SelectAppointmentTimeController extends GetxController {
       return false;
     }
     return freeTime.any((slot) => slot.dayNumber == day);
+  }
+
+  // Check if a specific day is a walk-in day
+  bool isWalkInDay(DateTime dateToCheck) {
+    return getWorkingHourForDate(dateToCheck)?.isWalkIn ?? false;
+  }
+
+  // Get working hour details for a specific date
+  WorkingHourDay? getWorkingHourForDate(DateTime dateToCheck) {
+    // 1. Check walk-in ranges first for this specific date
+    final isInWalkInRange = walkInRanges.any((range) {
+      final start = DateTime.fromMillisecondsSinceEpoch(range.startDate);
+      final end = DateTime.fromMillisecondsSinceEpoch(range.endDate);
+      
+      final checkDate = DateTime(dateToCheck.year, dateToCheck.month, dateToCheck.day);
+      final startDateNormalized = DateTime(start.year, start.month, start.day);
+      final endDateNormalized = DateTime(end.year, end.month, end.day);
+      
+      return (checkDate.isAtSameMomentAs(startDateNormalized) || checkDate.isAfter(startDateNormalized)) &&
+             (checkDate.isAtSameMomentAs(endDateNormalized) || checkDate.isBefore(endDateNormalized));
+    });
+
+    // 2. Check workingHoursRange
+    final matchFromRange = workingHoursRange.firstWhereOrNull((workingDay) {
+      final date = DateTime.fromMillisecondsSinceEpoch(workingDay.date);
+      return date.year == dateToCheck.year && 
+             date.month == dateToCheck.month && 
+             date.day == dateToCheck.day;
+    });
+
+    if (matchFromRange != null) {
+      if (isInWalkInRange && !matchFromRange.isWalkIn) {
+        // Return a copy with isWalkIn forced to true
+        return WorkingHourDay(
+          date: matchFromRange.date,
+          formattedDate: matchFromRange.formattedDate,
+          dayName: matchFromRange.dayName,
+          isOffDay: matchFromRange.isOffDay,
+          isWalkIn: true,
+          startHour: matchFromRange.startHour,
+          endHour: matchFromRange.endHour,
+        );
+      }
+      return matchFromRange;
+    }
+
+    // 3. If not in workingHoursRange but in walk-in range, return synthetic
+    if (isInWalkInRange) {
+      return WorkingHourDay(
+        date: dateToCheck.millisecondsSinceEpoch,
+        formattedDate: DateFormat('yyyy-MM-dd').format(dateToCheck),
+        dayName: _getDayName(dateToCheck.weekday),
+        isOffDay: false,
+        isWalkIn: true,
+        startHour: 9,
+        endHour: 17, // Traditional walk-in hours
+      );
+    }
+
+    return null;
+  }
+
+  // Fetch working hours range including walk-in info
+  Future<void> fetchWorkingHoursRange(String barberId) async {
+    try {
+      final response = await _apiCall.getData(
+        Variables.GET_WORKING_HOURS_RANGE + barberId,
+      );
+      
+      if (response.statusCode == 200) {
+        final responseBody = json.decode(response.body);
+        final workingHoursData = WorkingHoursRangeResponse.fromJson(responseBody);
+        workingHoursRange.value = workingHoursData.workingHoursRange;
+        walkInRanges.value = workingHoursData.walkIn;
+        update(['timeSlots']);
+      }
+    } catch (e) {
+      print('Error fetching working hours range: $e');
+    }
   }
 
   Future<void> getTimeSlotsForDay(int dayTimestamp, bool ishold) async {

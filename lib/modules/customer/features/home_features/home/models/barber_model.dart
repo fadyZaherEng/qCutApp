@@ -40,6 +40,7 @@ class Barber {
   final String? instagramPage;
   final List<String> offDay;
   final List<WorkingDay> workingDays;
+  final String? locationDescription;
   final BarberShopLocation? barberShopLocation; // ✅ أضفنا اللوكيشن
   bool isFavorite;
 
@@ -57,6 +58,7 @@ class Barber {
     required this.instagramPage,
     required this.offDay,
     required this.workingDays,
+    this.locationDescription,
     this.barberShopLocation,
   });
 
@@ -88,6 +90,7 @@ class Barber {
                   ? BarberShopLocation.fromJson(json['barberShopLocation'])
                   : null
           : null,
+      locationDescription: json['locationDescription'],
     );
   }
 
@@ -106,6 +109,7 @@ class Barber {
       'isFavorite': isFavorite,
       'offDay': offDay,
       'workingDays': workingDays.map((x) => x.toJson()).toList(),
+      'locationDescription': locationDescription,
       'barberShopLocation': barberShopLocation?.toJson(), // ✅
     };
   }

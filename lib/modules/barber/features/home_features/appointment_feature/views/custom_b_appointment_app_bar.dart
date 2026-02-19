@@ -15,10 +15,12 @@ import 'package:q_cut/modules/barber/features/home_features/appointment_feature/
 class CustomBAppointmentAppBar extends StatelessWidget
     implements PreferredSizeWidget {
   final BarberLocation? location;
+  final String?city;
 
   const CustomBAppointmentAppBar({
     super.key,
     this.location,
+    this.city,
   });
 
   @override
@@ -46,18 +48,26 @@ class CustomBAppointmentAppBar extends StatelessWidget
 
             SizedBox(
               width: 200.w,
-              child: FutureBuilder(
-                future: location?.getAddress(Get.locale?.languageCode ?? "en"),
-                builder: (context, loc) {
-                  return Text(
-                    loc.data ?? "Loading...",
-                    //addressController.currentAddress.value,
-                    style: Styles.textStyleS12W400(),
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
-                  );
-                },
+              child: Text(
+                city ?? "Loading...",
+                style: Styles.textStyleS12W400(),
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
               ),
+
+
+              // FutureBuilder(
+              //   future: location?.getAddress(Get.locale?.languageCode ?? "en"),
+              //   builder: (context, loc) {
+              //     return Text(
+              //       loc.data ?? "Loading...",
+              //       //addressController.currentAddress.value,
+              //       style: Styles.textStyleS12W400(),
+              //       maxLines: 3,
+              //       overflow: TextOverflow.ellipsis,
+              //     );
+              //   },
+              // ),
             ),
             SizedBox(width: 4.w),
 

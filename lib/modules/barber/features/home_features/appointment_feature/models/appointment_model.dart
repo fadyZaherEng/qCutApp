@@ -32,6 +32,7 @@ class BarberAppointment {
   final String paymentMethod;
   final String formattedDate;
   final String formattedTime;
+  final String formattedTimeRange;
 
   BarberAppointment({
     required this.id,
@@ -46,6 +47,7 @@ class BarberAppointment {
     required this.paymentMethod,
     required this.formattedDate,
     required this.formattedTime,
+    required this.formattedTimeRange,
   });
 
   factory BarberAppointment.fromJson(Map<String, dynamic> json) {
@@ -67,6 +69,7 @@ class BarberAppointment {
         id: '',
         fullName: json['userName'] ?? 'Unknown',
         profilePic: '',
+        phoneNumber: '',
       );
     }
 
@@ -96,7 +99,9 @@ class BarberAppointment {
     }
 
     final formattedDate = DateFormat('yyyy-MM-dd').format(startDate);
-    final formattedTime = DateFormat('h:mm').format(startDate);
+    final formattedTime = DateFormat('HH:mm').format(startDate);
+    final formattedTimeRange =
+        "${DateFormat('HH:mm').format(startDate)}-${DateFormat('HH:mm').format(endDate)}";
 
     return BarberAppointment(
       id: json['_id'] ?? '',
@@ -111,14 +116,21 @@ class BarberAppointment {
       paymentMethod: json['paymentMethod'] ?? 'unknown',
       formattedDate: formattedDate,
       formattedTime: formattedTime,
+      formattedTimeRange: formattedTimeRange,
     );
   }
+
+  int get totalUsers =>
+      services.fold(0, (sum, item) => sum + item.numberOfUsers);
+
+  int get totalServices => services.length;
 }
 
 class BarberInfo {
   final String id;
   final String fullName;
   final String userType;
+  final String phoneNumber;
   final BarberLocation? location;
   final String barberShop;
 
@@ -128,6 +140,7 @@ class BarberInfo {
     required this.userType,
     required this.location,
     required this.barberShop,
+    required this.phoneNumber,
   });
 
   factory BarberInfo.fromJson(Map<String, dynamic> json) {
@@ -140,6 +153,7 @@ class BarberInfo {
           ? BarberLocation.fromJson(json['barberShopLocation'])
           : null,
       barberShop: json['barberShop'] ?? '',
+      phoneNumber: json['phoneNumber'] ?? json['phone'] ?? '',
     );
   }
 
@@ -150,6 +164,7 @@ class BarberInfo {
       userType: '',
       location: null,
       barberShop: '',
+      phoneNumber: '',
     );
   }
 }
@@ -252,11 +267,13 @@ class UserInfo {
   final String id;
   final String fullName;
   final String profilePic;
+  final String phoneNumber;
 
   UserInfo({
     required this.id,
     required this.fullName,
     required this.profilePic,
+    required this.phoneNumber,
   });
 
   factory UserInfo.fromJson(Map<String, dynamic> json) {
@@ -264,6 +281,7 @@ class UserInfo {
       id: json['_id'] ?? '',
       fullName: json['fullName'] ?? 'Unknown',
       profilePic: json['profilePic'] ?? '',
+      phoneNumber: json['phoneNumber'] ?? json['phoneNumber'] ?? '',
     );
   }
 }

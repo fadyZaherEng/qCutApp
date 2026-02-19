@@ -5,14 +5,14 @@ import 'package:get/get.dart';
 import 'package:q_cut/core/utils/constants/colors_data.dart';
 
 class CustomDaysPicker extends StatelessWidget {
-  final int? selectedDay;
-  final ValueChanged<int> onDaySelected;
+  final DateTime? selectedDate;
+  final ValueChanged<DateTime> onDateSelected;
   final String? titleSimpleDaysPicker;
 
   const CustomDaysPicker({
     super.key,
-    required this.selectedDay,
-    required this.onDaySelected,
+    required this.selectedDate,
+    required this.onDateSelected,
     this.titleSimpleDaysPicker,
   });
 
@@ -89,11 +89,15 @@ class CustomDaysPicker extends StatelessWidget {
           scrollDirection: Axis.horizontal,
           child: Row(
             children: days.map((day) {
-              bool isSelected = selectedDay == day["date"];
+              final dayDate = day["fullDate"] as DateTime;
+              bool isSelected = selectedDate != null &&
+                  dayDate.year == selectedDate!.year &&
+                  dayDate.month == selectedDate!.month &&
+                  dayDate.day == selectedDate!.day;
               return Padding(
                 padding: EdgeInsets.only(right: 8.w),
                 child: GestureDetector(
-                  onTap: () => onDaySelected(day["date"]),
+                  onTap: () => onDateSelected(dayDate),
                   child: Container(
                     width: 60.w,
                     height: 100.h,

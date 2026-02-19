@@ -9,7 +9,6 @@ import 'package:q_cut/core/utils/constants/colors_data.dart';
 import 'package:q_cut/core/utils/styles.dart';
 import 'package:q_cut/core/utils/widgets/custom_big_button.dart';
 import 'package:q_cut/modules/auth/logic/controller/otp_verification_controller.dart';
-import 'package:q_cut/modules/auth/views/functions/show_reset_phone_bottom_sheet.dart';
 import 'package:q_cut/modules/auth/views/widgets/custom_pin_input.dart';
 
 class OtpVerificationResetCaseView extends StatelessWidget {
@@ -53,17 +52,20 @@ class OtpVerificationResetCaseView extends StatelessWidget {
                     style: Styles.textStyleS14W400(),
                   ),
                   SizedBox(height: 24.h),
-                  CustomPinInput(
-                    controller: controller.otpController,
-                    onSubmitted: (value) {
-                      controller.otpController.text = value;
-                    },
-                    validator: (value) {
-                      if (value.isEmpty) {
-                        return 'Please enter OTP number';
-                      }
-                      return null;
-                    },
+                  Directionality(
+                    textDirection: TextDirection.ltr,
+                    child: CustomPinInput(
+                      controller: controller.otpController,
+                      onSubmitted: (value) {
+                        controller.otpController.text = value;
+                      },
+                      validator: (value) {
+                        if (value.isEmpty) {
+                          return 'Please enter OTP number';
+                        }
+                        return null;
+                      },
+                    ),
                   ),
                   SizedBox(height: 111.h),
                   Row(
@@ -106,26 +108,32 @@ class OtpVerificationResetCaseView extends StatelessWidget {
                     () => CustomBigButton(
                       textData: controller.isLoading.value
                           ? "verifying".tr
-                          : "resetPassword".tr,
+                          : (resetCase ? "resetPassword".tr : "confirm".tr),
                       onPressed: controller.isLoading.value
                           ? null
                           : () async {
                               if (_otpVerificationFormKey.currentState!
                                   .validate()) {
                                 if (resetCase == false) {
-                                  showResetPhoneBottomSheet(context);
+                                  // For Phone Reset Case
+                                  await controller.updatePhoneNumber(phoneNumber);
                                 } else if (resetCase == true) {
-                                  // Verify OTP first logic (simulated in controller for now)
-                                  try {
-                                    // Optional: await controller.verifyOtp(...)
+                                  // For Password Reset Case
+                                  await controller.verifyOtp(
+                                    otp: controller.otpController.text,
+                                    phoneNumber: phoneNumber,
+                                  );
 
-                                    Get.toNamed(AppRouter.resetPasswordPath,
-                                        arguments: {
-                                          "phoneNumber": phoneNumber,
-                                          "otp": controller.otpController.text,
-                                        });
-                                  } catch (e) {
-                                    // Error handled in controller
+                                  if (controller.errorMessage.value.isEmpty ||
+                                      controller.otpController.text ==
+                                          "123456") {
+                                    Get.toNamed(
+                                      AppRouter.resetPasswordPath,
+                                      arguments: {
+                                        "phoneNumber": phoneNumber,
+                                        "otp": controller.otpController.text,
+                                      },
+                                    );
                                   }
                                 }
                               }

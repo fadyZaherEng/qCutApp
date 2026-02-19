@@ -1,83 +1,71 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 import 'package:q_cut/core/utils/constants/colors_data.dart';
+import 'package:q_cut/modules/customer/history_feature/view/previous_bookings_view.dart';
 import 'package:q_cut/modules/customer/history_feature/controller/history_controller.dart';
-import 'package:q_cut/modules/customer/history_feature/view/history_view_body.dart';
 
 class HistoryView extends GetView<HistoryController> {
   const HistoryView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<HistoryController>();
-
     // 🔥 الحالة المختارة للفلتر (افتراضي All)
     final RxString selectedFilter = 'all'.obs;
-    //Get Language
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text('History'.tr),
-          centerTitle: true,
-          backgroundColor: Colors.transparent,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () {
-              Navigator.pop(context);
-            },
-          ),
-          actions: [
-            Builder(
-              builder: (context) {
-                final tabController = DefaultTabController.of(context);
-                if (tabController.index == 0) {
-                  return _buildFilterButton(
-                    list: controller.previousAppointments,
-                    originalList: controller.previousAppointments.toList().obs,
-                    context: context,
-                    selectedFilter: selectedFilter,
-                  );
-                } else {
-                  return _buildFilterButton(
-                    list: controller.currentAppointments,
-                    originalList: controller.currentAppointments.toList().obs,
-                    context: context,
-                    selectedFilter: selectedFilter,
-                  );
-                }
-              },
-            ),
-          ],
-          bottom: TabBar(
-            indicatorColor: ColorsData.primary,
-            labelColor: ColorsData.font,
-            unselectedLabelColor: ColorsData.font,
-            indicatorWeight: 4,
-            indicatorSize: TabBarIndicatorSize.tab,
-            labelStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-            unselectedLabelStyle:
-                TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
-            dividerColor: Colors.white,
-            dividerHeight: 1,
-            tabs: [
-              //change locale
-              Tab(text: 'Currently'.tr),
-              Tab(text: 'Previous'.tr),
-            ],
-          ),
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('History'.tr),
+        centerTitle: true,
+        backgroundColor: Colors.transparent,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);
+          },
         ),
-        body: HistoryViewBody(
-          currentAppointments: controller.currentAppointments,
-          previousAppointments: controller.previousAppointments,
-        ),
+        actions: [
+          _buildFilterButton(
+            context: context,
+            selectedFilter: selectedFilter,
+          ),
+        ],
       ),
+      body: Obx(() {
+        if (controller.isLoading.value &&
+            controller.previousAppointments.isEmpty) {
+          return   const Center(
+            child: SpinKitDoubleBounce(color: ColorsData.primary),
+          );
+        }
+        
+        if (controller.isError.value && controller.previousAppointments.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  controller.errorMessage.value.tr,
+                  style: const TextStyle(color: Colors.red),
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () => controller.fetchAppointments("previous"),
+                  child: Text('Retry'.tr),
+                ),
+              ],
+            ),
+          );
+        }
+
+        return PreviousBookingsView(
+          appointments: controller.previousAppointments,
+        );
+      }),
     );
   }
 
   Widget _buildFilterButton({
-    required RxList list,
-    required RxList originalList,
     required BuildContext context,
     required RxString selectedFilter,
   }) {
@@ -88,14 +76,13 @@ class HistoryView extends GetView<HistoryController> {
           selectedFilter.value = value;
           controller.filterAppointments(
             value,
-            isPrevious: DefaultTabController.of(context).index == 0,
+            isPrevious: true,
           );
         },
         itemBuilder: (context) => [
           _buildMenuItem('all', 'All'.tr, selectedFilter.value),
-          _buildMenuItem('completed', 'Completed'.tr, selectedFilter.value),
-          _buildMenuItem('attended', 'Attended'.tr, selectedFilter.value),
-          _buildMenuItem('cancelled', 'Cancelled'.tr, selectedFilter.value),
+          _buildMenuItem('attended', 'Completed'.tr, selectedFilter.value),
+          _buildMenuItem('NotCome', 'Missed'.tr, selectedFilter.value),
         ],
         icon: const Icon(Icons.filter_list),
       );

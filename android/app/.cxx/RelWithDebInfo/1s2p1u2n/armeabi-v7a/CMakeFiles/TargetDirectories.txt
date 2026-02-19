@@ -1,0 +1,2 @@
+E:/QCutApp/android/app/.cxx/RelWithDebInfo/1s2p1u2n/armeabi-v7a/CMakeFiles/edit_cache.dir
+E:/QCutApp/android/app/.cxx/RelWithDebInfo/1s2p1u2n/armeabi-v7a/CMakeFiles/rebuild_cache.dir

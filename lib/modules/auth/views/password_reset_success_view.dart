@@ -68,14 +68,14 @@ class _PasswordResetSuccessViewState extends State<PasswordResetSuccessView>
             ),
             SizedBox(height: 32.h),
             Text(
-              "Password updated Successfully",
+              "Password updated Successfully".tr,
               textAlign: TextAlign.center,
               style: Styles.textStyleS16W700(color: ColorsData.primary)
                   .copyWith(fontSize: 20.sp),
             ),
             Spacer(),
             CustomBigButton(
-              textData: "Ok",
+              textData: "Ok".tr,
               onPressed: () {
                 Get.offAllNamed(AppRouter.bottomNavigationBar); 
               },

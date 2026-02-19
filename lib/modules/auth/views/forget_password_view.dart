@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
@@ -36,6 +38,7 @@ class _ForgetPasswordViewState extends State<ForgetPasswordView> {
             child: Center(
               child: Form(
                 key: _formKey,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
                 child: Column(
                   children: [
                     SvgPicture.asset(AssetsData.forgetPasswordImage),
@@ -70,26 +73,47 @@ class _ForgetPasswordViewState extends State<ForgetPasswordView> {
                       onPressed: () {
                         if (_formKey.currentState!.validate()) {
                           // Call API to send OTP
+                          print("Sending OTP to: ${_phoneNumberController.text}");
+                          print("API Endpoint: ${Variables.FORGET_PASSWORD}");
+                          final String phone = _phoneNumberController.text;
+                          final String formattedPhone = phone.startsWith('+')
+                              ? phone
+                              : (phone.startsWith('972')
+                                  ? '+$phone'
+                                  : "+972$phone");
+
                           NetworkAPICall().postDataAsGuest({
-                            "phoneNumber": _phoneNumberController.text
+                            "phoneNumber": formattedPhone
                           }, Variables.FORGET_PASSWORD).then((response) {
+                            print("Response status: ${response.statusCode}");
+                            print("Response body: ${response.body}");
                             if (response.statusCode == 200 || response.statusCode == 201) {
                                ShowToast.showSuccessSnackBar(message: "OTP is 123456".tr);
                                Get.toNamed(
                                 AppRouter.otpVerificationResetCasePath, // Navigate to OTP screen
                                 arguments: {
                                   "isFromResetPassword": true,
-                                  "phoneNumber": _phoneNumberController.text,
+                                  "phoneNumber": formattedPhone,
                                 },
                               );
                             } else {
-                              ShowToast.showError(message: "Failed to send OTP".tr);
+                              // Extract message from response body if it's a Map
+                              String errorMsg = "Failed to send OTP".tr;
+                              if (response.body is Map && response.body.containsKey('message')) {
+                                errorMsg = response.body['message'];
+                              } else if (response.body is String) {
+                                try {
+                                  final decoded = json.decode(response.body);
+                                  if (decoded is Map && decoded.containsKey('message')) {
+                                    errorMsg = decoded['message'];
+                                  }
+                                } catch (_) {}
+                              }
+                              ShowToast.showError(message: errorMsg.tr);
                             }
                           }).catchError((e){
                              ShowToast.showError(message: "Error: $e");
                           });
-                        // } else {
-                        //   // Validation failed
                         }
                       },
                     ),

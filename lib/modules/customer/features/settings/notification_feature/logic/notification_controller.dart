@@ -4,6 +4,13 @@ import 'package:get/get.dart';
 import 'package:q_cut/core/utils/network/api.dart';
 import 'package:q_cut/core/utils/network/network_helper.dart';
 import 'package:q_cut/modules/customer/features/settings/notification_feature/models/notification_model.dart';
+import 'package:q_cut/modules/customer/features/home_features/appointment_feature/models/customer_appointment_model.dart';
+import 'package:q_cut/modules/customer/features/home_features/appointment_feature/view/widgets/custom_delete_appointment_item.dart';
+import 'package:q_cut/core/utils/styles.dart';
+import 'package:q_cut/core/utils/widgets/custom_button.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+
 
 class NotificationController extends GetxController {
   final NetworkAPICall _apiCall = NetworkAPICall();
@@ -137,4 +144,72 @@ class NotificationController extends GetxController {
       return 'Just now';
     }
   }
+
+  // Fetch and show appointment details
+  Future<void> fetchAndShowAppointmentDetails(String appointmentId) async {
+    try {
+      // Show loading indicator
+      Get.dialog(
+        const Center(child: CircularProgressIndicator()),
+        barrierDismissible: false,
+      );
+
+      final response =
+          await _apiCall.getData("${Variables.APPOINTMENT}$appointmentId");
+      if (Get.isDialogOpen ?? false) Get.back(); // Close loading dialog
+
+      final responseBody = json.decode(response.body);
+
+      if (response.statusCode == 200) {
+        // Parse the appointment
+        final appointment = CustomerAppointment.fromJson(responseBody);
+
+        // Show details in bottom sheet
+        Get.bottomSheet(
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 24.h),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(20.r),
+                topRight: Radius.circular(20.r),
+              ),
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    "Appointment Details",
+                    style: Styles.textStyleS18W700(),
+                  ),
+                  SizedBox(height: 20.h),
+                  CustomDeleteAppointmentItem(
+                    appointment: appointment,
+                    onDelete: () {
+                      Get.back(); // Just close for now
+                    },
+                  ),
+                  SizedBox(height: 20.h),
+                  CustomButton(
+                    text: "Close",
+                    onPressed: () => Get.back(),
+                    backgroundColor: Colors.grey,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          isScrollControlled: true,
+        );
+      } else {
+        ShowToast.showError(
+            message: responseBody['message'] ?? 'Failed to load details');
+      }
+    } catch (e) {
+      if (Get.isDialogOpen ?? false) Get.back();
+      ShowToast.showError(message: 'Error fetching details: $e');
+    }
+  }
 }
+

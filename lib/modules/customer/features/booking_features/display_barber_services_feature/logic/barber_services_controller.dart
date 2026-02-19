@@ -62,25 +62,45 @@ class BarberServicesController extends GetxController {
     super.onClose();
   }
 
-  Future<void> fetchServices(String barberId) async {
+  Future<void> fetchServices(String barberId, {List<String>? preSelectedServiceIds}) async {
     isLoading.value = true;
+    errorMessage.value = '';
     try {
       final response = await _apiCall.getData(Variables.SERVICE + barberId);
-      print("=-=-${Variables.SERVICE + barberId}");
-      //   print(response.body);
+      print("Fetching services for barber ID: $barberId");
+      print("Request URL: ${Variables.SERVICE + barberId}");
+      
       final responseBody = json.decode(response.body);
       if (response.statusCode == 200) {
-        final servicesResponse = BarberServiceResponse.fromJson(responseBody);
-        barberServices.value = servicesResponse.services;
-        selectedServices.value =
-            List.generate(barberServices.length, (index) => false);
+        if (responseBody is List) {
+          barberServices.value = responseBody
+              .map((service) => BarberServices.fromJson(service))
+              .toList();
+        } else if (responseBody is Map<String, dynamic>) {
+          final servicesResponse = BarberServiceResponse.fromJson(responseBody);
+          barberServices.value = servicesResponse.services;
+        }
+        
+        // Initialize selected status based on pre-selection or default to false
+        selectedServices.value = List.generate(barberServices.length, (index) {
+          if (preSelectedServiceIds != null && preSelectedServiceIds.isNotEmpty) {
+            final serviceId = barberServices[index].id;
+            return preSelectedServiceIds.contains(serviceId);
+          }
+          return false;
+        });
+        
+        // Update selection count
+        selectedCount.value = selectedServices.where((selected) => selected).length;
+        hasSelection.value = selectedCount.value > 0;
+        
       } else {
         errorMessage.value =
-            responseBody['message'] ?? 'failedToFetchServices'.tr;
+            (responseBody is Map ? responseBody['message'] : null) ?? 'failedToFetchServices'.tr;
       }
     } catch (e) {
       errorMessage.value = '${'networkError'.tr}: $e';
-      print(e);
+      print("Error in fetchServices: $e");
     } finally {
       isLoading.value = false;
     }

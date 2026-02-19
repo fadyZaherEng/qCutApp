@@ -21,7 +21,7 @@ class BPaymentMethodsViewBody extends StatefulWidget {
 class _BPaymentMethodsViewBodyState extends State<BPaymentMethodsViewBody> {
   final PayToQcutController _controller = Get.put(PayToQcutController());
   final billId = Get.arguments as String?;
-  int? selectedDay;
+  DateTime? selectedDate;
   String selectedDateText = "noDateSelected".tr;
 
   @override
@@ -51,26 +51,14 @@ class _BPaymentMethodsViewBodyState extends State<BPaymentMethodsViewBody> {
           SizedBox(height: 16.h),
 
           CustomDaysPicker(
-            selectedDay: selectedDay ?? DateTime.now().day,
-            onDaySelected: (day) {
+            selectedDate: selectedDate ?? DateTime.now(),
+            onDateSelected: (date) {
               setState(() {
-                selectedDay = day;
-
-                // Find the full date from the current date + days
-                final now = DateTime.now();
-                DateTime selectedDate = now;
-
-                for (int i = 0; i < 7; i++) {
-                  final date = now.add(Duration(days: i));
-                  if (date.day == day) {
-                    selectedDate = date;
-                    break;
-                  }
-                }
+                selectedDate = date;
 
                 // Format and set the selected date text
                 selectedDateText =
-                    "${selectedDate.day}/${selectedDate.month}/${selectedDate.year}";
+                    "${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}";
               });
             },
             titleSimpleDaysPicker: "selectDate".tr,
@@ -93,12 +81,8 @@ class _BPaymentMethodsViewBodyState extends State<BPaymentMethodsViewBody> {
             onPressed: () async {
               await _controller.requestPayment(
                 billId: billId.toString(),
-                dateTimestamp: selectedDay != null
-                    ? DateTime(
-                        DateTime.now().year,
-                        DateTime.now().month,
-                        selectedDay!,
-                      ).millisecondsSinceEpoch
+                dateTimestamp: selectedDate != null
+                    ? selectedDate!.millisecondsSinceEpoch
                     : DateTime.now().millisecondsSinceEpoch,
               );
             },

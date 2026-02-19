@@ -18,6 +18,7 @@ import 'package:q_cut/modules/customer/features/home_features/home/views/widgets
 import 'package:q_cut/modules/customer/features/home_features/home/views/widgets/nearby_salons_section.dart';
 import 'package:q_cut/modules/customer/features/home_features/profile_feature/logic/profile_controller.dart';
 import 'package:q_cut/modules/customer/features/home_features/profile_feature/models/customer_profile_model.dart';
+import 'package:q_cut/core/utils/auth/auth_helper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeView extends StatefulWidget {
@@ -38,25 +39,10 @@ class _HomeViewState extends State<HomeView> {
   bool isSearching = false;
 
   @override
-  void didChangeDependencies() async {
-    super.didChangeDependencies();
-    await fetchProfileData();
-    await _determinePosition(context).then((Position? position) {
-      latitude = position!.latitude;
-      longitude = position.longitude;
-      loadSelectedCities();
-      setState(() {});
-      if (selectedCities.isNotEmpty) {
-        homeController.getBarbersCity(city: selectedCities.join(', '));
-      } else {
-        homeController.getNearestBarbers(longitude, latitude);
-      }
-      // homeController.getNearestBarbers(longitude, latitude);
-    }).catchError((e) {
-      // Handle the error, e.g., show a snackbar or dialog
-      print(e);
-    });
-    // await _notificationListener();
+  void initState() {
+    super.initState();
+    // loadSelectedCities();
+    _notificationListener();
   }
 
   Future<void> _notificationListener() async {
@@ -65,7 +51,6 @@ class _HomeViewState extends State<HomeView> {
         "onNotificationClick Stream home: ${onNotificationClick?.stream.toString()}");
     onNotificationClick?.stream.listen((event) {
       if (event.isNotEmpty) {
-        print("event11111111111111111111 $event");
         _onNotificationClick(event);
       }
     });
@@ -75,6 +60,32 @@ class _HomeViewState extends State<HomeView> {
     // Handle navigation based on notification payload
     Get.toNamed(AppRouter.notificationPath);
     onNotificationClick?.add("");
+  }
+
+  @override
+  void didChangeDependencies() async {
+    super.didChangeDependencies();
+
+    // Check if user is authenticated (not a guest)
+    if (AuthHelper.isAuthenticated()) {
+      await fetchProfileData();
+      await _determinePosition(context).then((Position? position) {
+        latitude = position!.latitude;
+        longitude = position.longitude;
+        loadSelectedCities();
+        setState(() {});
+        if (selectedCities.isNotEmpty) {
+          homeController.getBarbersCity(city: selectedCities.join(', '));
+        } else {
+          homeController.getNearestBarbers(longitude, latitude);
+        }
+      }).catchError((e) {
+        print(e);
+      });
+    } else {
+      // Guest user logic: Fetch all barbers without location/profile dependency
+      homeController.getBarbers();
+    }
   }
 
   Future<void> fetchProfileData() async {
@@ -161,7 +172,6 @@ class _HomeViewState extends State<HomeView> {
   @override
   Widget build(BuildContext context) {
     loadSelectedCities();
-    _notificationListener();
 
     return RefreshIndicator(
       onRefresh: () async {
@@ -171,19 +181,23 @@ class _HomeViewState extends State<HomeView> {
           selectedDateTime = null;
           _clearSelection();
         });
-        await fetchProfileData();
-        await _determinePosition(context).then((Position? position) {
-          latitude = position!.latitude;
-          longitude = position.longitude;
-          homeController.getNearestBarbers(longitude, latitude);
-        }).catchError((e) {
-          // Handle the error, e.g., show a snackbar or dialog
-          print(e);
-        });
+
+        if (AuthHelper.isAuthenticated()) {
+          await fetchProfileData();
+          await _determinePosition(context).then((Position? position) {
+            latitude = position!.latitude;
+            longitude = position.longitude;
+            homeController.getNearestBarbers(longitude, latitude);
+          }).catchError((e) {
+            print(e);
+          });
+        } else {
+          await homeController.getBarbers();
+        }
       },
       child: SafeArea(
           child: Scaffold(
-        drawer: CustomDrawer(),
+        drawer: const CustomDrawer(),
         body: CustomScrollView(
           slivers: [
             SliverToBoxAdapter(
@@ -200,14 +214,88 @@ class _HomeViewState extends State<HomeView> {
                         });
                       },
                     ),
-                    SizedBox(height: 12.h),
+
+                    // Guest user banner
+                    if (!AuthHelper.isAuthenticated()) ...[
+                      SizedBox(height: 12.h),
+                      Container(
+                        padding: EdgeInsets.all(16.w),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              ColorsData.primary.withOpacity(0.1),
+                              ColorsData.primary.withOpacity(0.05),
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(12.r),
+                          border: Border.all(
+                            color: ColorsData.primary.withOpacity(0.3),
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'welcomeGuest'.tr,
+                                    style: Styles.textStyleS14W700(
+                                      color: ColorsData.primary,
+                                    ),
+                                  ),
+                                  SizedBox(height: 4.h),
+                                  Text(
+                                    'loginToAccessAllFeatures'.tr,
+                                    style: Styles.textStyleS12W400(
+                                      color: ColorsData.secondary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(width: 8.w),
+                            ElevatedButton(
+                              onPressed: () {
+                                Get.toNamed(AppRouter.loginPath);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: ColorsData.primary,
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 16.w,
+                                  vertical: 10.h,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8.r),
+                                ),
+                              ),
+                              child: Text(
+                                'login'.tr,
+                                style: Styles.textStyleS14W600(
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                    if (profileController.profileData.value?.city.isNotEmpty ??
+                        false)
+                      SizedBox(height: 12.h),
                     Row(
                       children: [
-                        SvgPicture.asset(
-                          AssetsData.mapPinIcon,
-                          width: 24.w,
-                          height: 24.h,
-                        ),
+                        if (profileController
+                                .profileData.value?.city.isNotEmpty ??
+                            false)
+                          SvgPicture.asset(
+                            AssetsData.mapPinIcon,
+                            width: 24.w,
+                            height: 24.h,
+                          ),
                         SizedBox(width: 2.w),
                         Flexible(
                           child: Text(
@@ -216,12 +304,6 @@ class _HomeViewState extends State<HomeView> {
                             maxLines: 2,
                             style: Styles.textStyleS12W400(),
                           ),
-                        ),
-                        SizedBox(width: 2.w),
-                        SvgPicture.asset(
-                          AssetsData.downArrowIcon,
-                          width: 24.w,
-                          height: 24.h,
                         ),
                       ],
                     ),
@@ -297,8 +379,7 @@ class _HomeViewState extends State<HomeView> {
                                     city: selectedCities.isNotEmpty
                                         ? selectedCities.first
                                         : "",
-                                    startDate:
-                                        result.millisecondsSinceEpoch,
+                                    startDate: result.millisecondsSinceEpoch,
                                     endDate: result
                                         .add(const Duration(days: 180))
                                         .millisecondsSinceEpoch,

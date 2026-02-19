@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
@@ -12,9 +13,10 @@ import 'package:q_cut/core/utils/widgets/custom_big_button.dart';
 import 'package:q_cut/core/utils/widgets/custom_button.dart';
 import 'package:q_cut/core/utils/widgets/custom_checkbox.dart';
 import 'package:q_cut/modules/auth/logic/controller/auth_controller.dart';
+import 'package:q_cut/core/utils/network/api.dart';
 import 'package:q_cut/modules/auth/views/functions/validate_egyptian_phone_number.dart';
+import 'package:q_cut/modules/auth/views/functions/validate_arabic_text.dart';
 import 'package:q_cut/modules/auth/views/widgets/custom_text_form.dart';
-import 'package:q_cut/modules/barber/map_search/map_search_screen.dart';
 
 class SignUpView extends StatefulWidget {
   const SignUpView({super.key});
@@ -110,6 +112,7 @@ class _SignUpViewState extends State<SignUpView> {
               ),
               Form(
                 key: _authController.signupFormKey,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
                 child: Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16.w),
                   child: Column(
@@ -138,11 +141,23 @@ class _SignUpViewState extends State<SignUpView> {
                               children: [
                                 SizedBox(height: 16.h),
                                 CustomTextFormField(
-                                  //     controller: _barberShop,
+                                  controller: _authController.barberShopNameController,
                                   hintText: 'enterYourBarberShopName'.tr,
                                   validator: (value) {
                                     if (value == null || value.isEmpty) {
                                       return 'pleaseEnterYourBarberShopName'.tr;
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                SizedBox(height: 16.h),
+                                CustomTextFormField(
+                                  controller: _authController.locationDescriptionController,
+                                  hintText: 'locationDescription'.tr,
+                                  // maxLines: 3,
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'pleaseEnterLocationDescription'.tr;
                                     }
                                     return null;
                                   },
@@ -153,29 +168,23 @@ class _SignUpViewState extends State<SignUpView> {
                           : SizedBox(height: 16.h),
                       (SharedPref().getBool(PrefKeys.userRole)) == false
                           ? CustomTextFormField(
-                              onTap: () {
-                                // Implement location picker here
-                                // Future.delayed to ensure the tap is registered properly
-                                Navigator.push(context,
-                                    MaterialPageRoute(builder: (context) {
-                                  return MapSearchScreen(
-                                    initialLatitude: 32.0853,
-                                    initialLongitude: 34.7818,
-                                    onLocationSelected: (lat, lng, address) {
-                                      _authController.city.text = address;
-                                      _authController.locationLatitude = lat;
-                                      _authController.locationLongitude = lng;
-                                      setState(() {});
-                                    },
-                                  );
-                                }));
-                              },
-                              readOnly: true,
                               controller: _authController.city,
-                              hintText: 'enterYourCity'.tr,
+                              hintText: 'pleaseEnterCityNameInArabic'.tr,
+                              textDirection: TextDirection.rtl,
+                              // Set text direction to RTL for Arabic
+                              // Use custom formatter to allow only Arabic characters and show toast
+                              inputFormatters: [
+                                ArabicInputFormatter(),
+                              ],
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
                                   return 'Please enter your City'.tr;
+                                }
+                                // Validate that city name is in Arabic
+                                final arabicValidation =
+                                    validateArabicText(value);
+                                if (arabicValidation != null) {
+                                  return arabicValidation;
                                 }
                                 return null;
                               },
@@ -259,7 +268,7 @@ class _SignUpViewState extends State<SignUpView> {
                                 ),
                                 InkWell(
                                   onTap: () {
-                                     Get.toNamed(AppRouter.termsPath);
+                                    Get.toNamed(AppRouter.termsPath);
                                   },
                                   child: Text(
                                     'Terms and Conditions'.tr,
@@ -309,5 +318,41 @@ class _SignUpViewState extends State<SignUpView> {
         ),
       ),
     );
+  }
+}
+
+class ArabicInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    if (newValue.text.isEmpty) {
+      return newValue;
+    }
+
+    // Regex match (Arabic characters and spaces)
+    final validChars = RegExp(r'^[\u0600-\u06FF\s]+\$');
+
+    // If the new text is fully valid, allow it
+    if (validChars.hasMatch(newValue.text)) {
+      return newValue;
+    }
+
+    // Check if we are adding text
+    if (newValue.text.length > oldValue.text.length) {
+      // Check if the NEWLY added characters are invalid
+      // For simplicity, just check if the new text has ANY invalid char (which it does, otherwise the previous check would pass)
+
+      // Show toast error
+      ShowToast.showError(message: 'pleaseEnterCityNameInArabic'.tr);
+      return oldValue; // Reject change
+    }
+
+    // If we are here, it might be deletion or complex change, allow valid subset if feasible or assume blocking was handled above.
+    // However, if validChars failed, it means there are invalid chars.
+    // If it was a paste, we reject it. If it was typing, we reject it.
+
+    return oldValue;
   }
 }

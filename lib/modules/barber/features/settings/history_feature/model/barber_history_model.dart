@@ -129,8 +129,16 @@ class ServiceInfo {
   });
 
   factory ServiceInfo.fromJson(Map<String, dynamic> json) {
+    var serviceData = json['service'];
+    Map<String, dynamic> serviceMap = {};
+    if (serviceData is List && serviceData.isNotEmpty) {
+      serviceMap = serviceData.first;
+    } else if (serviceData is Map<String, dynamic>) {
+      serviceMap = serviceData;
+    }
+
     return ServiceInfo(
-      service: ServiceDetails.fromJson(json['service'] ?? {}),
+      service: ServiceDetails.fromJson(serviceMap),
       numberOfUsers: json['numberOfUsers'] ?? 0,
       price: (json['price'] ?? 0).toDouble(),
       id: json['_id'] ?? '',

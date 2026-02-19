@@ -300,6 +300,7 @@ class _BProfileViewBodyState extends State<BProfileView>
                           workingDays: profileData.workingDays,
                           barberShopLocation: profileData.barberShopLocation,
                           phoneNumber: profileData.phoneNumber,
+                          locationDescription: profileData.locationDescription,
                         ),
                       );
 

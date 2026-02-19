@@ -65,7 +65,7 @@ class _MyAppointmentViewState extends State<MyAppointmentView> {
           },
           child: Obx(() {
             if (controller.isLoading.value && controller.appointments.isEmpty) {
-              return Center(
+              return const Center(
                 child: SpinKitDoubleBounce(
                   color: ColorsData.primary,
                 ),
@@ -105,10 +105,12 @@ class _MyAppointmentViewState extends State<MyAppointmentView> {
                 ),
               );
             } else {
-              return ListView.builder(
+              return ListView.separated(
                 controller: _scrollController,
                 itemCount: controller.filteredAppointments.length +
                     (controller.isLoadingMore.value ? 1 : 0),
+                separatorBuilder: (context, index) =>
+                SizedBox(height: 20.h),
                 itemBuilder: (context, index) {
                   if (index < controller.filteredAppointments.length) {
                     final appointment = controller.filteredAppointments[index];
@@ -119,7 +121,7 @@ class _MyAppointmentViewState extends State<MyAppointmentView> {
                           context: context,
                           onYes: () async {
                             final success = await controller
-                                .deleteAppointment(appointment.id);
+                                .deleteAppointment(appointment);
                             if (success && context.mounted) {
                               Get.back();
                             }
@@ -132,8 +134,8 @@ class _MyAppointmentViewState extends State<MyAppointmentView> {
                     );
                   } else {
                     // loader at bottom while loading more
-                    return Padding(
-                      padding: const EdgeInsets.all(16.0),
+                    return const Padding(
+                      padding: EdgeInsets.all(16.0),
                       child: Center(
                         child: SpinKitThreeBounce(
                           color: ColorsData.primary,

@@ -170,9 +170,13 @@ class NetworkAPICall {
     List<int> fileBytes,
     String contentType,
   ) async {
+    print('Uploading ${fileBytes.length} bytes to S3...');
     return await http.put(
       Uri.parse(presignedUrl),
-      headers: {'Content-Type': contentType},
+      headers: {
+        'Content-Type': contentType,
+        'Content-Length': fileBytes.length.toString(),
+      },
       body: fileBytes,
     );
   }

@@ -71,7 +71,7 @@ class MonthlyStats {
 
   // Get maximum booking count for scale calculation
   int get maxBookings {
-    if (bookings.isEmpty) return 500; // Default value if no data
+    if (bookings.isEmpty) return 10; // Default value if no data
 
     int max = 0;
     for (var booking in bookings) {
@@ -79,6 +79,6 @@ class MonthlyStats {
         max = booking.totalBookings;
       }
     }
-    return max > 0 ? max : 500; // Ensure non-zero value
+    return max > 0 ? max : 10; // Ensure non-zero value
   }
 }

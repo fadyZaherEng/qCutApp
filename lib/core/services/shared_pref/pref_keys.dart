@@ -5,6 +5,7 @@ class PrefKeys {
   static const String id = 'id';
   static const String userRole = 'userRole';
   static const String saveMe = 'saveMe';
+  static const String pendingRoute = 'pendingRoute';
   static const String profilePic = 'profilePic';
   static const String coverPic = 'coverPic';
   static const String fullName = 'fullName';
@@ -12,4 +13,6 @@ class PrefKeys {
   static const String barberId = 'barberId';
   static const String barber = 'barber';
   static const String instagramLink = 'instagramLink';
+  static const String hasServices = 'hasServices';
+  static const String hasWorkingDays = 'hasWorkingDays';
 }

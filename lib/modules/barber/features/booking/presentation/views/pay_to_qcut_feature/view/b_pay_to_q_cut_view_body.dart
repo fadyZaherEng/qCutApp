@@ -3,11 +3,14 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:q_cut/core/utils/app_router.dart';
 import 'package:q_cut/core/utils/constants/assets_data.dart';
 import 'package:q_cut/core/utils/constants/colors_data.dart';
+import 'package:q_cut/core/utils/network/api.dart';
 import 'package:q_cut/core/utils/widgets/custom_big_button.dart';
 import 'package:q_cut/modules/barber/features/booking/presentation/views/pay_to_qcut_feature/logic/pay_to_qcut_controller.dart';
+import 'package:q_cut/modules/barber/features/booking/presentation/views/pay_to_qcut_feature/models/collection_schedule_model.dart';
 
 class BPayToQCutViewBody extends StatefulWidget {
   const BPayToQCutViewBody({super.key});
@@ -19,6 +22,7 @@ class BPayToQCutViewBody extends StatefulWidget {
 class _BPayToQCutViewBodyState extends State<BPayToQCutViewBody> {
   final PayToQcutController _controller = Get.put(PayToQcutController());
   bool isClicked = true;
+  final RxInt _selectedTab = 0.obs; // Set to 0 (Previous) as default to show the list
 
   @override
   Widget build(BuildContext context) {
@@ -84,50 +88,20 @@ class _BPayToQCutViewBodyState extends State<BPayToQCutViewBody> {
   }
 
   Widget _buildMainContent() {
-    return SingleChildScrollView(
-      physics: const AlwaysScrollableScrollPhysics(),
-      child: Padding(
+    return Scrollbar(
+      thumbVisibility: true,
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
         padding: EdgeInsets.symmetric(horizontal: 16.w),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(height: 20.h),
-            _buildHeaderSection(),
-            SizedBox(height: 20.h),
-            _buildInvoiceDetailsCard(),
-            SizedBox(height: 20.h),
-            Obx(() {
-              // Check if there's at least one unpaid invoice
-              final hasUnpaidInvoice =
-                  _controller.invoices.value.any((invoice) => !invoice.isPaid);
-
-              if (hasUnpaidInvoice) {
-                // Find the first unpaid invoice to get its ID
-                final unpaidInvoice = _controller.invoices.value.firstWhere(
-                  (invoice) => !invoice.isPaid,
-                  orElse: () => _controller.invoices.value.first,
-                );
-
-                return CustomBigButton(
-                  textData: "continueToPay".tr,
-                  onPressed: () {
-                    Get.toNamed(AppRouter.bpaymentMethodsPath,
-                        arguments: unpaidInvoice.id);
-                  },
-                );
-              } else if (_controller.invoices.value.isEmpty) {
-                return CustomBigButton(
-                  textData: "noPaymentsRequired".tr,
-                  onPressed: null,
-                );
-              } else {
-                // Return an empty SizedBox if all invoices are paid
-                return const SizedBox();
-              }
-            }),
-            SizedBox(height: 20.h),
-          ],
-        ),
+        children: [
+          SizedBox(height: 10.h),
+          _buildHeaderSection(),
+          SizedBox(height: 16.h),
+          _buildPaymentCard(),
+          SizedBox(height: 16.h),
+          _buildActionButtons(),
+          SizedBox(height: 55.h),
+        ],
       ),
     );
   }
@@ -139,199 +113,351 @@ class _BPayToQCutViewBodyState extends State<BPayToQCutViewBody> {
           child: Image.asset(
             AssetsData.thanksImage,
             width: 183.w,
-            height: 137.h,
+            height: 130.h,
           ),
         ),
-        SizedBox(height: 20.h),
+        SizedBox(height: 10.h),
         Center(
           child: Text(
             'weAreGlad'.tr,
             style: TextStyle(
               color: ColorsData.primary,
               fontWeight: FontWeight.bold,
-              fontSize: 14.sp,
+              fontSize: 16.sp,
             ),
           ),
         ),
-        SizedBox(height: 4.h),
+        SizedBox(height: 8.h),
         Center(
           child: Text(
             "checkSubscription".tr,
-            style: TextStyle(color: Colors.white70, fontSize: 12.sp),
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildInvoiceDetailsCard() {
+  Widget _buildPaymentCard() {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+      width: double.infinity,
       decoration: BoxDecoration(
-        color: ColorsData.cardColor,
-        borderRadius: BorderRadius.circular(12.r),
+        color: ColorsData.cardColor.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(20.r),
       ),
+      padding: EdgeInsets.all(20.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildJoinedSection(),
-          SizedBox(height: 16.h),
-          _buildPaymentTimelineSection(),
+          _buildJoinDateSection(),
+          SizedBox(height: 20.h),
+          Divider(color: Colors.white24, height: 1.h),
+          SizedBox(height: 20.h),
+          Text(
+            "monthlyPayment".trParams({
+              "amount": _controller.currentInvoice.value?.qcuteSubscription.toInt().toString() ?? "0"
+            }),
+            style: TextStyle(
+              color: ColorsData.primary,
+              fontSize: 15.sp,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 20.h),
+          Row(
+            children: [
+              _buildTabItem("previousPayments".tr, 0),
+              _buildTabItem("currentlyPayments".tr, 1),
+            ],
+          ),
+          SizedBox(height: 20.h),
+          Obx(() => _selectedTab.value == 0
+              ? _buildPreviousPaymentsList()
+              : _buildCurrentlyPaymentsGrid()),
         ],
       ),
     );
   }
 
-  Widget _buildJoinedSection() {
+  Widget _buildJoinDateSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'timeToJoinedQcut'.tr,
           style: TextStyle(
-            color: Colors.white,
+            color: ColorsData.primary,
             fontSize: 14.sp,
             fontWeight: FontWeight.bold,
           ),
         ),
-        Divider(color: Colors.white24, height: 16.h),
-        _buildInfoRow('dateToJoined'.tr, _controller.getJoinDate()),
-        _buildInfoRow('joinedSince'.tr, _controller.getJoinedSince(),
-            highlight: true),
+        SizedBox(height: 12.h),
+        _buildJoinInfoRow('dateToJoined'.tr, _controller.getJoinDate()),
+        SizedBox(height: 8.h),
+        _buildJoinInfoRow('joinedSince'.tr, _controller.getJoinedSince(), isGold: true),
       ],
     );
   }
 
-  Widget _buildPaymentTimelineSection() {
-    final paymentTimeline = _controller.getPaymentTimeline();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildJoinInfoRow(String label, String value, {bool isGold = false}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          'paymentTimeLine'.tr,
+          label,
+          style: TextStyle(color: Colors.white70, fontSize: 13.sp),
+        ),
+        Text(
+          value,
           style: TextStyle(
-            color: Colors.white,
-            fontSize: 14.sp,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        SizedBox(height: 8.h),
-        ...List.generate(
-          paymentTimeline.length,
-          (index) => _buildPaymentItem(
-            index,
-            paymentTimeline[index]['date'],
-            paymentTimeline[index]['status'],
-          ),
-        ),
-        Align(
-          alignment: Alignment.centerRight,
-          child: TextButton(
-            onPressed: () {
-              if (isClicked) {
-                isClicked = false;
-                setState(() {});
-                Get.toNamed(AppRouter.bpaymentTimeLinePath);
-                Future.delayed(const Duration(seconds: 2), () {
-                  isClicked = true;
-                  setState(() {});
-                });
-              }
-            },
-            child: Text(
-              'seeAll'.tr,
-              style: TextStyle(color: ColorsData.primary, fontSize: 12.sp),
-            ),
+            color: isGold ? ColorsData.primary : Colors.white,
+            fontSize: 13.sp,
+            fontWeight: isGold ? FontWeight.bold : FontWeight.normal,
           ),
         ),
       ],
     );
   }
 
-  Widget _buildInfoRow(String title, String value, {bool highlight = false}) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 4.h),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            title,
-            style: TextStyle(color: Colors.white70, fontSize: 12.sp),
-          ),
-          Text(
-            value,
-            style: TextStyle(
-              color: highlight ? ColorsData.primary : Colors.white,
-              fontSize: 12.sp,
-              fontWeight: highlight ? FontWeight.bold : FontWeight.normal,
+  Widget _buildTabItem(String title, int index) {
+    return Obx(() {
+      bool isSelected = _selectedTab.value == index;
+      return Expanded(
+        child: GestureDetector(
+          onTap: () {
+            _selectedTab.value = index;
+          },
+          child: Column(
+            children: [
+            Text(
+              title,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 13.sp,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              ),
+              textAlign: TextAlign.center,
             ),
-          ),
-        ],
+            SizedBox(height: 8.h),
+            Container(
+              height: 2.h,
+              width: 80.w,
+              color: isSelected ? ColorsData.primary : Colors.transparent,
+            ),
+          ],
+        ),
       ),
-    );
+      );
+    });
   }
 
-  Widget _buildPaymentItem(int index, String date, String status) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 6.h),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SvgPicture.asset(
-            AssetsData.calendarIcon,
-            height: 16.h,
-            width: 16.w,
-            colorFilter: const ColorFilter.mode(
-              ColorsData.primary,
-              BlendMode.srcIn,
-            ),
+  Widget _buildPreviousPaymentsList() {
+    final payments = _controller.getPaymentTimeline();
+
+    if (payments.isEmpty || (payments.length == 1 && payments[0]['date'] == 'No data')) {
+      return Padding(
+        padding: EdgeInsets.symmetric(vertical: 20.h),
+        child: Center(
+          child: Text(
+            "noPreviousPaymentsFound".tr,
+            style: TextStyle(color: Colors.white70, fontSize: 13.sp),
           ),
-          SizedBox(width: 8.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
+        ),
+      );
+    }
+
+    return Column(
+      children: payments.map((payment) {
+        return Padding(
+          padding: EdgeInsets.only(bottom: 12.h),
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10.r),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  date,
-                  style: TextStyle(color: Colors.white, fontSize: 12.sp),
-                ),
-                SizedBox(height: 4.h),
-                Text(
-                  status.toLowerCase().contains("paid")
-                      ? 'paid'.tr
-                      : 'unpaid'.tr,
+                  payment['date'],
                   style: TextStyle(
-                    color: _controller.isPaidList[index]
-                        ? Colors.white
-                        : Colors.white70,
-                    fontSize: 12.sp,
+                    color: Colors.black,
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w600,
                   ),
-                  softWrap: true,
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    // Text(
+                    //   "totalAfterDeductions".tr,
+                    //   style: TextStyle(
+                    //     color: Colors.black54,
+                    //     fontSize: 10.sp,
+                    //   ),
+                    // ),
+                    Text(
+                      "${payment['amount']} ${'currency'.tr}",
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
-          IconButton(
-            icon: Icon(
-              _controller.isPaidList[index]
-                  ? Icons.check_circle
-                  : Icons.radio_button_unchecked,
-              color: _controller.isPaidList[index]
-                  ? ColorsData.primary
-                  : Colors.white70,
-              size: 18.sp,
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildCurrentlyPaymentsGrid() {
+    return Obx(() {
+      if (_controller.schedules.isEmpty) {
+        return Padding(
+          padding: EdgeInsets.symmetric(vertical: 20.h),
+          child: Center(
+            child: Text(
+              "noSchedulesAvailable".tr,
+              style: TextStyle(color: Colors.white70, fontSize: 13.sp),
             ),
-            onPressed: () {},
-            constraints: BoxConstraints(
-              minWidth: 36.w,
-              minHeight: 36.h,
-            ),
-            padding: EdgeInsets.zero,
           ),
-        ],
+        );
+      }
+
+      return IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: _controller.schedules.map((schedule) {
+            bool isSelected = _controller.selectedScheduleId.value == schedule.id;
+            return Expanded(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 4.w),
+                child: _buildCurrentPaymentCard(schedule, isSelected),
+              ),
+            );
+          }).toList(),
+        ),
+      );
+    });
+  }
+
+  Widget _buildCurrentPaymentCard(CollectionSchedule schedule, bool isSelected) {
+    String startTime = DateFormat('HH:mm').format(
+        DateTime.fromMillisecondsSinceEpoch(schedule.startTime));
+    String endTime = DateFormat('HH:mm').format(
+        DateTime.fromMillisecondsSinceEpoch(schedule.endTime));
+
+    return GestureDetector(
+      onTap: () {
+        _controller.selectedScheduleId.value = schedule.id;
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: EdgeInsets.symmetric(vertical: 24.h),
+        decoration: BoxDecoration(
+          color: isSelected ? ColorsData.primary : Colors.white,
+          borderRadius: BorderRadius.circular(16.r),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: ColorsData.primary.withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  )
+                ]
+              : null,
+        ),
+        child: Column(
+          children: [
+            Text(
+              schedule.dayOfWeek.tr,
+              style: TextStyle(
+                color: isSelected ? Colors.white : Colors.black,
+                fontSize: 15.sp,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 8.h),
+            Text(
+              "$startTime - $endTime",
+              style: TextStyle(
+                color: isSelected ? Colors.white70 : Colors.black54,
+                fontSize: 12.sp,
+              ),
+            ),
+            if (_controller.myCollectionStatus.value != null &&
+                _controller.myCollectionStatus.value!.selectedDay ==
+                    schedule.dayOfWeek &&
+                _controller.myCollectionStatus.value!.selectedStartTime ==
+                    schedule.startTime)
+              Padding(
+                padding: EdgeInsets.only(top: 8.h),
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
+                  decoration: BoxDecoration(
+                    color: Colors.white24,
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  child: Text(
+                    _controller.myCollectionStatus.value!.status.tr,
+                    style: TextStyle(
+                      color: isSelected ? Colors.white : ColorsData.primary,
+                      fontSize: 10.sp,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
+  }
+
+  Widget _buildActionButtons() {
+    return Obx(() {
+      if (_selectedTab.value == 1) {
+        // Currently Tab - Select Schedule Slot
+        return CustomBigButton(
+          textData: "confirm".tr,
+          onPressed: () {
+            if (_controller.selectedScheduleId.value.isNotEmpty) {
+              _controller.selectCollectionSlot(_controller.selectedScheduleId.value);
+            } else {
+              ShowToast.showWarning(message: "pleaseSelectSlot".tr);
+            }
+          },
+        );
+      } else {
+        // Previous Tab - Pay Invoice
+        final hasUnpaidInvoice =
+            _controller.invoices.value.any((invoice) => !invoice.isPaid);
+
+        final unpaidInvoiceId = hasUnpaidInvoice
+            ? _controller.invoices.value.firstWhere((i) => !i.isPaid).id
+            : null;
+
+        return CustomBigButton(
+          textData: "confirm".tr,
+          onPressed: () {
+            if (unpaidInvoiceId != null) {
+              Get.toNamed(AppRouter.bpaymentMethodsPath,
+                  arguments: unpaidInvoiceId);
+            } else {
+              ShowToast.showWarning(message: "noUnpaidInvoices".tr);
+            }
+          },
+        );
+      }
+    });
   }
 }

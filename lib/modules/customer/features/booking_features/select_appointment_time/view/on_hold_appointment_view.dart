@@ -119,7 +119,7 @@ class _OnHoldAppointmentViewState extends State<OnHoldAppointmentView> {
                 SizedBox(height: 24.h),
                 CustomBSimpleDaysPicker(
                   selectedDay: controller.selectedDay.value,
-                  onDaySelected: (day) {
+                   onDaySelected: (day) {
                     print("On-hold day selected in UI: $day");
                     controller.changeSelectedDay(
                         day, selectedServices!.onHolding);

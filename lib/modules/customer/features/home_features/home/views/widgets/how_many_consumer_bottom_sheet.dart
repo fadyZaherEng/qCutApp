@@ -6,6 +6,7 @@ import 'package:q_cut/core/utils/app_router.dart';
 import 'package:q_cut/core/utils/constants/assets_data.dart';
 import 'package:q_cut/core/utils/constants/colors_data.dart';
 import 'package:q_cut/core/utils/styles.dart';
+import 'package:q_cut/core/utils/auth/auth_helper.dart';
 import 'package:q_cut/modules/customer/features/home_features/home/models/barber_model.dart';
 
 class HowManyConsumerBottomSheet extends StatelessWidget {
@@ -56,32 +57,55 @@ class HowManyConsumerBottomSheet extends StatelessWidget {
             _buildOption(
               context,
               "onlyOneConsumer".tr,
-              () =>
-                  Get.toNamed(AppRouter.barberServicesPath, arguments: barber),
+              () {
+                // Check authentication before booking
+                if (!AuthHelper.requireAuthentication(returnRoute: AppRouter.barberServicesPath)) {
+                  return; // User redirected to login
+                }
+                Get.toNamed(AppRouter.barberServicesPath, arguments: barber);
+              },
             ),
             _buildOption(
               context,
               "twoConsumers".tr,
-              () => Get.toNamed(AppRouter.qCutServicesPath, arguments: {
-                "barber": barber,
-                "isMultiple": 2,
-              }),
+              () {
+                // Check authentication before booking
+                if (!AuthHelper.requireAuthentication(returnRoute: AppRouter.qCutServicesPath)) {
+                  return; // User redirected to login
+                }
+                Get.toNamed(AppRouter.qCutServicesPath, arguments: {
+                  "barber": barber,
+                  "isMultiple": 2,
+                });
+              },
             ),
             _buildOption(
               context,
               "threeConsumers".tr,
-              () => Get.toNamed(AppRouter.qCutServicesPath, arguments: {
-                "barber": barber,
-                "isMultiple": 3,
-              }),
+              () {
+                // Check authentication before booking
+                if (!AuthHelper.requireAuthentication(returnRoute: AppRouter.qCutServicesPath)) {
+                  return; // User redirected to login
+                }
+                Get.toNamed(AppRouter.qCutServicesPath, arguments: {
+                  "barber": barber,
+                  "isMultiple": 3,
+                });
+              },
             ),
             _buildOption(
               context,
               "fourConsumers".tr,
-              () => Get.toNamed(AppRouter.qCutServicesPath, arguments: {
-                "barber": barber,
-                "isMultiple": 4,
-              }),
+              () {
+                // Check authentication before booking
+                if (!AuthHelper.requireAuthentication(returnRoute: AppRouter.qCutServicesPath)) {
+                  return; // User redirected to login
+                }
+                Get.toNamed(AppRouter.qCutServicesPath, arguments: {
+                  "barber": barber,
+                  "isMultiple": 4,
+                });
+              },
             ),
             const SizedBox(height: 32),
           ],

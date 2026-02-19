@@ -29,6 +29,7 @@ class BAppointmentView extends StatefulWidget {
 
 class _BAppointmentViewState extends State<BAppointmentView> {
   BarberLocation? location;
+  String? city;
 
   Future<void> fetchProfileData() async {
     final NetworkAPICall apiCall = NetworkAPICall();
@@ -44,6 +45,7 @@ class _BAppointmentViewState extends State<BAppointmentView> {
           type: profileResponse.data.barberShopLocation.type,
           coordinates: profileResponse.data.barberShopLocation.coordinates,
         );
+        city = profileResponse.data.city;
       } else {}
     } finally {}
     if (mounted) {
@@ -91,6 +93,7 @@ class _BAppointmentViewState extends State<BAppointmentView> {
                         children: [
                           CustomBAppointmentAppBar(
                             location: location,
+                            city: city,
                           ),
                           SizedBox(height: 16.h),
                           Column(
@@ -123,9 +126,9 @@ class _BAppointmentViewState extends State<BAppointmentView> {
                           SizedBox(height: 12.h),
                           CustomDaysPicker(
                             titleSimpleDaysPicker: "myAppointments".tr,
-                            selectedDay: controller.selectedDay.value,
-                            onDaySelected: (day) =>
-                                controller.changeSelectedDay(day),
+                            selectedDate: controller.selectedDate.value,
+                            onDateSelected: (date) =>
+                                controller.changeSelectedDate(date),
                           ),
                           SizedBox(height: 16.h),
                         ],
@@ -197,29 +200,43 @@ class _BAppointmentViewState extends State<BAppointmentView> {
                             controller.loadMoreAppointments();
                           }
 
-                          return Padding(
-                            padding: EdgeInsets.only(
-                                left: 16.w, right: 16.w, bottom: 12.h),
-                            child: CustomBAppointmentListItem(
-                              id: appointment.id,
-                              onDidNotComeTap: () => controller
-                                  .didntComeAppointment(appointment.id),
-                              imageUrl: profileDrawerImage,
-                              name: appointment.user.fullName,
-                              controller: controller,
-                              appointment: appointment,
-                              location: "location".tr,
-                              service: appointment.services.isNotEmpty
-                                  ? appointment.services[0].service.name
-                                  : "service".tr,
-                              hairStyle: appointment.runtimeType.toString(),
-                              qty: "${appointment.services.length}",
-                              bookingDay: appointment.formattedDate,
-                              bookingTime: appointment.formattedTime,
-                              type: appointment.status,
-                              price: appointment.price,
-                              finalPrice: appointment.price,
-                              services: appointment.services,
+                          return TweenAnimationBuilder<double>(
+                            tween: Tween(begin: 0.0, end: 1.0),
+                            duration: Duration(milliseconds: 300 + (index * 100)),
+                            curve: Curves.easeOutCubic,
+                            builder: (context, value, child) {
+                              return Opacity(
+                                opacity: value,
+                                child: Transform.translate(
+                                  offset: Offset(0, 30 * (1 - value)),
+                                  child: child,
+                                ),
+                              );
+                            },
+                            child: Padding(
+                              padding: EdgeInsets.only(
+                                  left: 16.w, right: 16.w, bottom: 12.h),
+                              child: CustomBAppointmentListItem(
+                                id: appointment.id,
+                                onDidNotComeTap: () => controller
+                                    .didntComeAppointment(appointment.id),
+                                imageUrl: profileDrawerImage,
+                                name: appointment.user.fullName,
+                                controller: controller,
+                                appointment: appointment,
+                                location: "location".tr,
+                                service: appointment.services.isNotEmpty
+                                    ? appointment.services[0].service.name
+                                    : "service".tr,
+                                hairStyle: appointment.runtimeType.toString(),
+                                qty: "${appointment.services.length}",
+                                bookingDay: appointment.formattedDate,
+                                bookingTime: appointment.formattedTime,
+                                type: appointment.status,
+                                price: appointment.price,
+                                finalPrice: appointment.price,
+                                services: appointment.services,
+                              ),
                             ),
                           );
                         },

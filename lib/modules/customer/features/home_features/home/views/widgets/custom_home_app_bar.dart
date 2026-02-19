@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:q_cut/core/utils/app_router.dart';
 import 'package:q_cut/core/utils/constants/assets_data.dart';
 import 'package:q_cut/core/utils/constants/colors_data.dart';
+import 'package:q_cut/core/utils/auth/auth_helper.dart';
 import 'package:q_cut/main.dart';
 import 'package:q_cut/modules/customer/features/home_features/profile_feature/views/my_profile_view.dart';
 
@@ -136,6 +137,10 @@ class _CustomHomeAppBarState extends State<CustomHomeAppBar> {
 
         InkWell(
           onTap: () {
+            // Check authentication before accessing profile
+            if (!AuthHelper.requireAuthentication(returnRoute: AppRouter.myProfilePath)) {
+              return; // User redirected to login
+            }
             Navigator.push(
               context,
               MaterialPageRoute(

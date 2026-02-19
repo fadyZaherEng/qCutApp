@@ -66,7 +66,6 @@ class HistoryController extends GetxController {
     super.onInit();
     // Initialize with the current day
     selectedDay.value = DateTime.now().day;
-    fetchAppointments("currently");
     fetchAppointments("previous");
   }
 
@@ -78,7 +77,6 @@ class HistoryController extends GetxController {
       final response = await _apiCall.getData(
           Variables.GET_CUSTOMER_HISTORY_APPOINTMENTS,
           body: {"type": type});
-
       if (response.statusCode == 200) {
         final responseBody = json.decode(response.body);
         if (responseBody['success'] == true) {
@@ -112,6 +110,18 @@ class HistoryController extends GetxController {
     if (isPrevious) {
       if (value == 'all') {
         previousAppointments.value = previousOriginal.toList();
+      } else if (value == 'attended'|| value == 'completed') {
+        previousAppointments.value = previousOriginal
+            .where((a) =>
+                a.status.toLowerCase() == 'attended' ||
+                a.status.toLowerCase() == 'completed')
+            .toList();
+      } else if (value == 'NotCome'|| value == 'missed') {
+        previousAppointments.value = previousOriginal
+            .where((a) =>
+                a.status.toLowerCase() == 'notcome' ||
+                a.status.toLowerCase() == 'missed')
+            .toList();
       } else {
         previousAppointments.value = previousOriginal
             .where((a) => a.status.toLowerCase() == value.toLowerCase())

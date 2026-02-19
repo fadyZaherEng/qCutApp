@@ -336,7 +336,7 @@ class _CustomTimeSelectDialogState extends State<CustomTimeSelectDialog> {
 }
 
 void showCustomTimeSelectDialog(BuildContext context,
-    {Function(String)? onTimeSelected}) {
+    {String? initialSelected, Function(String)? onTimeSelected}) {
   final List<String> timeOptions = [
     'today'.tr,
     'thisWeek'.tr,
@@ -366,6 +366,7 @@ void showCustomTimeSelectDialog(BuildContext context,
               ...timeOptions.map((option) => _buildTimeOption(
                     context,
                     option,
+                    option == initialSelected,
                     () {
                       Navigator.pop(context);
                       if (onTimeSelected != null) {
@@ -381,7 +382,8 @@ void showCustomTimeSelectDialog(BuildContext context,
   );
 }
 
-Widget _buildTimeOption(BuildContext context, String text, VoidCallback onTap) {
+Widget _buildTimeOption(
+    BuildContext context, String text, bool isSelected, VoidCallback onTap) {
   return InkWell(
     onTap: onTap,
     child: Container(
@@ -389,12 +391,17 @@ Widget _buildTimeOption(BuildContext context, String text, VoidCallback onTap) {
       padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.w),
       margin: EdgeInsets.only(bottom: 8.h),
       decoration: BoxDecoration(
-        color: ColorsData.cardColor,
+        color: isSelected ? ColorsData.primary : ColorsData.cardColor,
         borderRadius: BorderRadius.circular(8.r),
+        border: isSelected
+            ? Border.all(color: Colors.white.withOpacity(0.5), width: 1)
+            : null,
       ),
       child: Text(
         text,
-        style: Styles.textStyleS14W400(color: Colors.white),
+        style: Styles.textStyleS14W400(
+          color: isSelected ? Colors.black : Colors.white,
+        ).copyWith(fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400),
       ),
     ),
   );

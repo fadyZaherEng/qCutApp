@@ -53,6 +53,7 @@ class _OtpVerificationViewState extends State<OtpVerificationView> {
             child: Center(
               child: Form(
                 key: _formKey,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
                 child: Column(
                   children: [
                     SizedBox(

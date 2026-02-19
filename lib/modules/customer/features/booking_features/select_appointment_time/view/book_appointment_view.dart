@@ -25,9 +25,17 @@ class BookAppointmentView extends GetView<SelectAppointmentTimeController> {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(SelectAppointmentTimeController());
-    final selectedServices = Get.arguments["freeTimeRequestModel"]
-        as FreeTimeRequestModel?;
+    if (Get.arguments == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Get.offAllNamed(AppRouter.bottomNavigationBar);
+      });
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    final selectedServices =
+        Get.arguments["freeTimeRequestModel"] as FreeTimeRequestModel?;
     final barber = Get.arguments["barber"] as Barber;
+    final isBarberBooking = Get.arguments["isBarber"] as bool? ?? false;
 
     if (selectedServices != null) {
       if (selectedServices.barber.isNotEmpty) {
@@ -55,11 +63,14 @@ class BookAppointmentView extends GetView<SelectAppointmentTimeController> {
       // Fetch available days immediately without any delay
       controller.getAvailableDays(selectedServices);
 
+      // Fetch working hours range to get walk-in info
+      controller.fetchWorkingHoursRange(barber.id);
+
       // Manually add test timestamps if needed for debugging
       if (controller.availableDaysTimestamps.isEmpty) {
         print("addingTestTimestamps".tr);
         final now = DateTime.now().millisecondsSinceEpoch;
-        final oneDayMs = 86400000; // 24 hours in milliseconds
+        const oneDayMs = 86400000; // 24 hours in milliseconds
 
         // Add the next 7 days as test data
         for (int i = 0; i < 7; i++) {
@@ -70,7 +81,6 @@ class BookAppointmentView extends GetView<SelectAppointmentTimeController> {
         }
       }
     }
-
 
     return Scaffold(
       appBar: CustomAppBar(title: "bookAppointment".tr),
@@ -83,10 +93,15 @@ class BookAppointmentView extends GetView<SelectAppointmentTimeController> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  SpinKitDoubleBounce(color: ColorsData.primary),
+                  const SpinKitDoubleBounce(color: ColorsData.primary),
                   SizedBox(height: 20.h),
-                  Text("loadingAvailableAppointments".tr,
-                      style: TextStyle(fontSize: 16.sp, color: Colors.grey))
+                  Text(
+                    "loadingAvailableAppointments".tr,
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      color: Colors.grey,
+                    ),
+                  )
                 ],
               ),
             );
@@ -96,15 +111,18 @@ class BookAppointmentView extends GetView<SelectAppointmentTimeController> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                CustomBookAppointmentItem(
-                  services: selectedServices!.barberServices,
-                  quantities: selectedServices.services
-                      .asMap()
-                      .entries
-                      .map((entry) => entry.value.numberOfUsers)
-                      .toList(),
-                  barber: barber,
-                ),
+                if (selectedServices != null)
+                  CustomBookAppointmentItem(
+                    services: selectedServices.barberServices,
+                    quantities: selectedServices.services
+                        .asMap()
+                        .entries
+                        .map((entry) => entry.value.numberOfUsers)
+                        .toList(),
+                    barber: barber,
+                  )
+                else
+                  Center(child: Text("errorLoadingData".tr)),
                 SizedBox(height: 17.h),
                 Align(
                   alignment: Alignment.center,
@@ -121,8 +139,10 @@ class BookAppointmentView extends GetView<SelectAppointmentTimeController> {
                     selectedDay: controller.selectedDay.value,
                     onDaySelected: (day) {
                       print("${"daySelectedInUI".tr}: $day");
-                      controller.changeSelectedDay(
-                          day, selectedServices.onHolding);
+                      if (selectedServices != null) {
+                        controller.changeSelectedDay(
+                            day, selectedServices.onHolding);
+                      }
                     },
                     titleSimpleDaysPicker: "selectDay".tr,
                   );
@@ -139,35 +159,39 @@ class BookAppointmentView extends GetView<SelectAppointmentTimeController> {
                 // Use GetBuilder with specific ID for time slots to prevent full UI rebuilds
                 GetBuilder<SelectAppointmentTimeController>(
                   id: 'timeSlots',
-                  builder: (controller) => CustomAvailableTime(),
+                  builder: (controller) => const CustomAvailableTime(),
                 ),
                 SizedBox(height: 24.h),
-                Text(
-                  "ifAppointmentsDontFit".tr,
-                  style: Styles.textStyleS16W400(),
-                ),
-                Row(
-                  children: [
-                    Text(
-                      "youCanSelectFrom".tr,
-                      style: Styles.textStyleS16W400(),
-                    ),
-                    GestureDetector(
-                      onTap: () async {
-                        Get.toNamed(AppRouter.onHoldAppointmentPath,
-                            arguments:
-                                selectedServices.copyWith(onHolding: true));
-                      },
-                      child: Text(
-                        textAlign: TextAlign.left,
-                        "onHoldAppointments".tr,
-                        style:
-                            Styles.textStyleS16W400(color: ColorsData.primary),
+                if (!isBarberBooking) ...[
+                  Text(
+                    "ifAppointmentsDontFit".tr,
+                    style: Styles.textStyleS16W400(),
+                  ),
+                  Row(
+                    children: [
+                      Text(
+                        "youCanSelectFrom".tr,
+                        style: Styles.textStyleS16W400(),
                       ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 24.h),
+                      GestureDetector(
+                        onTap: () async {
+                          if (selectedServices != null) {
+                            Get.toNamed(AppRouter.onHoldAppointmentPath,
+                                arguments:
+                                    selectedServices.copyWith(onHolding: true));
+                          }
+                        },
+                        child: Text(
+                          textAlign: TextAlign.left,
+                          "onHoldAppointments".tr,
+                          style:
+                              Styles.textStyleS16W400(color: ColorsData.primary),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 24.h),
+                ],
               ],
             ),
           );
@@ -205,13 +229,17 @@ class BookAppointmentView extends GetView<SelectAppointmentTimeController> {
                       textData: "confirm".tr,
                       onPressed: isSlotSelected
                           ? () {
+                              if (selectedServices == null) return;
                               print("confirmButtonPressed".tr);
                               final slot = controller.selectedTimeSlot.value!;
                               final startTime =
-                                  DateFormat('h:mm').format(slot.startTime);
+                                  DateFormat('HH:mm').format(slot.startTime);
+                              final endTime =
+                                  DateFormat('HH:mm').format(slot.endTime);
+                              final timeRange = "$startTime-$endTime";
 
                               // 🟢 جهز بيانات الخدمات مرة واحدة
-                              final services = selectedServices!.services;
+                              final services = selectedServices.services;
                               final barberServices =
                                   selectedServices.barberServices!;
 
@@ -235,8 +263,7 @@ class BookAppointmentView extends GetView<SelectAppointmentTimeController> {
                                   .map((s) =>
                                       "${s["name"]} x${s["numberOfUsers"]}")
                                   .join(", ");
-                              final servicePrice =
-                                  serviceList.fold<double>(
+                              final servicePrice = serviceList.fold<double>(
                                 0,
                                 (sum, s) =>
                                     sum +
@@ -244,7 +271,8 @@ class BookAppointmentView extends GetView<SelectAppointmentTimeController> {
                                         (s["numberOfUsers"] as int)),
                               );
 
-                              final totalAmount = serviceList.fold<double>(0,
+                              final totalAmount = serviceList.fold<double>(
+                                  0,
                                   (sum, s) =>
                                       sum + (s["total"] as num).toDouble());
 
@@ -258,7 +286,7 @@ class BookAppointmentView extends GetView<SelectAppointmentTimeController> {
                                 barberImage: controller.barberImage.value,
                                 salonName: barberServices.first.name,
                                 appointmentDate: slot.dayName.toString(),
-                                appointmentTime: startTime,
+                                appointmentTime: timeRange,
                                 serviceDuration:
                                     "20", // TODO: احسبها ديناميك لو متاحة
                               );
@@ -289,6 +317,7 @@ class BookAppointmentView extends GetView<SelectAppointmentTimeController> {
                                   "bookingPaymentDetailsModel":
                                       bookingPaymentDetailsModel,
                                   "barber": barber,
+                                  "serviceList": serviceList,
                                 },
                               );
                             }

@@ -17,6 +17,6 @@ void showBChangeYourNameBottomSheet(BuildContext context) {
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
     ),
-    builder: (context) => const BChangeYourNameBottomSheet(),
+    builder: (context) =>   BChangeYourNameBottomSheet(),
   );
 }

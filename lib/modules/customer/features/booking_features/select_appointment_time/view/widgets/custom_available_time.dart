@@ -4,6 +4,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:q_cut/core/utils/constants/colors_data.dart';
+import 'package:q_cut/core/utils/styles.dart';
 import 'package:q_cut/modules/customer/features/booking_features/select_appointment_time/controller/select_appointment_time_controller.dart';
 import 'package:q_cut/modules/customer/features/booking_features/select_appointment_time/model/time_slot_model.dart';
 
@@ -20,14 +21,80 @@ class CustomAvailableTime extends GetView<SelectAppointmentTimeController> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                SpinKitDoubleBounce(color: ColorsData.primary),
+                const SpinKitDoubleBounce(color: ColorsData.primary),
                 SizedBox(height: 10.h),
                 Text(
-                  'Loading time slots...',
+                  'loadingAvailableAppointments'.tr,
                   style: TextStyle(
                     fontSize: 14.sp,
                     color: Colors.grey.shade600,
                   ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        final workingDay =
+            controller.getWorkingHourForDate(controller.selectedDate.value);
+        final bool isWalkIn = workingDay?.isWalkIn ?? false;
+
+        if (isWalkIn && workingDay != null) {
+          return Container(
+            width: double.infinity,
+            margin: EdgeInsets.symmetric(vertical: 20.h),
+            padding: EdgeInsets.all(20.r),
+            decoration: BoxDecoration(
+              color: Colors.green.withOpacity(0.05),
+              borderRadius: BorderRadius.circular(16.r),
+              border: Border.all(
+                  color: Colors.greenAccent.withOpacity(0.5), width: 2),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: EdgeInsets.all(12.r),
+                  decoration: BoxDecoration(
+                    color: Colors.greenAccent.withOpacity(0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(Icons.directions_walk,
+                      size: 40.r, color: Colors.green.shade800),
+                ),
+                SizedBox(height: 16.h),
+                Text(
+                  "Walk-In Day".tr,
+                  style: Styles.textStyleS18W700(color: Colors.green.shade900),
+                ),
+                SizedBox(height: 8.h),
+                Container(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20.r),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      )
+                    ],
+                  ),
+                  child: Text(
+                    workingDay != null && workingDay.workingHours != null
+                        ? workingDay.workingHours
+                        : "openAllDay".tr,
+                    style:
+                        Styles.textStyleS20W700(color: Colors.green.shade700),
+                  ),
+                ),
+                SizedBox(height: 16.h),
+                Text(
+                  "walkInDayMessage".tr,
+                  textAlign: TextAlign.center,
+                  style: Styles.textStyleS14W400(color: Colors.green.shade800),
                 ),
               ],
             ),

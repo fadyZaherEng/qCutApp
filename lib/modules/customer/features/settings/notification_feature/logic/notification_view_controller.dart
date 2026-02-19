@@ -5,6 +5,11 @@ import 'package:q_cut/core/utils/network/api.dart';
 import 'package:q_cut/core/utils/network/network_helper.dart';
 import 'package:q_cut/modules/customer/features/settings/notification_feature/logic/notification_controller.dart';
 import 'package:q_cut/modules/customer/features/settings/notification_feature/models/notification_model.dart';
+import 'package:q_cut/modules/customer/features/home_features/appointment_feature/logic/appointment_controller.dart';
+import 'package:q_cut/modules/customer/features/home_features/appointment_feature/view/appointment_detail_view.dart';
+import 'package:flutter/material.dart';
+import 'package:q_cut/core/utils/constants/colors_data.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class NotificationViewModel extends GetxController {
   final NotificationController _controller = Get.find<NotificationController>();
@@ -63,7 +68,7 @@ class NotificationViewModel extends GetxController {
 
   String getNotificationMessage(NotificationModel notification) {
     //check for language
-    Locale currentLocale = Get.locale ?? Locale('en');
+    Locale currentLocale = Get.locale ?? const Locale('en');
     print("Current Locale: ${currentLocale.languageCode}");
     if (currentLocale.languageCode == 'ar' &&
         notification.messageAr.isNotEmpty) {
@@ -89,6 +94,13 @@ class NotificationViewModel extends GetxController {
         notification.process.startsWith("Request");
   }
 
+  bool isAppointmentRelated(NotificationModel notification) {
+    return notification.processId.isNotEmpty &&
+        (notification.process.contains("Appointment") ||
+            notification.process.contains("Request") ||
+            notification.process.contains("Booking"));
+  }
+
   // Actions
   void refreshNotifications() {
     _controller.refreshNotifications();
@@ -109,6 +121,37 @@ class NotificationViewModel extends GetxController {
         : ShowToast.showError(message: "Notification is Expired".tr);
 
     refreshNotifications();
+  }
+
+  void goToAppointmentDetails(NotificationModel notification) async {
+    if (notification.processId.isEmpty) return;
+
+    // Show loading dialog
+    Get.dialog(
+      const Center(
+        child: SpinKitDoubleBounce(
+          color: ColorsData.primary,
+        ),
+      ),
+      barrierDismissible: false,
+    );
+
+    try {
+      final appointmentController = Get.put(CustomerAppointmentController());
+      final appointment =
+          await appointmentController.fetchAppointmentById(notification.appointmentId);
+      print("Fetched appointment: ${notification.appointmentId}");
+      Get.back(); // Close loading dialog
+
+      if (appointment != null) {
+        Get.to(() => AppointmentDetailView(appointment: appointment));
+      } else {
+        ShowToast.showError(message: "Could not find appointment details".tr);
+      }
+    } catch (e) {
+      Get.back(); // Close loading dialog
+      ShowToast.showError(message: "Error fetching appointment details".tr);
+    }
   }
 
   String getTimeAgo(notification) {

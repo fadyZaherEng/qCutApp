@@ -58,7 +58,7 @@ class _BAvailableAppointmentsViewBodyState
           ),
           CustomBSimpleDaysPicker(
             selectedDay: selectedDay,
-            onDaySelected: (value) {
+             onDaySelected: (value) {
               setState(() {
                 selectedDay = value;
               });

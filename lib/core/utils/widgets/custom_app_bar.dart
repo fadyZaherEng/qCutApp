@@ -8,10 +8,12 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     super.key,
     required this.title,
     this.onPressed,
+    this.backgroundColor,
   });
 
   final String title;
   final void Function()? onPressed;
+  final Color? backgroundColor ;
 
   @override
   Widget build(BuildContext context) {
@@ -20,6 +22,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         title,
         style: Styles.textStyleS16W700(),
       ),
+      backgroundColor: backgroundColor,
       leading: CustomArrowLeft(
         onPressed: onPressed,
       ),

@@ -9,6 +9,7 @@ class UploadMedia extends GetxController {
   Future<String?> uploadFile(File file, String type) async {
     try {
       final presignedResponse = await _apiCall.getPresignedUrl(type, 1);
+      print('Presigned URL response: ${presignedResponse.statusCode} - ${presignedResponse.body}');
 
       if (presignedResponse.statusCode == 200) {
         final jsonData = json.decode(presignedResponse.body);
@@ -21,6 +22,8 @@ class UploadMedia extends GetxController {
           fileBytes,
           'image/jpeg',
         );
+        print('File upload response: ${uploadResponse.statusCode} - ${uploadResponse.body}');
+        print('Media URL: $mediaURL');
 
         if (uploadResponse.statusCode == 200) {
           return mediaURL;

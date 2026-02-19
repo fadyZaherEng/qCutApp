@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:q_cut/core/services/shared_pref/pref_keys.dart';
+import 'package:q_cut/core/services/shared_pref/shared_pref.dart';
 import 'package:q_cut/core/utils/network/api.dart';
 import 'package:q_cut/core/utils/network/network_helper.dart';
 import 'package:q_cut/modules/customer/features/home_features/profile_feature/models/customer_profile_model.dart';
@@ -70,6 +72,13 @@ class ProfileController extends GetxController {
 
   // Fetch profile data from API
   Future<void> fetchProfileData() async {
+    // Skip fetching profile data for guest users
+    final accessToken = SharedPref().getString(PrefKeys.accessToken);
+    if (accessToken == null || accessToken.isEmpty) {
+      isLoading.value = false;
+      return; // Guest user, no profile to fetch
+    }
+
     isLoading.value = true;
     isError.value = false;
     errorMessage.value = '';
@@ -139,8 +148,7 @@ class ProfileController extends GetxController {
     } catch (e) {
       isError.value = true;
       errorMessage.value = 'Network error: $e';
-      Get.snackbar('Error', 'Failed to connect to server',
-          backgroundColor: Colors.red, colorText: Colors.white);
+      ShowToast.showError(message: 'Failed to connect to server'.tr);
     } finally {
       isLoading.value = false;
     }

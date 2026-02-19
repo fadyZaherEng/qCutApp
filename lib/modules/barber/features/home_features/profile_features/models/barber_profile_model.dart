@@ -11,6 +11,7 @@ class BarberProfileModel {
   final String coverPic;
   final String city;
   final List<WorkingDay> workingDays;
+  final String locationDescription;
   final BarberShopLocation barberShopLocation;
 
   BarberProfileModel({
@@ -23,6 +24,7 @@ class BarberProfileModel {
     required this.coverPic,
     required this.city,
     required this.workingDays,
+    required this.locationDescription,
     required this.barberShopLocation,
     required this.phoneNumber,
   });
@@ -43,6 +45,7 @@ class BarberProfileModel {
           [],
       barberShopLocation:
           BarberShopLocation.fromJson(json['barberShopLocation'] ?? {}),
+      locationDescription: json['locationDescription'] ?? '',
       phoneNumber: json['phoneNumber'] ?? '',
     );
   }

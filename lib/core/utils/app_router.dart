@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:q_cut/modules/auth/binding/auth_binding.dart';
 import 'package:q_cut/modules/auth/views/forget_password_view.dart';
@@ -7,7 +8,8 @@ import 'package:q_cut/modules/auth/views/otp_verification_view.dart';
 import 'package:q_cut/modules/auth/views/reset_password_view.dart';
 import 'package:q_cut/modules/auth/views/reset_phone_number_view.dart';
 import 'package:q_cut/modules/auth/views/sign_up_view.dart';
-import 'package:q_cut/modules/auth/views/legal_documents_view.dart'; // Added
+import 'package:q_cut/modules/auth/views/legal_documents_view.dart';
+import 'package:q_cut/modules/auth/views/update_phone_number_view.dart'; // Added
 import 'package:q_cut/modules/barber/features/booking/presentation/views/b_available_appointments_view.dart';
 import 'package:q_cut/modules/barber/features/booking/presentation/views/b_booking_view.dart';
 import 'package:q_cut/modules/barber/features/booking/presentation/views/pay_to_qcut_feature/view/b_pay_to_q_cut_view.dart';
@@ -22,6 +24,7 @@ import 'package:q_cut/modules/barber/features/home_features/statistics_feature/v
 import 'package:q_cut/modules/barber/features/settings/presentation/views/b_connect_us_view.dart';
 import 'package:q_cut/modules/barber/features/settings/presentation/views/b_history_view.dart';
 import 'package:q_cut/modules/barber/features/settings/presentation/views/b_settings_view.dart';
+import 'package:q_cut/modules/barber/features/settings/presentation/views/delete_account_reason_page.dart';
 import 'package:q_cut/modules/barber/features/settings/report_feature/view/reports_view.dart';
 import 'package:q_cut/modules/customer/features/booking_features/display_barber_services_feature/views/barber_services_view.dart';
 import 'package:q_cut/modules/customer/features/booking_features/select_appointment_time/view/book_appointment_view.dart';
@@ -72,6 +75,7 @@ abstract class AppRouter {
   static const String botpVerificationResetCasePath =
       "/botpVerificationResetCasePath";
   static const String bresetPhoneNumberPath = "/bresetPhoneNumberPath";
+  static const String updatePhoneNumberPath = "/updatePhoneNumberPath"; // Added
   static const String homPath = "/homPath";
   static const String selectedPath = "/selectedPath";
   static const String myProfilePath = "/myProfilePath";
@@ -98,6 +102,7 @@ abstract class AppRouter {
   static const String imageViewPath = "/imageViewPath";
   static const String bconectUsPath = "/bconectUsPath";
   static const String bchatWithUsPath = "/bchatWithUsPath";
+  static const String bdeleteAccountReasonPath = "/bdeleteAccountReasonPath";
 
   static const String bsettingsPath = "/bsettingsPath";
   static const String reportsPath = "/reportsPath";
@@ -154,15 +159,19 @@ abstract class AppRouter {
     ),
     GetPage(
       name: otpVerificationPath,
-      page: () => OtpVerificationView(userId: ""),
+      page: () => const OtpVerificationView(userId: ""),
     ),
     GetPage(
       name: resetPasswordPath,
-      page: () => ResetPasswordView(),
+      page: () => const ResetPasswordView(),
     ),
     GetPage(
       name: otpVerificationResetCasePath,
       page: () => OtpVerificationResetCaseView(),
+    ),
+    GetPage(
+      name: updatePhoneNumberPath,
+      page: () => UpdatePhoneNumberView(),
     ),
     GetPage(
       name: resetPhoneNumberPath,
@@ -195,7 +204,7 @@ abstract class AppRouter {
     ),
     GetPage(
       name: historyPath,
-      page: () => HistoryView(),
+      page: () => const HistoryView(),
       binding: HistoryBinding(),
     ),
     // GetPage(
@@ -220,7 +229,7 @@ abstract class AppRouter {
     ),
     GetPage(
       name: bookAppointmentPath,
-      page: () => BookAppointmentView(),
+      page: () => const BookAppointmentView(),
     ),
     GetPage(
       name: bookAppointmentWithPaymentMethodsPath,
@@ -249,6 +258,9 @@ abstract class AppRouter {
     GetPage(
       name: beditProfilePath,
       page: () => const BEditProfileView(),
+      transition: Transition.fadeIn,
+      transitionDuration: const Duration(milliseconds: 400),
+      curve: Curves.easeInOut,
     ),
     GetPage(
       name: imageViewPath,
@@ -299,12 +311,24 @@ abstract class AppRouter {
       page: () => const BPaymentTimeLineView(),
     ),
     GetPage(
+      name: bdeleteAccountReasonPath,
+      page: () => const DeleteAccountReasonPage(),
+    ),
+    GetPage(
       name: bpaymentMethodsPath,
       page: () => const BPaymentMethodsView(),
     ),
     GetPage(
+      name: bresetPhoneNumberPath,
+      page: () => ResetPhoneNumberView(),
+    ),
+    GetPage(
+      name: botpVerificationResetCasePath,
+      page: () => OtpVerificationResetCaseView(),
+    ),
+    GetPage(
       name: successScreenPath,
-      page: () => SuccessScreen(),
+      page: () => const SuccessScreen(),
     ),
     GetPage(
       name: citySelectionPath,
