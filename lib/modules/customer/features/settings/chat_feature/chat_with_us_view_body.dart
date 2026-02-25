@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:q_cut/core/utils/constants/colors_data.dart';
 import 'package:q_cut/modules/customer/features/settings/chat_feature/chat_bubble_for_barber.dart';
 import 'package:q_cut/modules/customer/features/settings/chat_feature/chat_bubble_for_customer.dart';
 import 'package:get/get.dart';
@@ -51,7 +53,7 @@ class ChatWithUsViewBodyState extends State<ChatWithUsViewBody> {
         Expanded(
           child: Obx(() {
             if (_chatController.isLoading.value) {
-              return const Center(child: CircularProgressIndicator());
+              return const Center(child: SpinKitDoubleBounce(color: ColorsData.primary));
             }
 
             if (_chatController.messages.isEmpty) {
@@ -72,7 +74,7 @@ class ChatWithUsViewBodyState extends State<ChatWithUsViewBody> {
                       ? const Center(
                           child: Padding(
                             padding: EdgeInsets.all(8.0),
-                            child: CircularProgressIndicator(),
+                            child: SpinKitDoubleBounce(color: ColorsData.primary),
                           ),
                         )
                       : const SizedBox.shrink());

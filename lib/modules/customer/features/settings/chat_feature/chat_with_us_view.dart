@@ -39,12 +39,21 @@ class _ChatWithUsViewState extends State<ChatWithUsView> {
       body: ChatWithUsViewBody(key: _chatBodyKey),
       bottomNavigationBar: SingleChildScrollView(
         padding:
-            EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+            //check if keyboard is open and add extra padding to avoid being covered by keyboard
+            keyboardIsOpen(context)
+                ? EdgeInsets.only(
+                    bottom: MediaQuery.of(context).viewInsets.bottom-10)
+                : EdgeInsets.only(
+                    bottom: MediaQuery.of(context).viewInsets.bottom + 30),
         child: MessageInput(
           onSendMessage: _handleSendMessage,
           onCameraTap: _handleImageSelection,
         ),
       ),
     );
+  }
+
+  bool keyboardIsOpen(BuildContext context) {
+    return MediaQuery.of(context).viewInsets.bottom > 0;
   }
 }

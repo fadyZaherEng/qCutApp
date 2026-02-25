@@ -65,7 +65,7 @@ class ChatController extends GetxController {
     print("Connecting to socket...");
     socket = IO.io(
       'ws://QcutEnv-env.eba-iynfw5mb.us-east-1.elasticbeanstalk.com',
-        // 'ws://qcut-env.eba-turffyr8.us-east-1.elasticbeanstalk.com',
+      //   'ws://qcut-env.eba-turffyr8.us-east-1.elasticbeanstalk.com',
         <String, dynamic>{
           'transports': ['websocket'],
           'autoConnect': true,
