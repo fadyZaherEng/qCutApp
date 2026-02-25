@@ -552,18 +552,18 @@ class MainController extends GetxController {
                 ),
                 SizedBox(height: 24.h),
                 Text(
-                  "Please Wait",
+                  "pleaseWait".tr,
                   style: titleStyle,
                 ),
                 SizedBox(height: 10.h),
                 Text(
-                  "QCut is preparing a special offer for you",
+                  "preparingOffer".tr,
                   textAlign: TextAlign.center,
                   style: subtitleStyle,
                 ),
                 SizedBox(height: 8.h),
                 Text(
-                  "We'll notify you once your offer is ready",
+                  "notifyWhenReady".tr,
                   textAlign: TextAlign.center,
                   style: subtitleStyle.copyWith(
                     fontSize: 14.sp,
@@ -588,7 +588,7 @@ class MainController extends GetxController {
                       SizedBox(width: 12.w),
                       Expanded(
                         child: Text(
-                          "Our team is reviewing your application. You'll receive personalized terms shortly.",
+                          "reviewingApplication".tr,
                           style: TextStyle(
                             fontSize: 14.sp,
                             color: Color(0xFF555555),
@@ -613,7 +613,7 @@ class MainController extends GetxController {
                     elevation: 2,
                   ),
                   child: Text(
-                    "Got It",
+                    "gotIt".tr,
                     style: TextStyle(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.bold,

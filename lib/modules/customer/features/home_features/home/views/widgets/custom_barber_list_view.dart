@@ -33,6 +33,9 @@ class CustomBarberListView extends StatelessWidget {
     try {
       final response = await apiCall.getData(Variables.SERVICE + barberId);
       final responseBody = json.decode(response.body);
+      print("response for services: $responseBody");
+      print("response status code: ${response.statusCode}");
+      print("response body type: ${responseBody.runtimeType}");
 
       if (response.statusCode == 200) {
         if (responseBody is List) {
@@ -64,6 +67,7 @@ class CustomBarberListView extends StatelessWidget {
         validBarbers.add(barber);
       }
     }
+    print("Valid barbers count: ${validBarbers.length}");
 
     return validBarbers;
   }

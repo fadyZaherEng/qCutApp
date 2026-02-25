@@ -26,7 +26,7 @@ class MyTranslation extends Translations {
           "Change your Instagram link (Optional)":
               "تغيير رابط الانستجرام الخاص بك (اختياري)",
           "totalAfterDeductions": "الإجمالي بعد الخصومات",
-          "monthlyPayment": "الدفع الشهري هو @amount\$!",
+          "monthlyPayment": "الدفع الشهري هو @amount\₪",
           "previousPayments": "الدفعات القديمة",
           "currentlyPayments": "الدفع الحالي",
           "emailreq": "البريد الإلكتروني مطلوب",
@@ -667,6 +667,11 @@ class MyTranslation extends Translations {
           "pending": "قيد الانتظار",
           "noPreviousPaymentsFound": "لم يتم العثور على دفعات سابقة",
           "currency": "شيكل",
+          "pleaseWait": "يرجى الانتظار",
+          "preparingOffer": "كيوكت يقوم بتجهيز عرض خاص لك",
+          "notifyWhenReady": "سنقوم بإخطارك فور جاهزية عرضك",
+          "reviewingApplication": "يقوم فريقنا بمراجعة طلبك. ستتلقى الشروط المخصصة لك قريباً.",
+          "gotIt": "حسناً",
         },
         "en": {
           "Appointment Day": "Appointment Day",
@@ -692,7 +697,7 @@ class MyTranslation extends Translations {
           "Change your Instagram link (Optional)":
               "Change your Instagram link (Optional)",
           "totalAfterDeductions": "Total after deductions",
-          "monthlyPayment": "monthly payment is @amount\$!",
+          "monthlyPayment": "monthly payment is @amount\₪",
           "previousPayments": "Previous Payments",
           "currentlyPayments": "Currently Payments",
           "emailreq": "Email is Required",

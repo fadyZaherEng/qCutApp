@@ -202,7 +202,7 @@ class _CustomBDrawerState extends State<CustomBDrawer> {
                           ),
                           SizedBox(height: 8.h),
                           Text(
-                            "\u200E+972${" ${phoneNumber.split("+972")[1]}"}",
+                            "\u200E+972${phoneNumber.contains("+972") && phoneNumber.split("+972").length > 1 ? " ${phoneNumber.split("+972")[1]}" : " $phoneNumber"}",
                             style: Styles.textStyleS20W400(
                                 color: ColorsData.primary),
                           ),
