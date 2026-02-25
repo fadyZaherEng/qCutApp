@@ -109,6 +109,9 @@ class MainController extends GetxController {
   @override
   void onInit() async {
     super.onInit();
+    if (Get.arguments is int) {
+      currentIndex.value = Get.arguments;
+    }
     if (isCustomer == false) {
       final BProfileController profileController = Get.put(BProfileController());
       fetchDealById();

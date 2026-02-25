@@ -6,7 +6,11 @@ import 'package:get/get.dart';
 import 'package:q_cut/core/utils/constants/colors_data.dart';
 import 'package:q_cut/core/utils/styles.dart';
 import 'package:q_cut/core/utils/widgets/custom_button.dart';
+import 'package:q_cut/core/services/shared_pref/pref_keys.dart';
+import 'package:q_cut/core/services/shared_pref/shared_pref.dart';
+import 'package:q_cut/core/utils/app_router.dart';
 import 'package:q_cut/modules/customer/features/settings/notification_feature/logic/notification_view_controller.dart';
+import 'package:q_cut/modules/main/logic/main_controller.dart';
 
 class NotificationViewBody extends StatelessWidget {
   const NotificationViewBody({super.key});
@@ -171,8 +175,14 @@ class NotificationCard extends StatelessWidget {
                     child: CustomButton(
                       width: 200.w,
                       text: "seeDetails".tr,
-                      onPressed: () =>
-                          viewModel.goToAppointmentDetails(notification),
+                      // onPressed: () =>
+                      //     viewModel.goToAppointmentDetails(notification),
+                      onPressed: () {
+                        final isCustomer = SharedPref().getBool(PrefKeys.userRole) ?? true;
+                        final index = isCustomer ? 1 : 0;
+                        Get.offAllNamed(AppRouter.bottomNavigationBar,
+                            arguments: index);
+                      },
                     ),
                   ),
                 ),
