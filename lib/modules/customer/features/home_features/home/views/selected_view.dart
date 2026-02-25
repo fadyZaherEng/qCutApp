@@ -4,6 +4,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
+import 'package:q_cut/core/utils/app_router.dart';
+import 'package:q_cut/core/utils/auth/auth_helper.dart';
 import 'package:q_cut/core/utils/constants/assets_data.dart';
 import 'package:q_cut/core/utils/constants/colors_data.dart';
 import 'package:q_cut/core/utils/network/api.dart';
@@ -740,6 +742,10 @@ class _SelectedViewState extends State<SelectedView> {
           child: CustomBigButton(
             textData: "book".tr,
             onPressed: () {
+              // Check authentication before booking
+              if (!AuthHelper.requireAuthentication(returnRoute: AppRouter.qCutServicesPath)) {
+                return; // User redirected to login
+              }
               showHowManyConsumerBottomSheet(context, barber: barber);
             },
           ),

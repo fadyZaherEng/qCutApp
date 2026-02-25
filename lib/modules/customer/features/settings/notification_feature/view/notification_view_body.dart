@@ -20,7 +20,7 @@ class NotificationViewBody extends StatelessWidget {
       // Show loading spinner only when actively loading
       if (viewModel.isLoading.value) {
         return Center(
-          child: CircularProgressIndicator(
+          child: SpinKitDoubleBounce(
             color: ColorsData.primary,
           ),
         );
