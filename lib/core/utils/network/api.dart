@@ -24,7 +24,7 @@ class Variables {
   static const String BARBER = "${baseUrl}barber/";
   static const String SEARCH_BARBER_SHOP = "${BARBER}search-by-barberShop";
   static const String SEARCH_BARBER_FULL_NAME = "${BARBER}search-by-name";
-  static const String SEARCH_BARBER_NAME = SEARCH_BARBER_SHOP; 
+  static const String SEARCH_BARBER_NAME = SEARCH_BARBER_SHOP;
   static const String GET_BARBERS = "${BARBER}active/";
   static const String GET_BARBERS_FILTER = "${BARBER}search-by-city";
   static const String UPDATE_WALK_IN = "${BARBER}update-walk-in";
@@ -65,7 +65,16 @@ class Variables {
 
 class ShowToast {
   const ShowToast._();
-
+ static String _getErrorMessage(String message) {
+    if (message.contains('|')) {
+      final parts = message.split('|');
+      if (Get.locale?.languageCode == 'ar' && parts.length > 1) {
+        return parts[1].trim();
+      }
+      return parts[0].trim();
+    }
+    return message;
+  }
   static showError({String? title, required String message}) {
     Get.rawSnackbar(
       titleText: Text(
@@ -78,7 +87,7 @@ class ShowToast {
         ),
       ),
       messageText: Text(
-        message,
+        _getErrorMessage(message),
         style: TextStyle(
           color: Colors.white.withOpacity(0.9),
           fontWeight: FontWeight.w400,
@@ -173,7 +182,7 @@ class ShowToast {
         ),
       ),
       messageText: Text(
-        message,
+        _getErrorMessage(message),
         style: TextStyle(
           color: Colors.white.withOpacity(0.9),
           fontWeight: FontWeight.w400,

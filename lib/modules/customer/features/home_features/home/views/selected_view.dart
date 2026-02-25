@@ -21,7 +21,6 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:q_cut/modules/customer/features/home_features/home/models/working_hours_range_model.dart';
 import 'dart:convert';
 import 'package:intl/intl.dart';
-// Added for firstWhereOrNull if needed, but Get has it too. Actually WorkingHoursRangeResponse is imported.
 
 class SelectedView extends StatefulWidget {
   const SelectedView({super.key});
@@ -461,7 +460,7 @@ class _SelectedViewState extends State<SelectedView> {
                                         ],
                                       ),
                                     );
-                                  }).toList(),
+                                  }),
                                   SizedBox(height: 4.h),
                                 ],
                               );

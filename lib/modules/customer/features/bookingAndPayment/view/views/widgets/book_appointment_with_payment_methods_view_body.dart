@@ -184,7 +184,7 @@ class BookAppointmentWithPaymentMethodsViewBody
                         return "failedToBookAppointment".tr;
                       }
                     }();
-                    ShowToast.showError(message: errorMessage);
+                    ShowToast.showError(message: _getErrorMessage(errorMessage));
                   }
                 } catch (e, s) {
                   print("❌ Booking Error: $e\n$s");
@@ -203,6 +203,16 @@ class BookAppointmentWithPaymentMethodsViewBody
         ),
       ),
     );
+  }
+  String _getErrorMessage(String message) {
+    if (message.contains('|')) {
+      final parts = message.split('|');
+      if (Get.locale?.languageCode == 'ar' && parts.length > 1) {
+        return parts[1].trim();
+      }
+      return parts[0].trim();
+    }
+    return message;
   }
 }
 

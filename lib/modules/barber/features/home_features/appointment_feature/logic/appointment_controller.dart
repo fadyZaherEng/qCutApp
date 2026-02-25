@@ -50,8 +50,19 @@ class BAppointmentController extends GetxController {
     fetchNextWorkingDays();
   }
 
+  String _getErrorMessage(String message) {
+    if (message.contains('|')) {
+      final parts = message.split('|');
+      if (Get.locale?.languageCode == 'ar' && parts.length > 1) {
+        return parts[1].trim();
+      }
+      return parts[0].trim();
+    }
+    return message;
+  }
   // Fetch appointments from API with pagination
   Future<void> fetchAppointments({bool loadMore = false}) async {
+    bool snowball = false;
     print("fetchAppointments called with loadMore: $loadMore");
 
     if (loadMore) {
@@ -85,7 +96,8 @@ class BAppointmentController extends GetxController {
           print("Response is a List, wrapping in data property");
           appointmentsResponse =
               BarberAppointmentResponse.fromJson({'data': responseBody});
-        } else if (responseBody is Map) {
+        }
+        else if (responseBody is Map) {
           // Object containing data property
           if (responseBody.containsKey('data')) {
             print("Response contains 'data' property");
@@ -161,13 +173,16 @@ class BAppointmentController extends GetxController {
           errorMessage.value = 'Error: ${response.statusCode}';
         }
         print("Error message: ${errorMessage.value}");
-        ShowToast.showError(message: errorMessage.value);
+        if(snowball==false) {
+          ShowToast.showError(message: _getErrorMessage(errorMessage.value));
+          snowball = true;
+        }
       }
     } catch (e) {
       print("Exception while fetching appointments: $e");
       isError.value = true;
       errorMessage.value = 'Network error: $e';
-      ShowToast.showError(message: errorMessage.value);
+      // ShowToast.showError(message: _getErrorMessage(errorMessage.value));
     } finally {
       isLoading.value = false;
       isLoadingMore.value = false;
@@ -361,7 +376,7 @@ class BAppointmentController extends GetxController {
         final responseBody = json.decode(response.body);
         final message =
             responseBody['message'] ?? 'Failed to Did Not Come appointment';
-        ShowToast.showError(message: message);
+        ShowToast.showError(message: _getErrorMessage(message));
         return false;
       }
     } catch (e) {
@@ -419,7 +434,7 @@ class BAppointmentController extends GetxController {
         final responseBody = json.decode(response.body);
         final message =
             responseBody['message'] ?? 'Failed to fetch available times';
-        ShowToast.showError(message: message);
+        ShowToast.showError(message: _getErrorMessage(message));
         return [];
       }
     } catch (e) {
@@ -462,7 +477,7 @@ class BAppointmentController extends GetxController {
         final responseBody = json.decode(response.body);
         final message =
             responseBody['message'] ?? 'Failed to delete appointment';
-        ShowToast.showError(message: message);
+        ShowToast.showError(message: _getErrorMessage(message));
         return false;
       }
     } catch (e) {

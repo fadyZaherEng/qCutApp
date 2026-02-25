@@ -137,7 +137,7 @@ class BProfileController extends GetxController {
         isError.value = true;
         errorMessage.value =
             responseBody['message'] ?? 'Failed to fetch profile data'.tr;
-        ShowToast.showError(message: errorMessage.value);
+        ShowToast.showError(message: _getErrorMessage(errorMessage.value));
       }
     } catch (e) {
       isError.value = true;
@@ -149,6 +149,16 @@ class BProfileController extends GetxController {
     }
   }
 
+  String _getErrorMessage(String message) {
+    if (message.contains('|')) {
+      final parts = message.split('|');
+      if (Get.locale?.languageCode == 'ar' && parts.length > 1) {
+        return parts[1].trim();
+      }
+      return parts[0].trim();
+    }
+    return message;
+  }
   // Modified fetchGallery method
   Future<void> fetchGallery() async {
     isGalleryLoading.value = true;
@@ -166,7 +176,7 @@ class BProfileController extends GetxController {
         isError.value = true;
         errorMessage.value =
             responseBody['message'] ?? 'Failed to fetch gallery'.tr;
-        ShowToast.showError(message: errorMessage.value);
+        ShowToast.showError(message:_getErrorMessage(errorMessage.value));
       }
     } catch (e) {
       isError.value = true;
@@ -212,7 +222,7 @@ class BProfileController extends GetxController {
         final errorMsg =
             responseBody['message'] ?? 'Failed to fetch barber services'.tr;
         errorMessage.value = errorMsg;
-        ShowToast.showError(message: errorMsg);
+        ShowToast.showError(message: _getErrorMessage(errorMessage.value));
       }
     } catch (e) {
       isError.value = true;

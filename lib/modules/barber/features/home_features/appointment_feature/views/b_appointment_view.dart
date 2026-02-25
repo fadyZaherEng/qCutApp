@@ -31,6 +31,8 @@ class _BAppointmentViewState extends State<BAppointmentView> {
   BarberLocation? location;
   String? city;
 
+  late final BAppointmentController controller;
+
   Future<void> fetchProfileData() async {
     final NetworkAPICall apiCall = NetworkAPICall();
 
@@ -56,25 +58,23 @@ class _BAppointmentViewState extends State<BAppointmentView> {
   @override
   void initState() {
     super.initState();
+    controller = Get.put(BAppointmentController());
     fetchProfileData();
   }
 
-  @override
-  didChangeDependencies() {
-    super.didChangeDependencies();
-    fetchProfileData();
-  }
-
-  @override
-  didUpdateWidget(covariant BAppointmentView oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    fetchProfileData();
+  String _getErrorMessage(String message) {
+    if (message.contains('|')) {
+      final parts = message.split('|');
+      if (Get.locale?.languageCode == 'ar' && parts.length > 1) {
+        return parts[1].trim();
+      }
+      return parts[0].trim();
+    }
+    return message;
   }
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(BAppointmentController());
-    // fetchProfileData();
 
     return SafeArea(
       child: Scaffold(
@@ -157,7 +157,7 @@ class _BAppointmentViewState extends State<BAppointmentView> {
                                 Padding(
                                   padding: EdgeInsets.only(top: 8.h),
                                   child: Text(
-                                    "Error: ${controller.errorMessage.value}",
+                                    _getErrorMessage(controller.errorMessage.value),
                                     style: Styles.textStyleS12W400()
                                         .copyWith(color: Colors.red),
                                     textAlign: TextAlign.center,

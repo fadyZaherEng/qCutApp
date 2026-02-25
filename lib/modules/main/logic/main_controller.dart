@@ -833,13 +833,23 @@ class MainController extends GetxController {
   }
 
   void _showRequirementSnackbar(String title, String message) {
-    ShowToast.showWarning(message: message);
+    ShowToast.showWarning(message: _getErrorMessage(message));
   }
 
   void _showSuccessSnackbar(String title, String message) {
     ShowToast.showSuccessSnackBar(message: message);
   }
 
+  String _getErrorMessage(String message) {
+    if (message.contains('|')) {
+      final parts = message.split('|');
+      if (Get.locale?.languageCode == 'ar' && parts.length > 1) {
+        return parts[1].trim();
+      }
+      return parts[0].trim();
+    }
+    return message;
+  }
   void _onNotificationClick(event) {
     // Handle navigation based on notification payload
     Get.toNamed(AppRouter.notificationPath);
