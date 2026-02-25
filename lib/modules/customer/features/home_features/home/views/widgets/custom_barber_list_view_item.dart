@@ -49,7 +49,7 @@ class CustomBarberListViewItem extends StatelessWidget {
             },
             child: ClipRRect(
               borderRadius: BorderRadius.circular(8.r),
-              child: barber?.coverPic != null
+              child: (barber?.coverPic != null && barber!.coverPic!.trim().isNotEmpty)
                   ? CachedNetworkImage(
                       imageUrl: barber!.coverPic!,
                       width: 211.w,
@@ -164,7 +164,7 @@ class BarberImagesPage extends StatelessWidget {
             panEnabled: true,
             minScale: 0.8,
             maxScale: 4.0,
-            child: imageUrl != null
+            child: (imageUrl != null && imageUrl!.trim().isNotEmpty)
                 ? CachedNetworkImage(
                     imageUrl: imageUrl!,
                     fit: BoxFit.contain,

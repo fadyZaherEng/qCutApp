@@ -388,9 +388,11 @@ class HomeController extends GetxController {
       }
 
       // 2. API Search - By Shop Name
-      final shopResponse = await _apiCall.getData("${Variables.SEARCH_BARBER_SHOP}?name=$query&page=1");
+      final shopResponse = await _apiCall
+          .getData("${Variables.SEARCH_BARBER_SHOP}?name=$query&page=1");
       if (shopResponse.statusCode == 200) {
-        final List<dynamic> results = json.decode(shopResponse.body)['results'] ?? [];
+        final List<dynamic> results =
+            json.decode(shopResponse.body)['results'] ?? [];
         for (var data in results) {
           final b = Barber.fromJson(data);
           combinedMap[b.id] = b;
@@ -399,9 +401,11 @@ class HomeController extends GetxController {
 
       // 3. API Search - By Barber Name (Attempt)
       try {
-        final nameResponse = await _apiCall.getData("${Variables.SEARCH_BARBER_FULL_NAME}?name=$query&page=1");
+        final nameResponse = await _apiCall
+            .getData("${Variables.SEARCH_BARBER_FULL_NAME}?name=$query&page=1");
         if (nameResponse.statusCode == 200) {
-          final List<dynamic> results = json.decode(nameResponse.body)['results'] ?? [];
+          final List<dynamic> results =
+              json.decode(nameResponse.body)['results'] ?? [];
           for (var data in results) {
             final b = Barber.fromJson(data);
             combinedMap[b.id] = b;
