@@ -19,6 +19,8 @@ class GalleryController extends GetxController {
           await _apiCall.getData('${Variables.baseUrl}gallery/$barberId');
 
       print('Response status: ${response.body}');
+      print('Response status code: ${response.statusCode}');
+      print('Response bodyhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh: ${response.body}');
       if (response.statusCode == 200) {
         try {
           final dynamic decodedData = json.decode(response.body);
@@ -46,8 +48,9 @@ class GalleryController extends GetxController {
           print('Error parsing gallery response: $e');
         }
       } else {
-        hasError.value = true;
-        errorMessage.value = 'Failed to load gallery';
+        hasError.value = false;
+        photos.value = [];
+        print('Gallery API returned status: ${response.statusCode}, falling back to empty gallery');
       }
     } catch (e) {
       hasError.value = true;

@@ -58,10 +58,15 @@ class SplashController extends GetxController
 
   void _navigateAfterDelay() {
     Future.delayed(const Duration(seconds: kSplashDelay), () {
+      bool saveMe = SharedPref().getBool(PrefKeys.saveMe) ?? false;
       String? token = SharedPref().getString(PrefKeys.accessToken);
-      if (token != null && token.isNotEmpty) {
+      
+      if (saveMe && token != null && token.isNotEmpty) {
         NavigationHelper.navigateToAndRemoveUntil(AppRouter.bottomNavigationBar);
       } else {
+        if (!saveMe) {
+          SharedPref().removePreference(PrefKeys.accessToken);
+        }
         NavigationHelper.navigateToAndRemoveUntil(AppRouter.selectServicesPath);
       }
     });

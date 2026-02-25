@@ -290,7 +290,8 @@ class _SignUpViewState extends State<SignUpView> {
                                 color: ColorsData.primary,
                               )
                             : CustomBigButton(
-                                textData: 'request'.tr,
+                                textData:(SharedPref().getBool(PrefKeys.userRole)) == false? 'request'.tr:
+                                'signUp'.tr,
                                 onPressed: () {
                                   if (isChecked) {
                                     if (_authController.city.text.isEmpty) {

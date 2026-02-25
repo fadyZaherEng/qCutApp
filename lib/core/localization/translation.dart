@@ -560,7 +560,7 @@ class MyTranslation extends Translations {
           "Not Attended": "لم يحضر",
           "Completed": "مكتمل",
           "status": "حالة الحجز",
-          "areYouSureDeleteAppointment": "هل أنت متأكد أنك تريد حذف الحجز؟",
+          "areYouSureDeleteAppointment": "هل أنت متأكد أنك تريد الغاء الحجز؟",
           "Previous": "السابق",
           "Currently": "الحالي",
           'No previous appointments': "لا يوجد حجوزات سابقة",
@@ -1229,7 +1229,7 @@ class MyTranslation extends Translations {
           "Completed": "Completed",
           "status": "status",
           "areYouSureDeleteAppointment":
-              "Are you sure you want to delete appointment?",
+              "Are you sure you want to cancel appointment?",
 
           "Previous": "Previous",
           "Currently": "Currently",

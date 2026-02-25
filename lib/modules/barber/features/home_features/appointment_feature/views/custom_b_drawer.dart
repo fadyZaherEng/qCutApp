@@ -1,13 +1,20 @@
+import 'dart:convert';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
+import 'package:q_cut/core/services/shared_pref/pref_keys.dart';
+import 'package:q_cut/core/services/shared_pref/shared_pref.dart';
 import 'package:q_cut/core/utils/app_router.dart';
 import 'package:q_cut/core/utils/constants/assets_data.dart';
 import 'package:q_cut/core/utils/constants/colors_data.dart';
+import 'package:q_cut/core/utils/network/api.dart';
+import 'package:q_cut/core/utils/network/network_helper.dart';
 import 'package:q_cut/core/utils/styles.dart';
 import 'package:q_cut/main.dart';
+import 'package:q_cut/modules/barber/features/home_features/profile_features/profile_display/models/barber_profile_model.dart';
 
 class CustomBDrawer extends StatefulWidget {
   const CustomBDrawer({super.key});
@@ -18,6 +25,92 @@ class CustomBDrawer extends StatefulWidget {
 
 class _CustomBDrawerState extends State<CustomBDrawer> {
   bool isNotificationsEnabled = true;
+
+  Future<void> fetchProfileData() async {
+    final NetworkAPICall apiCall = NetworkAPICall();
+    final Rx<BarberProfileData?> profileData = Rx<BarberProfileData?>(null);
+
+    try {
+      final response = await apiCall.getData(Variables.GET_PROFILE);
+      final responseBody = json.decode(response.body);
+      print(responseBody);
+      if (response.statusCode == 200) {
+        final profileResponse = BarberProfileResponse.fromJson(responseBody);
+        profileData.value = profileResponse.data;
+        SharedPref().removePreference(PrefKeys.profilePic);
+        SharedPref().removePreference(PrefKeys.coverPic);
+        profileImage = profileResponse.data.profilePic;
+        coverImage = profileResponse.data.coverPic;
+        currentBarberId = profileResponse.data.id;
+        instagramLink = profileResponse.data.instagramPage;
+        await SharedPref()
+            .setString(PrefKeys.profilePic, profileResponse.data.profilePic);
+        await SharedPref()
+            .setString(PrefKeys.coverPic, profileResponse.data.coverPic);
+        await SharedPref()
+            .setString(PrefKeys.fullName, profileResponse.data.fullName);
+        await SharedPref()
+            .setString(PrefKeys.phoneNumber, profileResponse.data.phoneNumber);
+        await SharedPref()
+            .setString(PrefKeys.barberId, profileResponse.data.id);
+        await SharedPref().setString(
+            PrefKeys.instagramLink, profileResponse.data.instagramPage);
+        if (profileData.value != null) {
+          if (profileData.value!.barberShop.isEmpty) {
+            profileData.value!.barberShop = 'My Barber Shop';
+          }
+
+          if (profileData.value!.instagramPage.isEmpty) {
+            profileData.value!.instagramPage = 'Not set';
+          }
+
+          // Ensure workingDays is initialized
+          if (profileData.value!.workingDays.isEmpty) {
+            profileData.value!.workingDays = [];
+          }
+
+          // Ensure offDay is initialized
+          if (profileData.value!.offDay.isEmpty) {
+            profileData.value!.offDay = [];
+          }
+
+          // Update form controllers with profile data
+          // fullNameController.text = profileData.value?.fullName ?? '';
+          // phoneNumberController.text = profileData.value?.phoneNumber ?? '';
+          // 2. Initialize variables from preferences
+          profileImage = SharedPref().getString(PrefKeys.profilePic) ?? " ";
+          coverImage = SharedPref().getString(PrefKeys.coverPic) ?? " ";
+          fullName = SharedPref().getString(PrefKeys.fullName) ?? "";
+          phoneNumber = SharedPref().getString(PrefKeys.phoneNumber) ?? " ";
+          currentBarberId = SharedPref().getString(PrefKeys.barberId) ?? "";
+          instagramLink = SharedPref().getString(PrefKeys.instagramLink) ?? "";
+
+          // Update cache for working days
+          await SharedPref().setBool(PrefKeys.hasWorkingDays,
+              profileData.value!.workingDays.isNotEmpty);
+          setState(() {});
+        }
+      } else {
+        // isError.value = true;
+        // errorMessage.value =
+        //     responseBody['message'] ?? 'Failed to fetch profile data'.tr;
+        // ShowToast.showError(message: errorMessage.value);
+      }
+    } catch (e) {
+      // isError.value = true;
+      // errorMessage.value = '${'networkError'.tr}: $e';
+      // Get.snackbar('Error'.tr, 'Failed to connect to server'.tr,
+      //     backgroundColor: Colors.red, colorText: Colors.white);
+    } finally {
+      // isLoading.value = false;
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchProfileData();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -109,7 +202,7 @@ class _CustomBDrawerState extends State<CustomBDrawer> {
                           ),
                           SizedBox(height: 8.h),
                           Text(
-                            "\u200E$phoneNumber",
+                            "\u200E+972${" ${phoneNumber.split("+972")[1]}"}",
                             style: Styles.textStyleS20W400(
                                 color: ColorsData.primary),
                           ),

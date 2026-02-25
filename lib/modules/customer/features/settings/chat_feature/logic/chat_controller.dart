@@ -64,7 +64,8 @@ class ChatController extends GetxController {
   void connectSocket() {
     print("Connecting to socket...");
     socket = IO.io(
-        'ws://qcut-env.eba-turffyr8.us-east-1.elasticbeanstalk.com',
+      'ws://QcutEnv-env.eba-iynfw5mb.us-east-1.elasticbeanstalk.com',
+        // 'ws://qcut-env.eba-turffyr8.us-east-1.elasticbeanstalk.com',
         <String, dynamic>{
           'transports': ['websocket'],
           'autoConnect': true,
@@ -210,6 +211,9 @@ class ChatController extends GetxController {
 
       // API call
       await _apiCall.addData(messageData, '${Variables.baseUrl}messages/send');
+      print('Message sent successfully: $messageData');
+      print('Current messages count: ${messages.length}');
+      print('Current messages: ${messages.map((m) => m.message).toList()}');
     } catch (e) {
       print('Error sending message: $e');
       messages

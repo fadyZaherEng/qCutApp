@@ -554,9 +554,12 @@ class _SelectedViewState extends State<SelectedView> {
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: ColorsData.primary,
                               ),
-                              child: Text("Retry".tr,
-                                  style: Styles.textStyleS14W400(
-                                      color: Colors.white)),
+                              child: Text(
+                                "Retry".tr,
+                                style: Styles.textStyleS14W400(
+                                  color: Colors.white,
+                                ),
+                              ),
                             ),
                           ],
                         ),
