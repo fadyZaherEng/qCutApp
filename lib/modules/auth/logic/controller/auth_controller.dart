@@ -195,11 +195,24 @@ class AuthController extends GetxController {
     await SharedPref().setString(PrefKeys.fullName, loginResponse.fullName);
     await SharedPref().setBool(PrefKeys.saveMe, isChecked);
 
+    // Save userOffer for barbers
+    if (loginResponse.userOffer != null) {
+      final offerJson = jsonEncode({
+        'dealDateStart': loginResponse.userOffer!.dealDateStart,
+        'dealDateEnd': loginResponse.userOffer!.dealDateEnd,
+        'QCuteSubscription': loginResponse.userOffer!.qCuteSubscription,
+        'freeUntilDate': loginResponse.userOffer!.freeUntilDate,
+        'status': loginResponse.userOffer!.status,
+      });
+      await SharedPref().setString(PrefKeys.userOffer, offerJson);
+    }
+
     if ((SharedPref().getBool(PrefKeys.userRole)) == false) {
       Barber barber = Barber.fromJson(responseBody);
       await SharedPref().setString(PrefKeys.barber, jsonEncode(barber.toJson()));
     }
   }
+
 
   Future<void> login(BuildContext context, bool isChecked) async {
     if (!loginFormKey.currentState!.validate()) {

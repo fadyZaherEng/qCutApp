@@ -2,9 +2,12 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:q_cut/core/services/shared_pref/pref_keys.dart';
+import 'package:q_cut/core/services/shared_pref/shared_pref.dart';
 import 'package:q_cut/core/utils/app_router.dart';
 import 'package:q_cut/core/utils/network/api.dart';
 import 'package:q_cut/core/utils/network/network_helper.dart';
+import 'package:q_cut/modules/auth/models/auth_response_model.dart';
 import 'package:q_cut/modules/barber/features/booking/presentation/views/pay_to_qcut_feature/models/collection_schedule_model.dart';
 import 'package:q_cut/modules/barber/features/booking/presentation/views/pay_to_qcut_feature/models/collection_status_model.dart';
 import 'package:q_cut/modules/barber/features/booking/presentation/views/pay_to_qcut_feature/models/monthly_invoice_model.dart';
@@ -23,6 +26,9 @@ class PayToQcutController extends GetxController {
   final Rx<MonthlyInvoiceModel?> currentInvoice =
       Rx<MonthlyInvoiceModel?>(null);
 
+  // userOffer from login response
+  final Rx<UserOffer?> userOffer = Rx<UserOffer?>(null);
+
   // Collection Schedules
   final RxList<CollectionSchedule> schedules = <CollectionSchedule>[].obs;
   final RxString selectedScheduleId = "".obs;
@@ -36,9 +42,22 @@ class PayToQcutController extends GetxController {
   void onInit() {
     super.onInit();
     print("DEBUG: PayToQcutController initialized");
+    _loadUserOffer();
     fetchInvoiceData();
     fetchCollectionSchedule();
     fetchMyCollectionStatus();
+  }
+
+  void _loadUserOffer() {
+    final offerStr = SharedPref().getString(PrefKeys.userOffer);
+    if (offerStr != null && offerStr.isNotEmpty) {
+      try {
+        final offerJson = jsonDecode(offerStr) as Map<String, dynamic>;
+        userOffer.value = UserOffer.fromJson(offerJson);
+      } catch (e) {
+        print('Error loading userOffer: $e');
+      }
+    }
   }
 
   // Fetch my collection status

@@ -157,17 +157,87 @@ class _BPayToQCutViewBodyState extends State<BPayToQCutViewBody> {
           SizedBox(height: 20.h),
           Divider(color: Colors.white24, height: 1.h),
           SizedBox(height: 20.h),
-          Text(
-            "monthlyPayment".trParams({
-              "amount": _controller.currentInvoice.value?.qcuteSubscription.toInt().toString() ?? "0"
-            }),
-            style: TextStyle(
-              color: ColorsData.primary,
-              fontSize: 15.sp,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          SizedBox(height: 20.h),
+          // ── userOffer section ──
+          Obx(() {
+            final offer = _controller.userOffer.value;
+            if (offer == null) return const SizedBox.shrink();
+
+            final startDate = DateFormat('d MMM yyyy').format(
+                DateTime.fromMillisecondsSinceEpoch(offer.dealDateStart));
+            final endDate = DateFormat('d MMM yyyy').format(
+                DateTime.fromMillisecondsSinceEpoch(offer.dealDateEnd));
+
+            // Map status to colour
+            Color statusColor;
+            switch (offer.status.toLowerCase()) {
+              case 'active':
+                statusColor = Colors.greenAccent;
+                break;
+              case 'pending':
+                statusColor = Colors.orangeAccent;
+                break;
+              case 'expired':
+                statusColor = Colors.redAccent;
+                break;
+              default:
+                statusColor = Colors.white70;
+            }
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Monthly payment amount
+                Text(
+                  "monthlyPayment".trParams({
+                    "amount": offer.qCuteSubscription.toString(),
+                  }),
+                  style: TextStyle(
+                    color: ColorsData.primary,
+                    fontSize: 15.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 14.h),
+                // Deal start date
+                _buildJoinInfoRow("dealStartDate".tr, startDate),
+                SizedBox(height: 8.h),
+                // Deal end date
+                _buildJoinInfoRow("dealEndDate".tr, endDate),
+                SizedBox(height: 8.h),
+                // Status
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "offerStatus".tr,
+                      style: TextStyle(color: Colors.white70, fontSize: 13.sp),
+                    ),
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 10.w, vertical: 3.h),
+                      decoration: BoxDecoration(
+                        color: statusColor.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(20.r),
+                        border: Border.all(color: statusColor, width: 1),
+                      ),
+                      child: Text(
+                        offer.status.tr,
+                        style: TextStyle(
+                          color: statusColor,
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 20.h),
+                Divider(color: Colors.white24, height: 1.h),
+                SizedBox(height: 20.h),
+              ],
+            );
+          }),
+          // Tabs
           Row(
             children: [
               _buildTabItem("previousPayments".tr, 0),
@@ -182,6 +252,7 @@ class _BPayToQCutViewBodyState extends State<BPayToQCutViewBody> {
       ),
     );
   }
+
 
   Widget _buildJoinDateSection() {
     return Column(
