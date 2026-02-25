@@ -9,7 +9,6 @@ import 'package:q_cut/core/utils/constants/colors_data.dart';
 import 'package:q_cut/core/utils/styles.dart';
 import 'package:q_cut/core/utils/network/api.dart';
 import 'package:q_cut/modules/barber/features/home_features/appointment_feature/views/b_appointment_view.dart';
-import 'package:q_cut/modules/barber/features/home_features/profile_features/models/barber_profile_model.dart';
 import 'package:q_cut/modules/barber/features/home_features/profile_features/profile_display/logic/b_profile_controller.dart';
 import 'package:q_cut/modules/barber/features/home_features/profile_features/profile_display/views/b_profile_view.dart';
 import 'package:q_cut/modules/barber/features/home_features/profile_features/profile_display/views/widgets/custom_add_new_service_bottom_sheet.dart';
@@ -51,16 +50,22 @@ class Deal {
 
   factory Deal.fromJson(Map<String, dynamic> json) {
     return Deal(
-      id: json['_id'],
-      dealDateStart: json['dealDateStart'],
-      dealDateEnd: json['dealDateEnd'],
-      qCuteSubscription: json['QCuteSubscription'],
-      qCuteTax: json['QCuteTax'],
-      freeDaysNumber: json['freeDaysNumber'],
-      status: json['status'],
-      barber: json['barber'],
-      createdAt: json['createdAt'],
-      updatedAt: json['updatedAt'],
+      id: json['_id'] ?? json['id'] ?? '',
+      dealDateStart: json['dealDateStart'] ?? 0,
+      dealDateEnd: json['dealDateEnd'] ?? 0,
+      qCuteSubscription: json['QCuteSubscription'] ?? 0,
+      qCuteTax: json['QCuteTax'] ?? 0,
+      freeDaysNumber: json['freeDaysNumber'] ??
+          (json['freeUntilDate'] != null
+              ? DateTime.fromMillisecondsSinceEpoch(json['freeUntilDate'])
+                  .difference(DateTime.fromMillisecondsSinceEpoch(
+                      json['dealDateStart'] ?? 0))
+                  .inDays
+              : 0),
+      status: json['status'] ?? '',
+      barber: json['barber'] ?? '',
+      createdAt: json['createdAt'] ?? '',
+      updatedAt: json['updatedAt'] ?? '',
     );
   }
 }
@@ -89,7 +94,7 @@ class MainController extends GetxController {
   final Rx<DealResponse?> dealResponse = Rx<DealResponse?>(null);
   final RxBool isLoadingDeal = false.obs;
   final RxString dealError = ''.obs;
-  
+
   // Flag to prevent multiple dialogs overlapping
   bool _isCheckingProfile = false;
 
@@ -113,10 +118,10 @@ class MainController extends GetxController {
       currentIndex.value = Get.arguments;
     }
     if (isCustomer == false) {
-      final BProfileController profileController = Get.put(BProfileController());
-      fetchDealById();
-      // Start checking profile enforcement
-      _enforceBarberProfile(profileController);
+      final BProfileController profileController =
+          Get.put(BProfileController());
+      // Sequence: Fetch deal status, then check profile completeness
+      await fetchDealById();
     }
     await _notificationListener();
   }
@@ -131,52 +136,52 @@ class MainController extends GetxController {
 
   // Method to fetch deal by ID
   Future<void> fetchDealById() async {
+    print("Fetching deal for barber...");
     isLoadingDeal.value = true;
     dealError.value = '';
     String? id = SharedPref().getString(PrefKeys.id);
-    String? act = SharedPref().getString(PrefKeys.accessToken);
-    print(act);
     final BProfileController profileController = Get.find<BProfileController>();
-    try {
-      final response = await _apiCall.getData(
-        '${Variables.baseUrl}deal/$id',
-      );
 
-      print('${Variables.baseUrl}deal/$id');
-      print(response.body);
+    try {
+      final response = await _apiCall.getData('${Variables.baseUrl}deal/$id');
+      print('Deal Response: ${response.body}');
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = json.decode(response.body);
         dealResponse.value = DealResponse.fromJson(responseData);
 
-        // Check if there's an accepted deal and show dialog
-        if (dealResponse.value != null &&
-            dealResponse.value!.deals.isNotEmpty &&
-            dealResponse.value!.deals.any((deal) => deal.status == "pending")) {
-          final pendingDeal = dealResponse.value!.deals
-              .firstWhere((deal) => deal.status == "pending");
+        final List<Deal> deals = dealResponse.value?.deals ?? [];
 
+        // Find the most recent pending deal (assuming sorted by creation or just first in list)
+        // If multiple, maybe find the one with latest createdAt
+        Deal? pendingDeal;
+        try {
+          pendingDeal = deals.where((d) => d.status == "pending").last;
+        } catch (_) {
+          // No pending deal found
+        }
+
+        if (pendingDeal != null) {
           showDealDialog(pendingDeal);
-        } else if (dealResponse.value != null &&
-            dealResponse.value!.deals.isNotEmpty &&
-            dealResponse.value!.deals
-                .any((deal) => deal.status == "accepted")) {
-          // Triggered in onInit already
+          // Note: After user accepts in showDealDialog, _enforceBarberProfile will be called there
         } else {
-          // Show waiting dialog when API call fails
-          await showWaitingForOfferDialog();
-          // Profile enforcement is already running from onInit
-          // After waiting dialog, enforce profile
+          // No pending deal. Check if there's any accepted deal.
+          bool hasAccepted = deals.any((d) => d.status == "accepted");
+          if (!hasAccepted) {
+            // No pending and no accepted? Waiting for offer.
+            await showWaitingForOfferDialog();
+          }
+          // Always ensure profile is complete if no pending deal is blocking the view
           await _enforceBarberProfile(profileController);
         }
       } else {
-        // If API call fails (e.g., 404, 500), show waiting dialog and enforce profile
+        // API failed (e.g. 404 - no deals yet)
         await showWaitingForOfferDialog();
         await _enforceBarberProfile(profileController);
       }
     } catch (e) {
-      dealError.value = 'Error fetching deal: $e';
-      // Show waiting dialog when exception occurs and enforce profile
+      print('Error fetching deal: $e');
+      dealError.value = e.toString();
       await showWaitingForOfferDialog();
       await _enforceBarberProfile(profileController);
     } finally {
@@ -288,17 +293,18 @@ class MainController extends GetxController {
                         Icons.date_range,
                         "${"Valid Period".tr}: $startDate - $endDate",
                       ),
-                      SizedBox(height: 10.h),
-                      offerDetailRow(
-                        Icons.money_off,
-                        "${"QCut Tax:".tr} ${deal.qCuteTax}% per booking",
-                      ),
+                      // SizedBox(height: 10.h),
+                      // offerDetailRow(
+                      //   Icons.money_off,
+                      //   "${"QCut Tax:".tr} ${deal.qCuteTax}% per booking",
+                      // ),
                       SizedBox(height: 10.h),
                       offerDetailRow(
                         Icons.payment,
                         "${"Subscription".tr}: \$${deal.qCuteSubscription}",
                       ),
                       SizedBox(height: 10.h),
+                      if (deal.freeDaysNumber > 0)
                       offerDetailRow(
                         Icons.card_giftcard,
                         "${"Free Trial".tr}: ${deal.freeDaysNumber} days",
@@ -343,8 +349,7 @@ class MainController extends GetxController {
                                         spreadRadius: 2,
                                       ),
                                       BoxShadow(
-                                        color:
-                                            Colors.black.withOpacity(0.08),
+                                        color: Colors.black.withOpacity(0.08),
                                         blurRadius: 10,
                                         offset: Offset(0, 4),
                                       ),
@@ -411,44 +416,15 @@ class MainController extends GetxController {
                             final BProfileController profileController =
                                 Get.put(BProfileController());
                             await profileController.fetchProfileData();
-                            Get.back();
+                            Get.back(); // Close processing dialog
                             ShowToast.showSuccessSnackBar(
                               message: "Offer accepted successfully".tr,
                             );
-                            final profileData =
-                                profileController.profileData.value;
-                            final editProfileResult = await Get.toNamed(
-                              AppRouter.beditProfilePath,
-                              arguments: BarberProfileModel(
-                                  fullName: profileData?.fullName.trim() ?? '',
-                                  offDay: profileData?.offDay ?? [],
-                                  barberShop: profileData?.barberShop ?? '',
-                                  bankAccountNumber:
-                                      profileData?.bankAccountNumber ?? '',
-                                  instagramPage:
-                                      profileData?.instagramPage ?? '',
-                                  profilePic:
-                                      profileData?.profilePic.trim() ?? '',
-                                  coverPic: profileData?.coverPic.trim() ?? '',
-                                  city: profileData?.city ?? 'New City',
-                                  workingDays: profileData?.workingDays ?? [],
-                                  barberShopLocation:
-                                      profileData?.barberShopLocation ??
-                                          BarberShopLocation(
-                                              type: 'Point',
-                                              coordinates: [0, 0]),
-                                  phoneNumber: profileData?.phoneNumber ?? '',
-                                  locationDescription:
-                                      profileData?.locationDescription.trim() ??
-                                          ''),
-                            );
-                            if (editProfileResult == true) {
-                              await _enforceBarberProfile(profileController);
-                            } else {
-                              await _enforceBarberProfile(profileController);
-                            }
+
+                            // Trigger enforcement (Services -> Working Days)
+                            await _enforceBarberProfile(profileController);
                           } else {
-                            Get.back();
+                            Get.back(); // Close processing dialog
                             ShowToast.showError(
                               message: "Failed to accept the offer".tr,
                             );
@@ -637,6 +613,7 @@ class MainController extends GetxController {
     DateTime date = DateTime.fromMillisecondsSinceEpoch(timestamp);
     return DateFormat('MM/dd/yyyy').format(date);
   }
+
   void changePage(int index) {
     if (index >= 0 && index < pages.length) {
       currentIndex.value = index;
@@ -650,11 +627,16 @@ class MainController extends GetxController {
   }
 
   // Consolidated method to ensure barber profile is complete
-  Future<void> _enforceBarberProfile(BProfileController profileController) async {
+  Future<void> _enforceBarberProfile(
+      BProfileController profileController) async {
+    // If the view is currently covered by a deal dialog, we might want to wait.
+    // But for now, we just rely on the fact that deal cards are shown first.
+
     if (_isCheckingProfile) return;
     _isCheckingProfile = true;
 
     try {
+      print("Starting barber profile enforcement...");
       bool completed = false;
       while (!completed) {
         // Step 1: Check and force services
@@ -703,11 +685,14 @@ class MainController extends GetxController {
       WillPopScope(
         onWillPop: () async => false,
         child: Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
           child: _buildRequirementDialogContent(
             icon: Icons.add_business_rounded,
             title: "Add Your First Service".tr,
-            description: "You must add at least one service before customers can book appointments with you.".tr,
+            description:
+                "You must add at least one service before customers can book appointments with you."
+                    .tr,
             buttonText: "Add Service".tr,
             onPressed: () => Get.back(result: 'addService'),
           ),
@@ -723,7 +708,8 @@ class MainController extends GetxController {
           onWillPop: () async {
             await profileController.fetchBarberServices();
             if (profileController.barberServices.isEmpty) {
-              _showRequirementSnackbar("Service Required".tr, "Please add at least one service to continue".tr);
+              _showRequirementSnackbar("Service Required".tr,
+                  "Please add at least one service to continue".tr);
               return false;
             }
             return true;
@@ -733,13 +719,15 @@ class MainController extends GetxController {
         isDismissible: false,
         enableDrag: false,
         isScrollControlled: true,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20.r))),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20.r))),
       );
 
       await profileController.fetchBarberServices();
       if (profileController.barberServices.isNotEmpty) {
         await SharedPref().setBool(PrefKeys.hasServices, true);
-        _showSuccessSnackbar("Setup Complete".tr, "Service added successfully!".tr);
+        _showSuccessSnackbar(
+            "Setup Complete".tr, "Service added successfully!".tr);
         return true;
       }
     }
@@ -747,12 +735,15 @@ class MainController extends GetxController {
   }
 
   // Returns true if working days are present or successfully added
-  Future<bool> _runWorkingDaysCheck(BProfileController profileController) async {
-    bool hasWorkingDays = SharedPref().getBool(PrefKeys.hasWorkingDays) ?? false;
+  Future<bool> _runWorkingDaysCheck(
+      BProfileController profileController) async {
+    bool hasWorkingDays =
+        SharedPref().getBool(PrefKeys.hasWorkingDays) ?? false;
 
     if (!hasWorkingDays) {
       await profileController.fetchProfileData();
-      if (profileController.profileData.value?.workingDays.isNotEmpty ?? false) {
+      if (profileController.profileData.value?.workingDays.isNotEmpty ??
+          false) {
         await SharedPref().setBool(PrefKeys.hasWorkingDays, true);
         hasWorkingDays = true;
       }
@@ -764,11 +755,14 @@ class MainController extends GetxController {
       WillPopScope(
         onWillPop: () async => false,
         child: Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
           child: _buildRequirementDialogContent(
             icon: Icons.calendar_month_rounded,
             title: "Set Working Days".tr,
-            description: "You must set at least one working day so customers know when you are available.".tr,
+            description:
+                "You must set at least one working day so customers know when you are available."
+                    .tr,
             buttonText: "Set Days".tr,
             onPressed: () => Get.back(result: 'setDays'),
           ),
@@ -786,9 +780,11 @@ class MainController extends GetxController {
       );
 
       await profileController.fetchProfileData();
-      if (profileController.profileData.value?.workingDays.isNotEmpty ?? false) {
+      if (profileController.profileData.value?.workingDays.isNotEmpty ??
+          false) {
         await SharedPref().setBool(PrefKeys.hasWorkingDays, true);
-        _showSuccessSnackbar("Setup Complete".tr, "Working days set successfully!".tr);
+        _showSuccessSnackbar(
+            "Setup Complete".tr, "Working days set successfully!".tr);
         Get.offAllNamed(AppRouter.bottomNavigationBar);
         return true;
       }
@@ -810,13 +806,18 @@ class MainController extends GetxController {
         children: [
           Container(
             padding: EdgeInsets.all(16.w),
-            decoration: const BoxDecoration(color: Color(0xFFFAF6E9), shape: BoxShape.circle),
+            decoration: const BoxDecoration(
+                color: Color(0xFFFAF6E9), shape: BoxShape.circle),
             child: Icon(icon, color: ColorsData.primary, size: 32.sp),
           ),
           SizedBox(height: 24.h),
-          Text(title, textAlign: TextAlign.center, style: Styles.textStyleS18W700(color: ColorsData.secondary)),
+          Text(title,
+              textAlign: TextAlign.center,
+              style: Styles.textStyleS18W700(color: ColorsData.secondary)),
           SizedBox(height: 12.h),
-          Text(description, textAlign: TextAlign.center, style: Styles.textStyleS14W400(color: ColorsData.thirty)),
+          Text(description,
+              textAlign: TextAlign.center,
+              style: Styles.textStyleS14W400(color: ColorsData.thirty)),
           SizedBox(height: 32.h),
           SizedBox(
             width: double.infinity,
@@ -824,10 +825,12 @@ class MainController extends GetxController {
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: ColorsData.primary,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.r)),
               ),
               onPressed: onPressed,
-              child: Text(buttonText, style: Styles.textStyleS16W600(color: Colors.white)),
+              child: Text(buttonText,
+                  style: Styles.textStyleS16W600(color: Colors.white)),
             ),
           ),
         ],
@@ -853,6 +856,7 @@ class MainController extends GetxController {
     }
     return message;
   }
+
   void _onNotificationClick(event) {
     // Handle navigation based on notification payload
     Get.toNamed(AppRouter.notificationPath);

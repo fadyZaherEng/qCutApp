@@ -71,11 +71,11 @@ class _CustomButtonState extends State<CustomButton> {
               widget.onPressed?.call();
             } catch (e) {
               isClicked = true;
-              setState(() {});
+              if (mounted) setState(() {});
             } finally {
               await Future.delayed(const Duration(seconds: 2), () {
                 isClicked = true;
-                setState(() {});
+                if (mounted) setState(() {});
               });
             }
           }
