@@ -169,7 +169,7 @@ class _MyProfileViewState extends State<MyProfileView> {
                           ),
                         ),
                       ),
-                      // if (widget.isBack)
+                      if (widget.isBack)
                       Positioned(
                         top: 40.h,
                         left: Get.locale?.languageCode == 'ar' ||
