@@ -256,6 +256,12 @@ class AuthController extends GetxController {
 
         await saveLoginData(responseBody, loginResponse.value!, isChecked);
 
+        // Save password for background ban checks
+        await SharedPref().setString(PrefKeys.password, passwordController.text);
+        //get password from shared pref and print it to verify it's saved correctly
+        String? savedPassword =   SharedPref().getString(PrefKeys.password);
+        print("Saved password for background checks: ${savedPassword != null ? '***' : null}");
+
         // You might want to show a success message
         ShowToast.showSuccessSnackBar(message: "loggedInSuccessfully".tr);
 

@@ -12,6 +12,7 @@ class PrefKeys {
   static const String phoneNumber = 'phoneNumber';
   static const String barberId = 'barberId';
   static const String barber = 'barber';
+  static const String password = 'password';
   static const String instagramLink = 'instagramLink';
   static const String hasServices = 'hasServices';
   static const String hasWorkingDays = 'hasWorkingDays';

@@ -249,16 +249,18 @@ class BStaticsViewBody extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SvgPicture.asset(
-            height: 16.h,
-            width: 16.w,
-            svgImagePath,
-            colorFilter: const ColorFilter.mode(
-              ColorsData.primary,
-              BlendMode.srcIn,
+          Expanded(
+            child: SvgPicture.asset(
+              height: 16.h,
+              width: 16.w,
+              svgImagePath,
+              colorFilter: const ColorFilter.mode(
+                ColorsData.primary,
+                BlendMode.srcIn,
+              ),
             ),
           ),
-          SizedBox(height: 5.h),
+          SizedBox(height: 2.h),
           Text(
             title,
             style: Styles.textStyleS12W400(color: ColorsData.primary).copyWith(
@@ -266,10 +268,13 @@ class BStaticsViewBody extends StatelessWidget {
               fontWeight: FontWeight.w400,
             ),
             textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
-          SizedBox(height: 5.h),
+          SizedBox(height: 2.h),
           FittedBox(
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
                   value,

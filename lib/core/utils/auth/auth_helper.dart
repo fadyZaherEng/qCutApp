@@ -49,6 +49,7 @@ class AuthHelper {
     await SharedPref().removePreference(PrefKeys.profilePic);
     await SharedPref().removePreference(PrefKeys.coverPic);
     await SharedPref().removePreference(PrefKeys.phoneNumber);
+    await SharedPref().removePreference(PrefKeys.password);
     await SharedPref().removePreference(PrefKeys.fullName);
     await SharedPref().removePreference(PrefKeys.barber);
   }

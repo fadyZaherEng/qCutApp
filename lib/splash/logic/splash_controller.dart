@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -6,6 +7,9 @@ import 'package:q_cut/core/utils/constants/constants.dart';
 import 'package:q_cut/core/utils/navigation_helper.dart';
 import 'package:q_cut/core/services/shared_pref/pref_keys.dart';
 import 'package:q_cut/core/services/shared_pref/shared_pref.dart';
+import 'package:q_cut/core/utils/network/api.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class SplashController extends GetxController
     with GetSingleTickerProviderStateMixin {
@@ -18,6 +22,7 @@ class SplashController extends GetxController
     _initAnimation();
     _configureSystemUI(true);
     _navigateAfterDelay();
+    print("SplashController initialized bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb");
   }
 
   @override
@@ -55,14 +60,89 @@ class SplashController extends GetxController
     }
   }
 
+  // Get FCM token
+  Future<String> getFCMToken() async {
+    String? fcmToken = await FirebaseMessaging.instance.getToken();
+    print("FCM Token: $fcmToken");
+    FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
+      fcmToken = newToken;
+      // Handle token refresh if needed
+      print('FCM Token refreshed: $newToken');
+    });
+    if (fcmToken == null) {
+      print('Failed to get FCM token');
+    } else {
+      print('FCM Token: $fcmToken');
+    }
+    return fcmToken ?? '';
+  }
 
   void _navigateAfterDelay() {
-    Future.delayed(const Duration(seconds: kSplashDelay), () {
+    Future.delayed(const Duration(seconds: kSplashDelay), () async {
       bool saveMe = SharedPref().getBool(PrefKeys.saveMe) ?? false;
+      String? phoneNumber = SharedPref().getString(PrefKeys.phoneNumber);
+      String? password = SharedPref().getString(PrefKeys.password);
+      bool? isUserRole = SharedPref().getBool(PrefKeys.userRole);
+      // Get FCM token before making the request
+      final fcmToken = await getFCMToken();
       String? token = SharedPref().getString(PrefKeys.accessToken);
-      
+      print(
+          "Saved credentials: phoneNumber=$phoneNumber, password=${password != null ? '***' : null}, isUserRole=$isUserRole, saveMe=$saveMe");
+      // Verify ban status in background if we have credentials
+      if (phoneNumber != null &&
+          phoneNumber.isNotEmpty &&
+          password != null &&
+          password.isNotEmpty &&
+          saveMe) {
+        try {
+          final response = await http
+              .post(
+                Uri.parse(Variables.LOGIN),
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Accept': 'application/json',
+                },
+                body: jsonEncode({
+                  'phoneNumber': phoneNumber,
+                  'password': password,
+                  'userType':
+                      isUserRole != null && isUserRole ? 'user' : 'barber',
+                  "fcmToken": token,
+                }),
+              )
+              .timeout(const Duration(seconds: 5));
+          print(
+              "Ban check response: ${response.statusCode} - ${response.body}");
+          print("Ban check request body: ${jsonEncode({
+                'phoneNumber': phoneNumber,
+                'password': password,
+                'userType':
+                    isUserRole != null && isUserRole ? 'user' : 'barber',
+                "fcmToken": token,
+              })}");
+
+          if (response.statusCode == 200) {
+            final responseBody = jsonDecode(response.body);
+            final bool isBanned = responseBody['isBanned'] ?? false;
+
+            if (isBanned) {
+              NavigationHelper.navigateToAndRemoveUntil(AppRouter.bannedPath,
+                  arguments: {
+                    "banReason": responseBody['banReason'],
+                    "bannedUntil": responseBody['bannedUntil'],
+                    "daysRemaining": responseBody['daysRemaining'],
+                  });
+              return; // Stop further navigation
+            }
+          }
+        } catch (e) {
+          debugPrint("Background ban check failed: $e");
+        }
+      }
+
       if (saveMe && token != null && token.isNotEmpty) {
-        NavigationHelper.navigateToAndRemoveUntil(AppRouter.bottomNavigationBar);
+        NavigationHelper.navigateToAndRemoveUntil(
+            AppRouter.bottomNavigationBar);
       } else {
         if (!saveMe) {
           SharedPref().removePreference(PrefKeys.accessToken);

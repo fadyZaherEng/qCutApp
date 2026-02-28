@@ -52,8 +52,7 @@ class BSettingViewBody extends StatelessWidget {
                 children: [
                   Container(
                     padding:
-                        EdgeInsets.only(top: 16.h, left: 16.w, right: 16.w),
-                    height: 161.h,
+                        EdgeInsets.symmetric(vertical: 16.h, horizontal: 16.w),
                     width: double.infinity,
                     decoration: BoxDecoration(
                       border: Border.all(color: ColorsData.cardStrock),

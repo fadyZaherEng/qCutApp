@@ -19,6 +19,10 @@ class CustomDaysPicker extends GetView<BAppointmentController> {
 
   @override
   Widget build(BuildContext context) {
+    if (!Get.isRegistered<BAppointmentController>()) {
+      Get.put(BAppointmentController());
+    }
+
     return Obx(() {
       final List<Map<String, dynamic>> days = controller.workingDays.map((item) {
         final dateTime = DateTime.fromMillisecondsSinceEpoch(item['date'] as int);

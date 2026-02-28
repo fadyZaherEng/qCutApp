@@ -19,7 +19,6 @@ import 'package:q_cut/modules/customer/features/home_features/appointment_featur
 import 'package:q_cut/modules/customer/features/home_features/profile_feature/views/my_profile_view.dart';
 import 'dart:convert';
 import 'package:intl/intl.dart';
-
 import '../../../core/utils/constants/assets_data.dart';
 import '../../../core/utils/network/network_helper.dart';
 
@@ -305,10 +304,10 @@ class MainController extends GetxController {
                       ),
                       SizedBox(height: 10.h),
                       if (deal.freeDaysNumber > 0)
-                      offerDetailRow(
-                        Icons.card_giftcard,
-                        "${"Free Trial".tr}: ${deal.freeDaysNumber} days",
-                      ),
+                        offerDetailRow(
+                          Icons.card_giftcard,
+                          "${"Free Trial".tr}: ${deal.freeDaysNumber} days",
+                        ),
                     ],
                   ),
                 ),
@@ -451,7 +450,10 @@ class MainController extends GetxController {
                     SizedBox(width: 12.w),
                     Expanded(
                       child: OutlinedButton(
-                        onPressed: () => {},
+                        onPressed: () => {
+                          //navigate to chat with support
+                          Get.toNamed(AppRouter.chatWithUsPath)
+                        },
                         style: OutlinedButton.styleFrom(
                           side: BorderSide(color: Color(0xFF757575)),
                           padding: EdgeInsets.symmetric(vertical: 12.h),

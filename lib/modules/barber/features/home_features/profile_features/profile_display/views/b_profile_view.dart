@@ -1111,6 +1111,15 @@ class _BProfileViewBodyState extends State<BProfileView>
     final Rx<RangeSelectionMode> rangeSelectionMode =
         RangeSelectionMode.toggledOn.obs;
 
+    DateTime firstAllowedDay = today;
+    if (initialStart != null) {
+      final startDay = DateTime(
+          initialStart.year, initialStart.month, initialStart.day);
+      if (startDay.isBefore(today)) {
+        firstAllowedDay = startDay;
+      }
+    }
+
     return Dialog(
       backgroundColor: Colors.transparent,
       insetPadding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 40.h),
@@ -1171,7 +1180,7 @@ class _BProfileViewBodyState extends State<BProfileView>
                 padding: EdgeInsets.all(16.w),
                 child: Obx(
                   () => TableCalendar(
-                    firstDay: today,
+                    firstDay: firstAllowedDay,
                     lastDay: today.add(const Duration(days: 365 * 2)),
                     // 2 years flexibility
                     focusedDay: focusedDay.value,
