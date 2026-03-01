@@ -17,8 +17,9 @@ class LegalDocumentsView extends StatelessWidget {
         child: Column(
           children: [
             Text(
-              // Placeholder content
-              "Content for ${titleKey.tr} goes here. \n\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+              titleKey == "Terms and Conditions" 
+                  ? "termsContent".tr 
+                  : "privacyContent".tr,
               style: TextStyle(fontSize: 14.sp, height: 1.5),
             ),
           ],

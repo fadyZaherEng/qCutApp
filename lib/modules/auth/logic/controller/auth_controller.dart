@@ -267,11 +267,15 @@ class AuthController extends GetxController {
 
         // Check if there's a pending route to return to
         // We clear it but navigate to home to prevent crashes due to missing arguments
-        if (loginResponse.value?.isBanned == true) {
-          Get.offAllNamed(AppRouter.bannedPath, arguments: {
-            "banReason": loginResponse.value?.banReason?.isEmpty ?? false
-                ? "Account is banned"
-                : loginResponse.value?.banReason ?? "Account is banned",
+        // Check if account is banned or archived (deleted)
+        if (loginResponse.value?.isBanned == true || loginResponse.value?.status == "archived") {
+          Get.offAndToNamed(AppRouter.bannedPath, arguments: {
+            "isArchived": loginResponse.value?.status == "archived",
+            "banReason": loginResponse.value?.status == "archived"
+                ? "Your account has been deleted. Please contact support if you believe this is a mistake.".tr
+                : (loginResponse.value?.banReason?.isEmpty ?? false
+                    ? "Account is banned"
+                    : loginResponse.value?.banReason ?? "Account is banned"),
             "bannedUntil": loginResponse.value?.bannedUntil ?? 17000000000000,
             "daysRemaining": loginResponse.value?.daysRemaining ?? 20,
           });

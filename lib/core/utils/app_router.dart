@@ -340,10 +340,14 @@ abstract class AppRouter {
     GetPage(
       name: termsPath,
       page: () => const LegalDocumentsView(titleKey: "Terms and Conditions"),
+      transition: Transition.fadeIn,
+      transitionDuration: const Duration(milliseconds: 400),
     ),
     GetPage(
       name: privacyPolicyPath,
       page: () => const LegalDocumentsView(titleKey: "privacyPolicy"),
+      transition: Transition.fadeIn,
+      transitionDuration: const Duration(milliseconds: 400),
     ),
     GetPage(
       name: bannedPath,

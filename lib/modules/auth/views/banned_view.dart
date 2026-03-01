@@ -13,12 +13,15 @@ class BannedView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Map<String, dynamic> args = Get.arguments ?? {};
-    final String banReason = args['banReason'] ?? "Your account has been banned for misuse of the app.".tr;
+    final bool isArchived = args['isArchived'] ?? false;
+    final String banReason = args['banReason'] ?? (isArchived 
+        ? "Your account has been deleted. Please contact support for more details.".tr
+        : "Your account has been banned for misuse of the app.".tr);
     final int? bannedUntilMs = args['bannedUntil'];
     final int? daysRemaining = args['daysRemaining'];
 
     String bannedUntilFormatted = "";
-    if (bannedUntilMs != null) {
+    if (bannedUntilMs != null && !isArchived) {
       final date = DateTime.fromMillisecondsSinceEpoch(bannedUntilMs);
       bannedUntilFormatted = DateFormat('dd/MM/yyyy').format(date);
     }
@@ -51,19 +54,19 @@ class BannedView extends StatelessWidget {
               ),
               SizedBox(height: 60.h),
               Text(
-                "youGotBanned".tr,
+                isArchived ? "accountDeleted".tr : "youGotBanned".tr,
                 style: Styles.textStyleS24W600(color: const Color(0xFFD1A439)),
                 textAlign: TextAlign.center,
               ),
               SizedBox(height: 40.h),
               
               // Ban Info
-              _buildInfoSection("reason".tr, banReason),
+              _buildInfoSection(isArchived ? "status".tr : "reason".tr, banReason),
               if (bannedUntilFormatted.isNotEmpty) ...[
                 SizedBox(height: 24.h),
                 _buildInfoSection("bannedUntil".tr, bannedUntilFormatted),
               ],
-              if (daysRemaining != null) ...[
+              if (daysRemaining != null && !isArchived) ...[
                 SizedBox(height: 24.h),
                 _buildInfoSection("daysRemaining".tr, "$daysRemaining ${"days".tr}"),
               ],
@@ -71,7 +74,7 @@ class BannedView extends StatelessWidget {
               const Spacer(),
               
               Text(
-                "onceYouGetUnbanned".tr,
+                isArchived ? "contactSupportToRestore".tr : "onceYouGetUnbanned".tr,
                 style: Styles.textStyleS14W400(color: const Color(0xFFD1A439).withOpacity(0.8)),
                 textAlign: TextAlign.center,
               ),

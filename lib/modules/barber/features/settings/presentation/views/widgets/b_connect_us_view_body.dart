@@ -6,111 +6,123 @@ import 'package:get/get.dart';
 import 'package:q_cut/core/utils/app_router.dart';
 import 'package:q_cut/core/utils/constants/assets_data.dart';
 import 'package:q_cut/core/utils/constants/colors_data.dart';
+import 'package:q_cut/core/utils/network/api.dart';
 import 'package:q_cut/core/utils/styles.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../home_features/profile_features/profile_display/logic/b_profile_controller.dart';
 
 class BConnectUsViewBody extends StatelessWidget {
-  final BProfileController controller = Get.put(BProfileController());
-
-  BConnectUsViewBody({super.key});
+  const BConnectUsViewBody({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(top: 32.h, left: 15.w, right: 15.w),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Center(
-            child: SvgPicture.asset(
-              AssetsData.connectUsImage,
-              width: 254.w,
-              height: 190.h,
+    return SingleChildScrollView(
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 32.h),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: SvgPicture.asset(
+                AssetsData.connectUsImage,
+                width: 250.w,
+                height: 200.h,
+                fit: BoxFit.contain,
+              ),
             ),
-          ),
-          SizedBox(height: 32.h),
-          Text(
-            "You can contact by".tr,
-            style: Styles.textStyleS16W700(color: ColorsData.primary),
-          ),
-          SizedBox(height: 16.h),
-          InkWell(
-            onTap: () async {
-              final instagramUrl =
-                  "https://www.instagram.com/moataz.abnha?igsh=MW12b2JyYzJtMjY0bA%3D%3D&utm_source=qr";
-              try {
-                final uri = Uri.parse(instagramUrl);
-                await launchUrl(uri);
-              } catch (e) {
-                showErrorSnackBar(context, "Instagram link is not set".tr);
-              }
-            },
-            child: Row(
-              children: [
-                SvgPicture.asset(
-                  height: 22.h,
-                  width: 22.w,
-                  AssetsData.instagramIcon,
-                  colorFilter: const ColorFilter.mode(
-                    ColorsData.primary,
-                    BlendMode.srcIn,
-                  ),
-                ),
-                SizedBox(width: 8.w),
-                Text(
-                  "INSTGRAM".tr,
-                  style: Styles.textStyleS16W400(),
-                ),
-              ],
+            SizedBox(height: 48.h),
+            Text(
+              "Contact Us".tr,
+              style: Styles.textStyleS20W700(color: ColorsData.primary),
             ),
-          ),
-          SizedBox(height: 24.h),
-          InkWell(
-            onTap: () {
-              Get.toNamed(AppRouter.chatWithUsPath);
-            },
-            child: Row(
-              children: [
-                SvgPicture.asset(
-                  height: 24.h,
-                  width: 24.w,
-                  AssetsData.messageIcon,
-                  colorFilter: const ColorFilter.mode(
-                    ColorsData.primary,
-                    BlendMode.srcIn,
-                  ),
-                ),
-                SizedBox(width: 8.w),
-                Text(
-                  "Chat with us".tr,
-                  style: Styles.textStyleS16W400(),
-                ),
-              ],
+            SizedBox(height: 8.h),
+            Text(
+              "You can contact by".tr,
+              style: Styles.textStyleS14W400(color: ColorsData.font.withOpacity(0.6)),
             ),
-          ),
-        ],
+            SizedBox(height: 32.h),
+            _buildContactItem(
+              title: "INSTGRAM".tr,
+              iconPath: AssetsData.instagramIcon,
+              onTap: () async {
+                const instagramUrl =
+                    "https://www.instagram.com/moataz.abnha?igsh=MW12b2JyYzJtMjY0bA%3D%3D&utm_source=qr";
+                try {
+                  final uri = Uri.parse(instagramUrl);
+                  await launchUrl(uri, mode: LaunchMode.externalApplication);
+                } catch (e) {
+                  ShowToast.showError(message: "Instagram link is not set".tr);
+                }
+              },
+            ),
+            SizedBox(height: 16.h),
+            _buildContactItem(
+              title: "Chat with us".tr,
+              iconPath: AssetsData.messageIcon,
+              onTap: () {
+                Get.toNamed(AppRouter.chatWithUsPath);
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  void openLink(String url, BuildContext context) async {
-    try {
-      await launch(url);
-    } catch (e) {
-      showErrorSnackBar(context, "Invalid Instagram link");
-      if (kDebugMode) {
-        print(e);
-      }
-    }
-  }
-
-  void showErrorSnackBar(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('⚠️ $message'),
-        backgroundColor: Colors.redAccent,
+  Widget _buildContactItem({
+    required String title,
+    required String iconPath,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12.r),
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 18.h),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12.r),
+          border: Border.all(color: ColorsData.cardStrock.withOpacity(0.5)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: EdgeInsets.all(10.r),
+              decoration: BoxDecoration(
+                color: ColorsData.primary.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: SvgPicture.asset(
+                iconPath,
+                height: 20.h,
+                width: 20.w,
+                colorFilter: const ColorFilter.mode(
+                  ColorsData.primary,
+                  BlendMode.srcIn,
+                ),
+              ),
+            ),
+            SizedBox(width: 16.w),
+            Text(
+              title,
+              style: Styles.textStyleS16W500(),
+            ),
+            const Spacer(),
+            Icon(
+              Icons.arrow_forward_ios,
+              size: 16.sp,
+              color: ColorsData.primary.withOpacity(0.5),
+            ),
+          ],
+        ),
       ),
     );
   }

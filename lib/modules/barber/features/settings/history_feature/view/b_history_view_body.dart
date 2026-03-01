@@ -7,6 +7,7 @@ import 'package:q_cut/core/utils/constants/drawer_constants.dart';
 import 'package:q_cut/core/utils/styles.dart';
 import 'package:q_cut/modules/barber/features/settings/history_feature/controller/history_controller.dart';
 import 'package:q_cut/modules/barber/features/settings/history_feature/view/CustomBHistoryItem.dart';
+import 'package:q_cut/modules/barber/features/home_features/profile_features/profile_display/logic/b_profile_controller.dart';
 
 class BHistoryViewBody extends StatelessWidget {
   const BHistoryViewBody({super.key});
@@ -18,10 +19,18 @@ class BHistoryViewBody extends StatelessWidget {
         ? Get.find<HistoryController>()
         : Get.put(HistoryController());
 
+    // Use BProfileController for dynamic profile image
+    final profileController = Get.isRegistered<BProfileController>()
+        ? Get.find<BProfileController>()
+        : Get.put(BProfileController());
+
     return Obx(() {
       if (controller.isLoading.value) {
         return const Center(child: CircularProgressIndicator());
       }
+
+      final profileImageUrl = profileController.profileData.value?.profilePic ?? 
+                             DrawerConstants.defaultProfileImage;
 
       return RefreshIndicator(
         onRefresh: controller.refreshHistory,
@@ -34,8 +43,7 @@ class BHistoryViewBody extends StatelessWidget {
                   children: [
                     CircleAvatar(
                       radius: 32.r,
-                      foregroundImage: const CachedNetworkImageProvider(
-                          DrawerConstants.defaultProfileImage),
+                      foregroundImage: CachedNetworkImageProvider(profileImageUrl),
                       backgroundColor: ColorsData.secondary,
                     ),
                     SizedBox(height: 16.h),

@@ -271,13 +271,21 @@ class _CustomBDrawerState extends State<CustomBDrawer> {
                         () {
                       Get.toNamed(AppRouter.bconectUsPath);
                     }),
-                    SizedBox(
-                      height: 10.h,
-                    ),
+                    SizedBox(height: 10.h),
                     buildDivider(),
-                    SizedBox(
-                      height: 10.h,
-                    ),
+                    SizedBox(height: 10.h),
+                    buildDrawerItemWithIcon("Terms and Conditions".tr, Icons.integration_instructions_outlined, () {
+                      Get.toNamed(AppRouter.termsPath);
+                    }),
+                    SizedBox(height: 10.h),
+                    buildDivider(),
+                    SizedBox(height: 10.h),
+                    buildDrawerItemWithIcon("privacyPolicy".tr, Icons.policy_outlined, () {
+                      Get.toNamed(AppRouter.privacyPolicyPath);
+                    }),
+                    SizedBox(height: 10.h),
+                    buildDivider(),
+                    SizedBox(height: 10.h),
                     buildDrawerItem("Share".tr, AssetsData.shareIcon, () {}),
                     SizedBox(
                       height: 10.h,
@@ -313,6 +321,43 @@ class _CustomBDrawerState extends State<CustomBDrawer> {
                   width: 24.w,
                   colorFilter: const ColorFilter.mode(
                       ColorsData.primary, BlendMode.srcIn),
+                ),
+                SizedBox(width: 12.w),
+                Text(
+                  title,
+                  style: Styles.textStyleS14W400(),
+                ),
+              ],
+            ),
+            SvgPicture.asset(
+              AssetsData.rightArrowIcon,
+              height: 24.h,
+              width: 24.w,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget buildDrawerItemWithIcon(String title, IconData icon, VoidCallback? onTap) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        Navigator.pop(context);
+        if (onTap != null) onTap();
+      },
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: 2.sp),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  icon,
+                  size: 24.sp,
+                  color: ColorsData.primary,
                 ),
                 SizedBox(width: 12.w),
                 Text(
