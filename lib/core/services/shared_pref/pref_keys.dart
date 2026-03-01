@@ -17,4 +17,5 @@ class PrefKeys {
   static const String hasServices = 'hasServices';
   static const String hasWorkingDays = 'hasWorkingDays';
   static const String userOffer = 'userOffer';
+  static const String isFirstDealFlow = 'isFirstDealFlow';
 }

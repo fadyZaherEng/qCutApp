@@ -84,6 +84,7 @@ class _HomeViewState extends State<HomeView> {
       });
     } else {
       // Guest user logic: Fetch all barbers without location/profile dependency
+      print("Guest user - fetching all barbers");
       homeController.getBarbers();
     }
   }

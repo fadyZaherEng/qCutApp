@@ -52,5 +52,6 @@ class AuthHelper {
     await SharedPref().removePreference(PrefKeys.password);
     await SharedPref().removePreference(PrefKeys.fullName);
     await SharedPref().removePreference(PrefKeys.barber);
+    await SharedPref().removePreference(PrefKeys.isFirstDealFlow);
   }
 }

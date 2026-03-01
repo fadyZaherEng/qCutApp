@@ -82,6 +82,7 @@ class HomeController extends GetxController {
     try {
       final response = await _apiCall.getData(Variables.GET_BARBERS);
       final responseBody = json.decode(response.body);
+      print(Variables.GET_BARBERS);
 
       if (response.statusCode == 200) {
         final barbersResponse = BarbersResponse.fromJson(responseBody);

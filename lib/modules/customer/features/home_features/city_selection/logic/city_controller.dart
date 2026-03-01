@@ -36,42 +36,29 @@ class CityController extends GetxController {
       errorMessage.value = '';
 
       final response = await _apiCall.getData(
-        '${Variables.baseUrl}mainDashboard/cities?page=${currentPage.value}&limit=$limit',
+        // '${Variables.baseUrl}mainDashboard/cities?page=${currentPage.value}&limit=$limit',
+        '${Variables.baseUrl}mainDashboard/countBarber/byCity',
       );
-
+      print("Url ${'${Variables.baseUrl}mainDashboard/countBarber/byCity'} ");
       final responseBody = json.decode(response.body);
       print(responseBody);
 
       if (response.statusCode == 200 && responseBody['success'] == true) {
-        final List<City> fetchedCities = (responseBody['cities']
-                as List<dynamic>)
-            .map((cityName) => City(name: cityName.toString(), barberCount: 0))
+        final List<dynamic> barberCounts = responseBody['barberCounts'] ?? [];
+        final List<City> fetchedCities = barberCounts
+            .map((cityJson) => City.fromJson(cityJson))
             .toList();
 
         cities.assignAll(fetchedCities);
-        //remove repeated cities or duplicates if any only remove one not all
-        //
-        // cities.removeWhere((city) =>
-        //     cities
-        //         .where((c) =>
-        //             c.name.trim().toLowerCase() ==
-        //             city.name.trim().toLowerCase())
-        //         .length >
-        //     1);
-        // ✅ المدن راجعة كـ List<String>
-        // final List<String> fetchedCities =
-        // List<String>.from(responseBody['cities'] ?? []);
-        //
-        // cities.assignAll(fetchedCities);
         filterCities(searchQuery.value);
 
         // ✅ بعد تحميل المدن من API نحمل الاختيارات المحفوظة ونربطها
         await loadSelectedCities();
 
         // ✅ تحديث معلومات الباجينيشن
+        totalBarbers.value = responseBody['totalBarbers'] ?? 0;
         final pagination = responseBody['pagination'] ?? {};
         totalPages.value = pagination['totalPages'] ?? 1;
-        // totalCities.value = pagination['totalCities'] ?? fetchedCities.length;
         currentPage.value = pagination['currentPage'] ?? 1;
       } else {
         isError.value = true;

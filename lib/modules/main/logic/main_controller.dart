@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -19,70 +21,9 @@ import 'package:q_cut/modules/customer/features/home_features/appointment_featur
 import 'package:q_cut/modules/customer/features/home_features/profile_feature/views/my_profile_view.dart';
 import 'dart:convert';
 import 'package:intl/intl.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import '../../../core/utils/constants/assets_data.dart';
 import '../../../core/utils/network/network_helper.dart';
-
-class Deal {
-  final String id;
-  final int dealDateStart;
-  final int dealDateEnd;
-  final int qCuteSubscription;
-  final int qCuteTax;
-  final int freeDaysNumber;
-  final String status;
-  final String barber;
-  final String createdAt;
-  final String updatedAt;
-
-  Deal({
-    required this.id,
-    required this.dealDateStart,
-    required this.dealDateEnd,
-    required this.qCuteSubscription,
-    required this.qCuteTax,
-    required this.freeDaysNumber,
-    required this.status,
-    required this.barber,
-    required this.createdAt,
-    required this.updatedAt,
-  });
-
-  factory Deal.fromJson(Map<String, dynamic> json) {
-    return Deal(
-      id: json['_id'] ?? json['id'] ?? '',
-      dealDateStart: json['dealDateStart'] ?? 0,
-      dealDateEnd: json['dealDateEnd'] ?? 0,
-      qCuteSubscription: json['QCuteSubscription'] ?? 0,
-      qCuteTax: json['QCuteTax'] ?? 0,
-      freeDaysNumber: json['freeDaysNumber'] ??
-          (json['freeUntilDate'] != null
-              ? DateTime.fromMillisecondsSinceEpoch(json['freeUntilDate'])
-                  .difference(DateTime.fromMillisecondsSinceEpoch(
-                      json['dealDateStart'] ?? 0))
-                  .inDays
-              : 0),
-      status: json['status'] ?? '',
-      barber: json['barber'] ?? '',
-      createdAt: json['createdAt'] ?? '',
-      updatedAt: json['updatedAt'] ?? '',
-    );
-  }
-}
-
-class DealResponse {
-  final bool success;
-  final List<Deal> deals;
-
-  DealResponse({required this.success, required this.deals});
-
-  factory DealResponse.fromJson(Map<String, dynamic> json) {
-    return DealResponse(
-      success: json['success'],
-      deals:
-          (json['deals'] as List).map((deal) => Deal.fromJson(deal)).toList(),
-    );
-  }
-}
 
 class MainController extends GetxController {
   final NetworkAPICall _apiCall = NetworkAPICall();
@@ -94,8 +35,14 @@ class MainController extends GetxController {
   final RxBool isLoadingDeal = false.obs;
   final RxString dealError = ''.obs;
 
+  // Stream Subscriptions
+  StreamSubscription? _notificationClickSubscription;
+  StreamSubscription? _foregroundMessageSubscription;
+
   // Flag to prevent multiple dialogs overlapping
   bool _isCheckingProfile = false;
+  bool _isWaitingDialogOpen = false;
+  bool _isDealDialogOpen = false;
 
   final List<Widget> pages = (SharedPref().getBool(PrefKeys.userRole)) == false
       ? [
@@ -126,66 +73,118 @@ class MainController extends GetxController {
   }
 
   Future<void> _notificationListener() async {
-    onNotificationClick?.stream.listen((event) {
+    // Listen for notification clicks
+    _notificationClickSubscription = onNotificationClick?.stream.listen((event) {
       if (event.isNotEmpty) {
+        if (isCustomer == false) {
+          fetchDealById();
+        }
         _onNotificationClick(event);
       }
     });
+
+    // Listen for foreground messages for real-time deal updates (for Barbers)
+    if (isCustomer == false) {
+      _foregroundMessageSubscription =
+          FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+        debugPrint(
+            "🔔 Foreground Deal Update: ${message.notification?.title}");
+        fetchDealById();
+      });
+    }
   }
+
+  /// Refetches the deal status for the current barber
+  Future<void> refreshDealStatus() async => await fetchDealById();
 
   // Method to fetch deal by ID
   Future<void> fetchDealById() async {
-    print("Fetching deal for barber...");
+    if (isLoadingDeal.value) return; // Prevent multiple simultaneous calls
+
+    debugPrint("🔄 Syncing Deal Status for barber [ID: ${SharedPref().getString(PrefKeys.id)}]");
     isLoadingDeal.value = true;
     dealError.value = '';
-    String? id = SharedPref().getString(PrefKeys.id);
-    final BProfileController profileController = Get.find<BProfileController>();
+    
+    final id = SharedPref().getString(PrefKeys.id);
+    final profileController = Get.find<BProfileController>();
 
     try {
       final response = await _apiCall.getData('${Variables.baseUrl}deal/$id');
-      print('Deal Response: ${response.body}');
-
+      
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = json.decode(response.body);
         dealResponse.value = DealResponse.fromJson(responseData);
+        final deals = dealResponse.value?.deals ?? [];
 
-        final List<Deal> deals = dealResponse.value?.deals ?? [];
-
-        // Find the most recent pending deal (assuming sorted by creation or just first in list)
-        // If multiple, maybe find the one with latest createdAt
+        // Identify the latest pending deal
         Deal? pendingDeal;
         try {
-          pendingDeal = deals.where((d) => d.status == "pending").last;
-        } catch (_) {
-          // No pending deal found
+          final pendingDeals = deals.where((d) => d.status == "pending").toList();
+          if (pendingDeals.isNotEmpty) pendingDeal = pendingDeals.last;
+        } catch (e) {
+          debugPrint("Error sorting deals: $e");
         }
 
         if (pendingDeal != null) {
-          showDealDialog(pendingDeal);
-          // Note: After user accepts in showDealDialog, _enforceBarberProfile will be called there
+          _handleReceivedPendingDeal(pendingDeal);
         } else {
-          // No pending deal. Check if there's any accepted deal.
-          bool hasAccepted = deals.any((d) => d.status == "accepted");
-          if (!hasAccepted) {
-            // No pending and no accepted? Waiting for offer.
-            await showWaitingForOfferDialog();
-          }
-          // Always ensure profile is complete if no pending deal is blocking the view
-          await _enforceBarberProfile(profileController);
+          await _handleNoPendingDeals(deals, profileController);
         }
       } else {
-        // API failed (e.g. 404 - no deals yet)
-        await showWaitingForOfferDialog();
-        await _enforceBarberProfile(profileController);
+        await _handleFetchFailure(profileController);
       }
     } catch (e) {
-      print('Error fetching deal: $e');
+      debugPrint('❌ Deal Fetch Error: $e');
       dealError.value = e.toString();
-      await showWaitingForOfferDialog();
-      await _enforceBarberProfile(profileController);
+      await _handleFetchFailure(profileController);
     } finally {
       isLoadingDeal.value = false;
     }
+  }
+
+  void _handleReceivedPendingDeal(Deal pendingDeal) {
+    // If we were in the waiting room, close it
+    if (_isWaitingDialogOpen) {
+      Get.back();
+      _isWaitingDialogOpen = false;
+    }
+
+    // Show the actual offer if not already visible
+    if (!_isDealDialogOpen) {
+      showDealDialog(pendingDeal);
+    }
+  }
+
+  Future<void> _handleNoPendingDeals(List<Deal> deals, BProfileController profileController) async {
+    final bool hasAccepted = deals.any((d) => d.status == "accepted");
+
+    if (!hasAccepted) {
+      // First-timer flow: no history of accepted deals
+      final bool isFirstTime = SharedPref().getBool(PrefKeys.isFirstDealFlow) ?? true;
+      if (isFirstTime && !_isWaitingDialogOpen && !_isDealDialogOpen) {
+        await showWaitingForOfferDialog();
+      }
+    } else {
+      // Returner flow: previously accepted deals exist
+      await SharedPref().setBool(PrefKeys.isFirstDealFlow, false);
+      if (_isWaitingDialogOpen) {
+        Get.back();
+        _isWaitingDialogOpen = false;
+      }
+    }
+
+    // Always ensure profile is complete if the UI isn't blocked by a deal popup
+    if (!_isDealDialogOpen) {
+      await _enforceBarberProfile(profileController);
+    }
+  }
+
+  Future<void> _handleFetchFailure(BProfileController profileController) async {
+    final bool isFirstTime = SharedPref().getBool(PrefKeys.isFirstDealFlow) ?? true;
+    if (isFirstTime && !_isWaitingDialogOpen && !_isDealDialogOpen) {
+      await showWaitingForOfferDialog();
+    }
+    await _enforceBarberProfile(profileController);
   }
 
   // Method to show deal dialog
@@ -225,9 +224,12 @@ class MainController extends GetxController {
       );
     }
 
+    _isDealDialogOpen = true;
     Get.dialog(
-      Dialog(
-        backgroundColor: Colors.transparent,
+      WillPopScope(
+        onWillPop: () async => false, // Prevent closing by back button
+        child: Dialog(
+          backgroundColor: Colors.transparent,
         child: Container(
           width: 335.w,
           padding: EdgeInsets.symmetric(vertical: 24.h, horizontal: 20.w),
@@ -317,6 +319,7 @@ class MainController extends GetxController {
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () async {
+                          _isDealDialogOpen = false;
                           Get.back();
 
                           Get.dialog(
@@ -420,6 +423,10 @@ class MainController extends GetxController {
                               message: "Offer accepted successfully".tr,
                             );
 
+                            // Mark that we are past the first deal flow
+                            await SharedPref()
+                                .setBool(PrefKeys.isFirstDealFlow, false);
+
                             // Trigger enforcement (Services -> Working Days)
                             await _enforceBarberProfile(profileController);
                           } else {
@@ -451,6 +458,8 @@ class MainController extends GetxController {
                     Expanded(
                       child: OutlinedButton(
                         onPressed: () => {
+                          _isDealDialogOpen = false,
+                          Get.back(),
                           //navigate to chat with support
                           Get.toNamed(AppRouter.chatWithUsPath)
                         },
@@ -478,6 +487,7 @@ class MainController extends GetxController {
           ),
         ),
       ),
+    ),
       barrierDismissible: false,
     );
   }
@@ -495,9 +505,12 @@ class MainController extends GetxController {
       color: Color(0xFF666666),
     );
 
+    _isWaitingDialogOpen = true;
     await Get.dialog(
-      Dialog(
-        backgroundColor: Colors.transparent,
+      WillPopScope(
+        onWillPop: () async => false,
+        child: Dialog(
+          backgroundColor: Colors.transparent,
         child: Container(
           width: 335.w,
           padding: EdgeInsets.symmetric(vertical: 24.h, horizontal: 20.w),
@@ -580,34 +593,36 @@ class MainController extends GetxController {
                   ),
                 ),
                 SizedBox(height: 24.h),
-                ElevatedButton(
-                  onPressed: () => Get.back(),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFFD1A439),
-                    foregroundColor: Colors.white,
-                    padding:
-                        EdgeInsets.symmetric(vertical: 12.h, horizontal: 30.w),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    minimumSize: Size(double.infinity, 50.h),
-                    elevation: 2,
-                  ),
-                  child: Text(
-                    "gotIt".tr,
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
+                // ElevatedButton(
+                //   onPressed: () => Get.back(),
+                //   style: ElevatedButton.styleFrom(
+                //     backgroundColor: Color(0xFFD1A439),
+                //     foregroundColor: Colors.white,
+                //     padding:
+                //         EdgeInsets.symmetric(vertical: 12.h, horizontal: 30.w),
+                //     shape: RoundedRectangleBorder(
+                //       borderRadius: BorderRadius.circular(8),
+                //     ),
+                //     minimumSize: Size(double.infinity, 50.h),
+                //     elevation: 2,
+                //   ),
+                //   child: Text(
+                //     "gotIt".tr,
+                //     style: TextStyle(
+                //       fontSize: 16.sp,
+                //       fontWeight: FontWeight.bold,
+                //     ),
+                //   ),
+                // ),
               ],
             ),
           ),
         ),
       ),
+    ),
       barrierDismissible: false,
     );
+    _isWaitingDialogOpen = false;
   }
 
   // Helper method to format timestamp to readable date
@@ -624,6 +639,8 @@ class MainController extends GetxController {
 
   @override
   void onClose() {
+    _notificationClickSubscription?.cancel();
+    _foregroundMessageSubscription?.cancel();
     pageController.dispose();
     super.onClose();
   }
@@ -864,5 +881,67 @@ class MainController extends GetxController {
     Get.toNamed(AppRouter.notificationPath);
 
     onNotificationClick?.add("");
+  }
+}
+
+class Deal {
+  final String id;
+  final int dealDateStart;
+  final int dealDateEnd;
+  final int qCuteSubscription;
+  final int qCuteTax;
+  final int freeDaysNumber;
+  final String status;
+  final String barber;
+  final String createdAt;
+  final String updatedAt;
+
+  Deal({
+    required this.id,
+    required this.dealDateStart,
+    required this.dealDateEnd,
+    required this.qCuteSubscription,
+    required this.qCuteTax,
+    required this.freeDaysNumber,
+    required this.status,
+    required this.barber,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+
+  factory Deal.fromJson(Map<String, dynamic> json) {
+    return Deal(
+      id: json['_id'] ?? json['id'] ?? '',
+      dealDateStart: json['dealDateStart'] ?? 0,
+      dealDateEnd: json['dealDateEnd'] ?? 0,
+      qCuteSubscription: json['QCuteSubscription'] ?? 0,
+      qCuteTax: json['QCuteTax'] ?? 0,
+      freeDaysNumber: json['freeDaysNumber'] ??
+          (json['freeUntilDate'] != null
+              ? DateTime.fromMillisecondsSinceEpoch(json['freeUntilDate'])
+                  .difference(DateTime.fromMillisecondsSinceEpoch(
+                      json['dealDateStart'] ?? 0))
+                  .inDays
+              : 0),
+      status: json['status'] ?? '',
+      barber: json['barber'] ?? '',
+      createdAt: json['createdAt'] ?? '',
+      updatedAt: json['updatedAt'] ?? '',
+    );
+  }
+}
+
+class DealResponse {
+  final bool success;
+  final List<Deal> deals;
+
+  DealResponse({required this.success, required this.deals});
+
+  factory DealResponse.fromJson(Map<String, dynamic> json) {
+    return DealResponse(
+      success: json['success'],
+      deals:
+          (json['deals'] as List).map((deal) => Deal.fromJson(deal)).toList(),
+    );
   }
 }
