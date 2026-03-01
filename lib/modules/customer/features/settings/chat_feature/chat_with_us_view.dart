@@ -37,12 +37,18 @@ class _ChatWithUsViewState extends State<ChatWithUsView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: ColorsData.secondary,
+      resizeToAvoidBottomInset: true,
       appBar: CustomAppBar(title: "Chat with us".tr),
-      body: ChatWithUsViewBody(key: _chatBodyKey),
-      bottomNavigationBar: MessageInput(
-        onSendMessage: _handleSendMessage,
-        onCameraTap: _handleImageSelection,
+      body: Column(
+        children: [
+          Expanded(child: ChatWithUsViewBody(key: _chatBodyKey)),
+          MessageInput(
+            onSendMessage: _handleSendMessage,
+            onCameraTap: _handleImageSelection,
+          ),
+        ],
       ),
+      drawerEnableOpenDragGesture: true,
     );
   }
 

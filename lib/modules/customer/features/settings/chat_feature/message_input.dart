@@ -69,7 +69,8 @@ class _MessageInputState extends State<MessageInput> {
                   AssetsData.cameraIcon,
                   height: 20.h,
                   width: 20.w,
-                  colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                  colorFilter:
+                      const ColorFilter.mode(Colors.white, BlendMode.srcIn),
                 ),
               ),
             ),
@@ -86,7 +87,8 @@ class _MessageInputState extends State<MessageInput> {
                   AssetsData.microphoneIcon,
                   height: 20.h,
                   width: 20.w,
-                  colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                  colorFilter:
+                      const ColorFilter.mode(Colors.white, BlendMode.srcIn),
                 ),
               ),
             ),
@@ -99,12 +101,13 @@ class _MessageInputState extends State<MessageInput> {
                 ),
                 child: TextField(
                   controller: _controller,
-                  style: Styles.textStyleS14W400(color: ColorsData.dark),
+                  style: Styles.textStyleS14W400(color: Colors.white),
                   onSubmitted: (_) => _submit(),
                   decoration: InputDecoration(
                     hintText: "enterYourMessage".tr,
-                    hintStyle: Styles.textStyleS14W400(color: ColorsData.thirty),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+                    hintStyle: Styles.textStyleS14W400(color: Colors.grey),
+                    contentPadding:
+                        EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
                     border: InputBorder.none,
                     isCollapsed: true,
                   ),
