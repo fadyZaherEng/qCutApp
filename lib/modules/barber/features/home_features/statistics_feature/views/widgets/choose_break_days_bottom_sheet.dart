@@ -36,6 +36,8 @@ class _ChooseBreakDaysBottomSheetState
     try {
       final response =
           await NetworkAPICall().getData("${Variables.BARBER}get-break-time");
+      print("Fetch breaks response: ${response.statusCode} - ${response.body}");
+      print("url: ${Variables.BARBER}get-break-time");
 
       if (response.statusCode == 200 && response.body != null) {
         final data =
@@ -57,6 +59,21 @@ class _ChooseBreakDaysBottomSheetState
     } catch (e) {
       debugPrint("Error fetching breaks: $e");
     }
+  }
+
+  bool _isDayInExistingBreak(DateTime day) {
+    if (_breakRanges.isEmpty) return false;
+    
+    // Normalize to date only
+    final date = DateTime(day.year, day.month, day.day);
+    
+    return _breakRanges.any((range) {
+      final start = DateTime(range['start']!.year, range['start']!.month, range['start']!.day);
+      final end = DateTime(range['end']!.year, range['end']!.month, range['end']!.day);
+      
+      return (date.isAtSameMomentAs(start) || date.isAfter(start)) &&
+             (date.isAtSameMomentAs(end) || date.isBefore(end));
+    });
   }
 
   @override
@@ -139,6 +156,50 @@ class _ChooseBreakDaysBottomSheetState
                         onPageChanged: (focused) {
                           _focusedDay = focused;
                         },
+                        calendarBuilders: CalendarBuilders(
+                          defaultBuilder: (context, day, focusedDay) {
+                            if (_isDayInExistingBreak(day)) {
+                              return Container(
+                                margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 6),
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  color: Colors.red.withOpacity(0.08),
+                                  borderRadius: BorderRadius.circular(10.r),
+                                  border: Border.all(color: Colors.red.withOpacity(0.2)),
+                                ),
+                                child: Text(
+                                  '${day.day}',
+                                  style: TextStyle(
+                                    color: Colors.red.shade800,
+                                    fontSize: 13.sp,
+                                    fontWeight: FontWeight.w500
+                                  ),
+                                ),
+                              );
+                            }
+                            return null;
+                          },
+                          outsideBuilder: (context, day, focusedDay) {
+                             if (_isDayInExistingBreak(day)) {
+                              return Container(
+                                margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 6),
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  color: Colors.red.withOpacity(0.03),
+                                  borderRadius: BorderRadius.circular(10.r),
+                                ),
+                                child: Text(
+                                  '${day.day}',
+                                  style: TextStyle(
+                                    color: Colors.red.withOpacity(0.3),
+                                    fontSize: 11.sp,
+                                  ),
+                                ),
+                              );
+                            }
+                            return null;
+                          },
+                        ),
                         calendarStyle: CalendarStyle(
                           defaultTextStyle: TextStyle(color: Colors.black, fontSize: 13.sp),
                           weekendTextStyle: TextStyle(color: Colors.black, fontSize: 13.sp),
@@ -269,6 +330,8 @@ class _ChooseBreakDaysBottomSheetState
         "${Variables.BARBER}take-break",
         body,
       );
+      print("Add break response: ${response.statusCode} - ${response.body}");
+      print("url: ${Variables.BARBER}take-break");
 
       if (response.statusCode == 200 || response.statusCode == 204) {
         Get.back();
