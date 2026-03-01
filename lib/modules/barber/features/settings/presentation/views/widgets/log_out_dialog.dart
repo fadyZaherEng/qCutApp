@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:go_router/go_router.dart';
+import 'package:get/get.dart';
+import 'package:q_cut/core/services/shared_pref/pref_keys.dart';
+import 'package:q_cut/core/services/shared_pref/shared_pref.dart';
 import 'package:q_cut/core/utils/app_router.dart';
 import 'package:q_cut/core/utils/constants/assets_data.dart';
 import 'package:q_cut/core/utils/constants/colors_data.dart';
@@ -46,14 +48,22 @@ class LogoutDialog extends StatelessWidget {
               children: [
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () => context.push(AppRouter.selectServicesPath),
+                    onPressed: () async {
+                      final bool? userRole =
+                          SharedPref().getBool(PrefKeys.userRole);
+                      await SharedPref().clearPreferences();
+                      if (userRole != null) {
+                        await SharedPref().setBool(PrefKeys.userRole, userRole);
+                      }
+                      Get.offAllNamed(AppRouter.selectServicesPath);
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: ColorsData.primary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8.r),
                       ),
                     ),
-                    child: Text("Yes",
+                    child: Text("Yes".tr,
                         style: Styles.textStyleS14W600(color: ColorsData.font)),
                   ),
                 ),
@@ -61,7 +71,7 @@ class LogoutDialog extends StatelessWidget {
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () {
-                      context.pop();
+                      Get.back();
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: ColorsData.cardStrock,
@@ -69,7 +79,7 @@ class LogoutDialog extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8.r),
                       ),
                     ),
-                    child: Text("NO",
+                    child: Text("No".tr,
                         style: Styles.textStyleS14W600(color: ColorsData.font)),
                   ),
                 ),

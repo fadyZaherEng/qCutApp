@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 import 'package:q_cut/core/utils/app_router.dart';
 import 'package:q_cut/core/utils/widgets/custom_app_bar.dart';
@@ -18,6 +19,7 @@ class BarberServicesView extends StatelessWidget {
 
   final BarberServicesController controller =
       Get.put(BarberServicesController());
+
   @override
   Widget build(BuildContext context) {
     final dynamic arguments = Get.arguments;
@@ -34,11 +36,13 @@ class BarberServicesView extends StatelessWidget {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Get.offAllNamed(AppRouter.bottomNavigationBar);
       });
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return Scaffold(
+          body: Center(child: SpinKitDoubleBounce(color: ColorsData.primary)));
     }
 
     controller.barberId.value = barber.id;
-    controller.fetchServices(barber.id, preSelectedServiceIds: preSelectedServiceIds);
+    controller.fetchServices(barber.id,
+        preSelectedServiceIds: preSelectedServiceIds);
 
     return Scaffold(
       appBar: CustomAppBar(title: "barberServices".tr),

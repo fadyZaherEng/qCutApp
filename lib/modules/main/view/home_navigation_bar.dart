@@ -23,6 +23,7 @@ class _HomeNavigationBarState extends State<HomeNavigationBar> {
     String? phoneNumber = SharedPref().getString(PrefKeys.phoneNumber);
     String? password = SharedPref().getString(PrefKeys.password);
     bool? isUserRole = SharedPref().getBool(PrefKeys.userRole);
+    print("Navigating with saveMe: $saveMe, phoneNumber: $phoneNumber, password: ${password != null ? '***' : null}, isUserRole: $isUserRole");
     // Get FCM token before making the request
     String? token = SharedPref().getString(PrefKeys.accessToken);
     // Verify ban status in background if we have credentials

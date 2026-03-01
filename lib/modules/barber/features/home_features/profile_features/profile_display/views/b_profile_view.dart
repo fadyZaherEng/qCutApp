@@ -517,7 +517,7 @@ class _BProfileViewBodyState extends State<BProfileView>
                 ),
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16.w),
+                    padding: EdgeInsets.only(left: 16.w, right: 16.w),
                     child: SizedBox(
                       height: 500.h, // Fixed height to prevent overflow
                       child: TabBarView(
@@ -525,6 +525,7 @@ class _BProfileViewBodyState extends State<BProfileView>
                         children: [
                           _buildServicesTab(),
                           _buildGalleryTab(),
+                          // Placeholder for future tabs if needed
                         ],
                       ),
                     ),
@@ -626,7 +627,7 @@ class _BProfileViewBodyState extends State<BProfileView>
                     showCustomAddNewServiceBottomSheet(context);
                   },
                 ),
-                const SizedBox(height: 58),
+                const SizedBox(height: 130),
               ],
             );
           }),
@@ -1046,6 +1047,7 @@ class _BProfileViewBodyState extends State<BProfileView>
               );
             },
           ),
+          SizedBox(height: 130.h),
         ],
       ),
     );

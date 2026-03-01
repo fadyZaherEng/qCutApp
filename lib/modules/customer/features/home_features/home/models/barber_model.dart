@@ -42,6 +42,9 @@ class Barber {
   final List<WorkingDay> workingDays;
   final String? locationDescription;
   final BarberShopLocation? barberShopLocation; // ✅ أضفنا اللوكيشن
+  final String? archiveReason;
+  final int? deleteDate;
+  final String? deleteReason;
   bool isFavorite;
 
   Barber({
@@ -60,6 +63,9 @@ class Barber {
     required this.workingDays,
     this.locationDescription,
     this.barberShopLocation,
+    this.archiveReason,
+    this.deleteDate,
+    this.deleteReason,
   });
 
   factory Barber.fromJson(Map<String, dynamic> json) {
@@ -91,6 +97,9 @@ class Barber {
                   : null
           : null,
       locationDescription: json['locationDescription'],
+      archiveReason: json['archiveReason'],
+      deleteDate: json['deleteDate'],
+      deleteReason: json['deleteReason'],
     );
   }
 
@@ -110,7 +119,10 @@ class Barber {
       'offDay': offDay,
       'workingDays': workingDays.map((x) => x.toJson()).toList(),
       'locationDescription': locationDescription,
-      'barberShopLocation': barberShopLocation?.toJson(), // ✅
+      'barberShopLocation': barberShopLocation?.toJson(),
+      'archiveReason': archiveReason,
+      'deleteDate': deleteDate,
+      'deleteReason': deleteReason,
     };
   }
 }

@@ -69,6 +69,9 @@ class LoginResponse {
   final int? daysRemaining;
   final bool? isInFreePeriod;
   final UserOffer? userOffer;
+  final String? archiveReason;
+  final int? deleteDate;
+  final String? deleteReason;
 
   LoginResponse({
     required this.accessToken,
@@ -86,6 +89,9 @@ class LoginResponse {
     this.daysRemaining,
     this.isInFreePeriod,
     this.userOffer,
+    this.archiveReason,
+    this.deleteDate,
+    this.deleteReason,
   });
 
   factory LoginResponse.fromJson(Map<String, dynamic> json) {
@@ -107,6 +113,9 @@ class LoginResponse {
       userOffer: json['userOffer'] != null
           ? UserOffer.fromJson(json['userOffer'])
           : null,
+      archiveReason: json['archiveReason'],
+      deleteDate: json['deleteDate'],
+      deleteReason: json['deleteReason'],
     );
   }
 }

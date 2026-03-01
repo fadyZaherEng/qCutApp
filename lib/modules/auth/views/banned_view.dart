@@ -25,20 +25,26 @@ class BannedView extends StatelessWidget {
       final date = DateTime.fromMillisecondsSinceEpoch(bannedUntilMs);
       bannedUntilFormatted = DateFormat('dd/MM/yyyy').format(date);
     }
+    
+    String? deleteDateFormatted;
+    if (args['deleteDate'] != null) {
+      final date = DateTime.fromMillisecondsSinceEpoch(args['deleteDate']);
+      deleteDateFormatted = DateFormat('dd/MM/yyyy HH:mm').format(date);
+    }
 
     return Scaffold(
-      backgroundColor: const Color(0xFF3B384D), // Dark purple background as per image
+      backgroundColor: const Color(0xFF3B384D), // Dark purple background
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 24.w),
           child: Column(
             children: [
-              SizedBox(height: 80.h),
+              SizedBox(height: 60.h),
               // Warning Icon inside circle
               Center(
                 child: Container(
-                  width: 140.w,
-                  height: 140.w,
+                  width: 120.w,
+                  height: 120.w,
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.05),
                     shape: BoxShape.circle,
@@ -47,25 +53,39 @@ class BannedView extends StatelessWidget {
                     child: Icon(
                       Icons.warning_amber_rounded,
                       color: const Color(0xFFD1A439),
-                      size: 80.sp,
+                      size: 70.sp,
                     ),
                   ),
                 ),
               ),
-              SizedBox(height: 60.h),
+              SizedBox(height: 40.h),
               Text(
-                isArchived ? "accountDeleted".tr : "youGotBanned".tr,
+                isArchived 
+                    ? (args['archiveReason'] == 'deleted' ? "accountDeleted".tr : "accountArchived".tr)
+                    : "youGotBanned".tr,
                 style: Styles.textStyleS24W600(color: const Color(0xFFD1A439)),
                 textAlign: TextAlign.center,
               ),
               SizedBox(height: 40.h),
               
               // Ban Info
-              _buildInfoSection(isArchived ? "status".tr : "reason".tr, banReason),
+              if (args['archiveReason'] != null) ...[
+                _buildInfoSection("status".tr, args['archiveReason'].toString().tr),
+                SizedBox(height: 24.h),
+              ],
+              
+              _buildInfoSection(isArchived ? "reason".tr : "reason".tr, banReason),
+              
+              if (deleteDateFormatted != null) ...[
+                SizedBox(height: 24.h),
+                _buildInfoSection("deletionDate".tr, deleteDateFormatted),
+              ],
+              
               if (bannedUntilFormatted.isNotEmpty) ...[
                 SizedBox(height: 24.h),
                 _buildInfoSection("bannedUntil".tr, bannedUntilFormatted),
               ],
+              
               if (daysRemaining != null && !isArchived) ...[
                 SizedBox(height: 24.h),
                 _buildInfoSection("daysRemaining".tr, "$daysRemaining ${"days".tr}"),
@@ -74,7 +94,9 @@ class BannedView extends StatelessWidget {
               const Spacer(),
               
               Text(
-                isArchived ? "contactSupportToRestore".tr : "onceYouGetUnbanned".tr,
+                isArchived 
+                    ? (args['archiveReason'] == 'deleted' ? "contactSupportToRestoreDeleted".tr : "contactSupportToRestore".tr)
+                    : "onceYouGetUnbanned".tr,
                 style: Styles.textStyleS14W400(color: const Color(0xFFD1A439).withOpacity(0.8)),
                 textAlign: TextAlign.center,
               ),

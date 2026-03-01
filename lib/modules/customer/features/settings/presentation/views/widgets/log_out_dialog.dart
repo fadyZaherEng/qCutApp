@@ -48,12 +48,19 @@ class LogoutDialog extends StatelessWidget {
               children: [
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
+                      final bool? userRole =
+                          SharedPref().getBool(PrefKeys.userRole);
                       SharedPref().clearPreferences();
-
+                      if (userRole != null) {
+                        SharedPref().setBool(PrefKeys.userRole, userRole);
+                      }
+                      await SharedPref().setBool(PrefKeys.saveMe, false);
                       SharedPref().getBool(PrefKeys.userRole) ?? false
                           ? Get.offAllNamed(AppRouter.loginPath)
                           : Get.offAllNamed(AppRouter.bloginPath);
+                      print(
+                          "User logged out, preferences cleared except userRole ${SharedPref().getBool(PrefKeys.saveMe)}");
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: ColorsData.primary,

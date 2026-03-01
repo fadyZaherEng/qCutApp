@@ -254,33 +254,61 @@ class AuthController extends GetxController {
         loginResponse.value = LoginResponse.fromJson(responseBody);
         isLoginSuccess.value = true;
 
-        await saveLoginData(responseBody, loginResponse.value!, isChecked);
-
-        // Save password for background ban checks
-        await SharedPref().setString(PrefKeys.password, passwordController.text);
-        //get password from shared pref and print it to verify it's saved correctly
-        String? savedPassword =   SharedPref().getString(PrefKeys.password);
-        print("Saved password for background checks: ${savedPassword != null ? '***' : null}");
-
-        // You might want to show a success message
-        ShowToast.showSuccessSnackBar(message: "loggedInSuccessfully".tr);
-
         // Check if there's a pending route to return to
         // We clear it but navigate to home to prevent crashes due to missing arguments
-        // Check if account is banned or archived (deleted)
-        if (loginResponse.value?.isBanned == true || loginResponse.value?.status == "archived") {
-          Get.offAndToNamed(AppRouter.bannedPath, arguments: {
-            "isArchived": loginResponse.value?.status == "archived",
-            "banReason": loginResponse.value?.status == "archived"
-                ? "Your account has been deleted. Please contact support if you believe this is a mistake.".tr
-                : (loginResponse.value?.banReason?.isEmpty ?? false
-                    ? "Account is banned"
-                    : loginResponse.value?.banReason ?? "Account is banned"),
-            "bannedUntil": loginResponse.value?.bannedUntil ?? 17000000000000,
-            "daysRemaining": loginResponse.value?.daysRemaining ?? 20,
+        // Check if account is banned or archived
+        if (loginResponse.value?.isBanned == true ||
+            loginResponse.value?.status == "archived") {
+          final res = loginResponse.value!;
+
+          String finalReason = "";
+          if (res.status == "archived") {
+            if (res.archiveReason == "unpaid") {
+              finalReason =
+                  "Your account has been archived due to unpaid subscription."
+                      .tr;
+            } else if (res.archiveReason == "banned") {
+              finalReason = res.banReason?.isNotEmpty == true
+                  ? res.banReason!
+                  : "Your account has been banned.".tr;
+            } else if (res.archiveReason == "deleted") {
+              finalReason = res.deleteReason?.isNotEmpty == true
+                  ? res.deleteReason!
+                  : "Your account has been deleted.".tr;
+            } else {
+              finalReason =
+                  "Your account has been archived. Please contact support.".tr;
+            }
+          } else {
+            finalReason = res.banReason?.isNotEmpty == true
+                ? res.banReason!
+                : "Account is banned".tr;
+          }
+
+          Get.toNamed(AppRouter.bannedPath, arguments: {
+            "isArchived": res.status == "archived",
+            "archiveReason": res.archiveReason,
+            "banReason": finalReason,
+            "bannedUntil": res.bannedUntil ?? 17000000000000,
+            "daysRemaining": res.daysRemaining,
+            "deleteDate": res.deleteDate,
+            "deleteReason": res.deleteReason,
           });
           return;
         }
+
+        await saveLoginData(responseBody, loginResponse.value!, isChecked);
+
+        // Save password for background ban checks
+        await SharedPref()
+            .setString(PrefKeys.password, passwordController.text);
+        //get password from shared pref and print it to verify it's saved correctly
+        String? savedPassword = SharedPref().getString(PrefKeys.password);
+        print(
+            "Saved password for background checks: ${savedPassword != null ? '***' : null}");
+
+        // You might want to show a success message
+        ShowToast.showSuccessSnackBar(message: "loggedInSuccessfully".tr);
 
         Get.offAllNamed(AppRouter.bottomNavigationBar);
       } else {

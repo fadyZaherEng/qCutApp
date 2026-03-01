@@ -125,13 +125,43 @@ class SplashController extends GetxController
           if (response.statusCode == 200) {
             final responseBody = jsonDecode(response.body);
             final bool isBanned = responseBody['isBanned'] ?? false;
+            final String status = responseBody['status'] ?? '';
 
-            if (isBanned) {
+            if (isBanned || status == "archived") {
+              String finalReason = "";
+              if (status == "archived") {
+                final String reason = responseBody['archiveReason'] ?? '';
+                if (reason == "unpaid") {
+                  finalReason =
+                      "Your account has been archived due to unpaid subscription."
+                          .tr;
+                } else if (reason == "banned") {
+                  finalReason = responseBody['banReason']?.isNotEmpty == true
+                      ? responseBody['banReason']
+                      : "Your account has been banned.".tr;
+                } else if (reason == "deleted") {
+                  finalReason = responseBody['deleteReason']?.isNotEmpty == true
+                      ? responseBody['deleteReason']
+                      : "Your account has been deleted.".tr;
+                } else {
+                  finalReason =
+                      "Your account has been archived. Please contact support.".tr;
+                }
+              } else {
+                finalReason = responseBody['banReason']?.isNotEmpty == true
+                    ? responseBody['banReason']
+                    : "Account is banned".tr;
+              }
+
               NavigationHelper.navigateToAndRemoveUntil(AppRouter.bannedPath,
                   arguments: {
-                    "banReason": responseBody['banReason'],
+                    "isArchived": status == "archived",
+                    "archiveReason": responseBody['archiveReason'],
+                    "banReason": finalReason,
                     "bannedUntil": responseBody['bannedUntil'],
                     "daysRemaining": responseBody['daysRemaining'],
+                    "deleteDate": responseBody['deleteDate'],
+                    "deleteReason": responseBody['deleteReason'],
                   });
               return; // Stop further navigation
             }
