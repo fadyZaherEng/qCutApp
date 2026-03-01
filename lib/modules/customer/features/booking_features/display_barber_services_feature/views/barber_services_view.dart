@@ -80,6 +80,7 @@ class BarberServicesView extends StatelessWidget {
                   itemCount: controller.barberServices.length,
                   itemBuilder: (context, index) {
                     final service = controller.barberServices[index];
+                    print("Service ${service.name} selected: ${service.minTime}");
                     return BarberServiceCard(
                       name: service.name,
                       imageUrl: service.imageUrl,

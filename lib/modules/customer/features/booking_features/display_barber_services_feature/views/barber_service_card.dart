@@ -96,7 +96,7 @@ class _BarberServiceCardState extends State<BarberServiceCard> {
                       ),
                     ),
                     Text(
-                      "${(widget.duration / 60000).round()}${'minutes'.tr}",
+                      "${widget.duration}${'minutes'.tr}",
                       style: Styles.textStyleS12W400(
                         color: ColorsData.bodyFont,
                       ),

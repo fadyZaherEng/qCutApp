@@ -20,10 +20,18 @@ class QCutServicesController extends GetxController {
     isLoading.value = true;
     errorMessage.value = '';
     try {
-      final String apiUrl = Variables.GET_BARBER_SERVICES;
-      final response = await _apiCall.getData(apiUrl);
+      final response;
+      if (barberId.isEmpty) {
+        final String apiUrl = Variables.GET_BARBER_SERVICES;
+        response = await _apiCall.getData(apiUrl);
+      } else {
+        response = await _apiCall.getData(Variables.SERVICE + barberId);
+      }
       print("Fetching services for barber ID: $barberId");
-      print("Request URL: $apiUrl");
+      print("Request URL: ${Variables.SERVICE + barberId}");
+
+      print("Fetching services for barber ID: $barberId");
+      print("Request URL: ${Variables.SERVICE + barberId}");
       print("Response status: ${response.statusCode}");
       print("Response body: ${response.body}");
 
