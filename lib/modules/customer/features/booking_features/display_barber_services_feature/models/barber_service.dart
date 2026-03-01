@@ -52,9 +52,9 @@ class BarberServices {
   }
 
   int getDisplayDuration() {
-    if (duration != null) {
-      return duration!;
-    }
+    // if (duration != null) {
+    //   return duration!;
+    // }
     return minTime ~/ 60000;
   }
 }

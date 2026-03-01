@@ -88,7 +88,10 @@ class _BEditProfileViewState extends State<BEditProfileView> {
               _buildTitle("Change Your Details".tr),
               SizedBox(height: 20.h),
               _buildInputField("Change your name".tr, "Full Name".tr,
-                  controller.nameController, controller),
+                  controller.nameController, controller,
+                  textDirection: TextDirection.rtl,
+                  inputFormatters: [ArabicInputFormatter()],
+                  validator: (value) => validateArabicText(value)),
               SizedBox(height: 16.h),
               // _buildInputField(
               //   "Change Your Phone Number".tr,
@@ -103,6 +106,9 @@ class _BEditProfileViewState extends State<BEditProfileView> {
                 "Saloon Name".tr,
                 controller.saloonController,
                 controller,
+                textDirection: TextDirection.rtl,
+                inputFormatters: [ArabicInputFormatter()],
+                validator: (value) => validateArabicText(value),
               ),
               SizedBox(height: 16.h),
               _buildInputField(

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:q_cut/core/utils/network/api.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:intl/intl.dart';
 
@@ -310,12 +311,11 @@ class _CustomBAppointmentListItemState extends State<CustomBAppointmentListItem>
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
             onPressed: () async {
-              final Uri launchUri = Uri(
-                scheme: 'tel',
-                path: phoneNumber,
-              );
+              final Uri launchUri = Uri.parse('tel:$phoneNumber');
               if (await canLaunchUrl(launchUri)) {
                 await launchUrl(launchUri);
+              } else {
+                 ShowToast.showError(message: "Invalid phone number".tr);
               }
               Navigator.of(ctx).pop();
             },

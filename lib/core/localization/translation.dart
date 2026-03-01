@@ -635,6 +635,7 @@ class MyTranslation extends Translations {
           "You must add at least one service before customers can book appointments with you.":
               "يجب إضافة خدمة واحدة على الأقل قبل أن يتمكن العملاء من حجز المواعيد معك.",
           "Add Service": "إضافة خدمة",
+          "Invalid phone number": "رقم الهاتف غير صالح",
           "Service Required": "الخدمة مطلوبة",
           "Please add at least one service to continue":
               "يرجى إضافة خدمة واحدة على الأقل للمتابعة",
@@ -1511,6 +1512,7 @@ class MyTranslation extends Translations {
           "theNewAraOfBooking": "הדרך הקלה להזמין שירותי ספר באזור שלך",
           "youAre": "אתה : ",
           "barber": "ספר",
+          "Invalid phone number": "מספר טלפון לא חוקי",
           "customer": "לקוח",
           "Request sent successfully": "הבקשה נשלחה בהצלחה",
           "nearbySalons": "מספרות קרובות",

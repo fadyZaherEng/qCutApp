@@ -20,11 +20,9 @@ import 'package:q_cut/modules/barber/features/home_features/profile_features/pro
 import 'package:q_cut/modules/barber/features/home_features/statistics_feature/views/widgets/custom_edit_new_service_bottom_sheet.dart';
 import 'package:q_cut/modules/barber/features/home_features/profile_features/profile_display/views/widgets/show_change_your_picture_dialog.dart';
 import 'package:q_cut/modules/barber/features/home_features/profile_features/profile_display/views/widgets/show_working_days_bottom_sheet.dart';
-import 'package:q_cut/modules/barber/map_search/map_search_screen.dart';
 import 'package:q_cut/modules/customer/features/home_features/profile_feature/views/my_profile_view.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:table_calendar/table_calendar.dart';
-import '../models/barber_profile_model.dart';
 
 class BProfileView extends StatefulWidget {
   const BProfileView({super.key});
@@ -346,7 +344,7 @@ class _BProfileViewBodyState extends State<BProfileView>
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                    Text(
+                                  Text(
                                     profileData.hashtag != null
                                         ? "#${profileData.hashtag}"
                                         : "NO. 1".tr,
@@ -638,22 +636,23 @@ class _BProfileViewBodyState extends State<BProfileView>
   }
 
   Widget _buildServiceItemFromData(BarberService service) {
+    print(
+        "Service duration: ${service.duration}, minTime: ${service.minTime}, maxTime: ${service.maxTime}");
     bool isClicked = true;
     String durationText;
-    if (service.duration != null) {
-      if (service.duration! > 60000) {
-        durationText = "${(service.duration! / 60000).round()} min";
-      } else {
-        durationText = "${service.duration} min";
-      }
-    } else {
-      int avgTime = ((service.minTime + service.maxTime) / 2).round();
-      if (avgTime > 60000) {
-        durationText = "${(avgTime / 60000).round()} min";
-      } else {
-        durationText = "$avgTime min";
-      }
-    }
+    // if (service.duration != null) {
+    //   // if (service.duration! > 60000) {
+    //   //   durationText = "${(service.duration! / 60000).round()} min";
+    //   // } else {
+    //     durationText = "${service.duration} min";
+    //   // }
+    // } else {
+    // if (service.minTime > 60000) {
+    durationText = "${(service.minTime / 60000).round()} min";
+    // } else {
+    //   durationText = "${service.minTime} min";
+    // }
+    // }
 
     return Container(
       padding: EdgeInsets.all(12.w),
@@ -766,26 +765,22 @@ class _BProfileViewBodyState extends State<BProfileView>
                     actions: [
                       TextButton(
                         onPressed: () => Get.back(),
-                        child: Text(
-                          "Cancel".tr,
+                        child: Text("Cancel".tr,
                             style: TextStyle(
                               color: ColorsData.primary,
                               fontSize: 15,
-                            )
-                        ),
+                            )),
                       ),
                       TextButton(
                         onPressed: () async {
                           Get.back();
                           await controller.deleteBarberService(service.id);
                         },
-                        child: Text(
-                          "Delete".tr,
+                        child: Text("Delete".tr,
                             style: TextStyle(
                               color: Colors.red,
                               fontSize: 15,
-                            )
-                        ),
+                            )),
                       ),
                     ],
                   );
@@ -1113,8 +1108,8 @@ class _BProfileViewBodyState extends State<BProfileView>
 
     DateTime firstAllowedDay = today;
     if (initialStart != null) {
-      final startDay = DateTime(
-          initialStart.year, initialStart.month, initialStart.day);
+      final startDay =
+          DateTime(initialStart.year, initialStart.month, initialStart.day);
       if (startDay.isBefore(today)) {
         firstAllowedDay = startDay;
       }
