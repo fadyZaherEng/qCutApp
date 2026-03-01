@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
@@ -7,6 +8,8 @@ import 'package:q_cut/core/utils/styles.dart';
 import 'package:q_cut/main.dart';
 import 'package:q_cut/modules/auth/views/widgets/custom_text_form.dart';
 import 'package:q_cut/modules/barber/map_search/map_search_screen.dart';
+import 'package:q_cut/modules/auth/views/functions/validate_arabic_text.dart';
+import 'package:q_cut/modules/auth/views/functions/arabic_input_formatter.dart';
 import '../../../statistics_feature/views/widgets/ChooseOffDaysBottomSheet.dart';
 import '../../profile_display/models/barber_profile_model.dart';
 import '../logic/b_edit_profile_controller.dart';
@@ -102,29 +105,15 @@ class _BEditProfileViewState extends State<BEditProfileView> {
                 controller,
               ),
               SizedBox(height: 16.h),
-              InkWell(
-                onTap: () {
-                  // // Future.delayed to ensure the tap is registered properly
-                  // Navigator.push(context, MaterialPageRoute(builder: (context) {
-                  //   return MapSearchScreen(
-                  //     initialLatitude:32.0853,
-                  //     initialLongitude: 34.7818,
-                  //     onLocationSelected: ( lat, lng, address) {
-                  //       controller.cityController.text = address;
-                  //       controller.locationLatitude = lat;
-                  //       controller.locationLongitude = lng;
-                  //       setState(() {});
-                  //     },
-                  //   );
-                  // }));
-                },
-                child: _buildInputField(
-                  "Change Your City".tr,
-                  "City".tr,
-                  controller.cityController,
-                  controller,
-                  readOnly: true,
-                ),
+              _buildInputField(
+                "Change Your City".tr,
+                "City".tr,
+                controller.cityController,
+                controller,
+                readOnly: false,
+                textDirection: TextDirection.rtl,
+                inputFormatters: [ArabicInputFormatter()],
+                validator: (value) => validateArabicText(value),
               ),
               SizedBox(height: 16.h),
               _buildInputField(
@@ -270,7 +259,11 @@ class _BEditProfileViewState extends State<BEditProfileView> {
 
   Widget _buildInputField(
       String label, String hint, TextEditingController controll, controller,
-      {bool isPhone = false, bool readOnly = false}) {
+      {bool isPhone = false,
+      bool readOnly = false,
+      TextDirection? textDirection,
+      List<TextInputFormatter>? inputFormatters,
+      String? Function(String?)? validator}) {
     return Padding(
       padding: EdgeInsets.only(bottom: 16.h),
       child: Column(
@@ -305,6 +298,9 @@ class _BEditProfileViewState extends State<BEditProfileView> {
             hintText: hint,
             controller: controll,
             keyboardType: isPhone ? TextInputType.phone : null,
+            textDirection: textDirection,
+            inputFormatters: inputFormatters,
+            validator: validator,
           ),
         ],
       ),

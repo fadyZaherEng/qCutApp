@@ -45,10 +45,10 @@ class CustomAvailableTime extends GetView<SelectAppointmentTimeController> {
             margin: EdgeInsets.symmetric(vertical: 20.h),
             padding: EdgeInsets.all(20.r),
             decoration: BoxDecoration(
-              color: Colors.green.withOpacity(0.05),
+              color: Colors.green.shade900.withOpacity(0.1),
               borderRadius: BorderRadius.circular(16.r),
               border: Border.all(
-                  color: Colors.greenAccent.withOpacity(0.5), width: 2),
+                  color: Colors.green.shade800.withOpacity(0.6), width: 2),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -56,11 +56,11 @@ class CustomAvailableTime extends GetView<SelectAppointmentTimeController> {
                 Container(
                   padding: EdgeInsets.all(12.r),
                   decoration: BoxDecoration(
-                    color: Colors.greenAccent.withOpacity(0.2),
+                    color: Colors.green.shade200.withOpacity(0.4),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(Icons.directions_walk,
-                      size: 40.r, color: Colors.green.shade800),
+                      size: 40.r, color: Colors.green.shade900),
                 ),
                 SizedBox(height: 16.h),
                 Text(
@@ -87,14 +87,14 @@ class CustomAvailableTime extends GetView<SelectAppointmentTimeController> {
                         ? workingDay.workingHours
                         : "openAllDay".tr,
                     style:
-                        Styles.textStyleS20W700(color: Colors.green.shade700),
+                        Styles.textStyleS20W700(color: Colors.green.shade900),
                   ),
                 ),
                 SizedBox(height: 16.h),
                 Text(
                   "walkInDayMessage".tr,
                   textAlign: TextAlign.center,
-                  style: Styles.textStyleS14W400(color: Colors.green.shade800),
+                  style: Styles.textStyleS14W400(color: Colors.green.shade900),
                 ),
               ],
             ),
