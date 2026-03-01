@@ -75,24 +75,24 @@ class _MessageInputState extends State<MessageInput> {
               ),
             ),
             SizedBox(width: 8.w),
-            InkWell(
-              onTap: widget.onRecTap,
-              child: Container(
-                padding: EdgeInsets.all(8.r),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: SvgPicture.asset(
-                  AssetsData.microphoneIcon,
-                  height: 20.h,
-                  width: 20.w,
-                  colorFilter:
-                      const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-                ),
-              ),
-            ),
-            SizedBox(width: 12.w),
+            // InkWell(
+            //   onTap: widget.onRecTap,
+            //   child: Container(
+            //     padding: EdgeInsets.all(8.r),
+            //     decoration: BoxDecoration(
+            //       color: Colors.white.withOpacity(0.1),
+            //       shape: BoxShape.circle,
+            //     ),
+            //     child: SvgPicture.asset(
+            //       AssetsData.microphoneIcon,
+            //       height: 20.h,
+            //       width: 20.w,
+            //       colorFilter:
+            //           const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+            //     ),
+            //   ),
+            // ),
+            // SizedBox(width: 12.w),
             Expanded(
               child: Container(
                 decoration: BoxDecoration(
