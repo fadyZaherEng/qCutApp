@@ -174,7 +174,7 @@ class _SelectedViewState extends State<SelectedView> {
                                 final todayWork =
                                     workingHoursRange.firstWhereOrNull(
                                         (d) => d.formattedDate == today);
-                                if (todayWork?.isWalkIn ?? false) {
+                                if (walkInRanges.isEmpty&&(todayWork?.isWalkIn ?? false)) {
                                   return Container(
                                     padding: EdgeInsets.symmetric(
                                         horizontal: 8.w, vertical: 2.h),

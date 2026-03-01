@@ -44,11 +44,8 @@ class NotificationViewModel extends GetxController {
   }
 
   void _updateViewModel(List<NotificationModel> notifications) {
-    if (notifications.isEmpty) return;
-
-    // Simply store all notifications for display
-    displayedNotifications.clear();
-    displayedNotifications.addAll(notifications);
+    // Clear and update with new data (allow empty list)
+    displayedNotifications.assignAll(notifications);
   }
 
   // Utility methods
@@ -115,10 +112,16 @@ class NotificationViewModel extends GetxController {
       {},
     );
     print(response.body);
-    response.statusCode == 200
-        ? ShowToast.showSuccessSnackBar(
-            message: "Appointment ${confirmed ? 'confirmed' : 'rejected'}")
-        : ShowToast.showError(message: "Notification is Expired".tr);
+    if (response.statusCode == 200) {
+      ShowToast.showSuccessSnackBar(
+          message: "Appointment ${confirmed ? 'confirmed' : 'rejected'}") ;
+      
+      // Immediate local update for better UX
+      displayedNotifications.removeWhere((n) => n.id == notification.id);
+      _controller.notifications.removeWhere((n) => n.id == notification.id);
+    } else {
+      ShowToast.showError(message: "Notification is Expired".tr);
+    }
 
     refreshNotifications();
   }

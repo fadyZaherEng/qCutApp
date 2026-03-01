@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:q_cut/core/utils/constants/colors_data.dart';
+import 'package:q_cut/core/utils/styles.dart';
 import 'package:q_cut/modules/customer/features/settings/chat_feature/chat_bubble_for_barber.dart';
 import 'package:q_cut/modules/customer/features/settings/chat_feature/chat_bubble_for_customer.dart';
 import 'package:get/get.dart';
@@ -48,64 +49,73 @@ class ChatWithUsViewBodyState extends State<ChatWithUsViewBody> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Expanded(
-          child: Obx(() {
-            if (_chatController.isLoading.value) {
-              return const Center(child: SpinKitDoubleBounce(color: ColorsData.primary));
-            }
-
-            if (_chatController.messages.isEmpty) {
-              return Center(
-                child: Text('noMessagesYet'.tr),
-              );
-            }
-
-            return ListView.builder(
-              controller: _scrollController,
-              reverse: true,
-              padding: EdgeInsets.symmetric(horizontal: 15.w),
-              itemCount: _chatController.messages.length + 1,
-              // +1 for loading indicator
-              itemBuilder: (context, index) {
-                if (index == _chatController.messages.length) {
-                  return Obx(() => _chatController.isLoadingMore.value
-                      ? const Center(
-                          child: Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: SpinKitDoubleBounce(color: ColorsData.primary),
-                          ),
-                        )
-                      : const SizedBox.shrink());
+    return Container(
+      decoration: BoxDecoration(
+        // color: ColorsData.bodyFont,
+        // borderRadius: BorderRadius.only(
+        //   topLeft: Radius.circular(32.r),
+        //   topRight: Radius.circular(32.r),
+        // ),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(32.r),
+          topRight: Radius.circular(32.r),
+        ),
+        child: Column(
+          children: [
+            Expanded(
+              child: Obx(() {
+                if (_chatController.isLoading.value) {
+                  return const Center(child: SpinKitDoubleBounce(color: ColorsData.primary));
                 }
 
-                final message = _chatController.messages[index];
+                if (_chatController.messages.isEmpty) {
+                  return Center(
+                    child: Text(
+                      'noMessagesYet'.tr,
+                      style: Styles.textStyleS16W400(color: ColorsData.thirty),
+                    ),
+                  );
+                }
 
-                print(
-                    '=================== Message Details ===================');
-                print('Message: ${message.message}');
-                print('MediaType: ${message.mediaType}');
-                print('MediaURL: ${message.mediaUrl}');
-                print('Created At: ${message.createdAt}');
-                print('====================================================');
+                return ListView.builder(
+                  controller: _scrollController,
+                  reverse: true,
+                  padding: EdgeInsets.fromLTRB(16.w, 24.h, 16.w, 16.h),
+                  itemCount: _chatController.messages.length + 1,
+                  itemBuilder: (context, index) {
+                    if (index == _chatController.messages.length) {
+                      return Obx(() => _chatController.isLoadingMore.value
+                          ? const Center(
+                              child: Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: SpinKitDoubleBounce(color: ColorsData.primary),
+                              ),
+                            )
+                          : const SizedBox.shrink());
+                    }
 
-                return message.adminReply
-                    ? ChatBubbleForBarber(
-                        text: message.message,
-                        mediaType: message.mediaType,
-                        mediaUrl: message.mediaUrl,
-                      )
-                    : ChatBubbleForCustomer(
-                        text: message.message,
-                        mediaType: message.mediaType,
-                        mediaUrl: message.mediaUrl,
-                      );
-              },
-            );
-          }),
+                    final message = _chatController.messages[index];
+
+                    return message.adminReply
+                        ? ChatBubbleForBarber(
+                            text: message.message,
+                            mediaType: message.mediaType,
+                            mediaUrl: message.mediaUrl,
+                          )
+                        : ChatBubbleForCustomer(
+                            text: message.message,
+                            mediaType: message.mediaType,
+                            mediaUrl: message.mediaUrl,
+                          );
+                  },
+                );
+              }),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }

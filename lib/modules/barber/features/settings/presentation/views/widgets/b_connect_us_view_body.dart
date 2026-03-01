@@ -39,7 +39,8 @@ class BConnectUsViewBody extends StatelessWidget {
             SizedBox(height: 8.h),
             Text(
               "You can contact by".tr,
-              style: Styles.textStyleS14W400(color: ColorsData.font.withOpacity(0.6)),
+              style: Styles.textStyleS14W400(
+                  color: ColorsData.font.withOpacity(0.6)),
             ),
             SizedBox(height: 32.h),
             _buildContactItem(
@@ -113,7 +114,9 @@ class BConnectUsViewBody extends StatelessWidget {
             SizedBox(width: 16.w),
             Text(
               title,
-              style: Styles.textStyleS16W500(),
+              style: Styles.textStyleS16W500(
+                color: Colors.black,
+              ),
             ),
             const Spacer(),
             Icon(

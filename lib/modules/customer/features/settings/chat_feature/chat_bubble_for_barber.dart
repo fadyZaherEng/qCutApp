@@ -29,10 +29,18 @@ class ChatBubbleForBarber extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            CircleAvatar(
-              radius: 25.r,
-              foregroundImage: const AssetImage(AssetsData.circleQCutImage),
-              backgroundColor: ColorsData.secondary,
+            Container(
+              padding: EdgeInsets.all(2.r),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: ColorsData.bodyFont,
+                border: Border.all(color: ColorsData.primary, width: 1.w),
+              ),
+              child: CircleAvatar(
+                radius: 25.r,
+                foregroundImage: const AssetImage(AssetsData.circleQCutImage),
+                backgroundColor: ColorsData.secondary,
+              ),
             ),
             SizedBox(width: 8.w),
             Container(
