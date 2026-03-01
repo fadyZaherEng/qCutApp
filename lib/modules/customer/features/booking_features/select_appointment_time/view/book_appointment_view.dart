@@ -162,7 +162,7 @@ class BookAppointmentView extends GetView<SelectAppointmentTimeController> {
                   builder: (controller) => const CustomAvailableTime(),
                 ),
                 SizedBox(height: 24.h),
-                if (!isBarberBooking) ...[
+                if (!isBarberBooking && !controller.isWalkInDay(controller.selectedDate.value)) ...[
                   Text(
                     "ifAppointmentsDontFit".tr,
                     style: Styles.textStyleS16W400(),

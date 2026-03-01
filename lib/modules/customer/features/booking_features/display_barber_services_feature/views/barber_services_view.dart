@@ -18,12 +18,12 @@ class BarberServicesView extends StatelessWidget {
 
   final BarberServicesController controller =
       Get.put(BarberServicesController());
-  final dynamic arguments = Get.arguments;
-  late final Barber barber;
-  List<String>? preSelectedServiceIds;
-
   @override
   Widget build(BuildContext context) {
+    final dynamic arguments = Get.arguments;
+    final Barber barber;
+    List<String>? preSelectedServiceIds;
+
     if (arguments is Barber) {
       barber = arguments;
     } else if (arguments is Map) {

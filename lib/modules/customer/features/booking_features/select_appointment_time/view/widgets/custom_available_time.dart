@@ -173,16 +173,16 @@ class CustomAvailableTime extends GetView<SelectAppointmentTimeController> {
                                 ]
                               : null,
                         ),
-                        child: Text(
-                          _formatTimeSlot(timeSlot),
-                          style: TextStyle(
-                            fontSize: 10.sp,
-                            fontWeight:
-                                isSelected ? FontWeight.w700 : FontWeight.w400,
-                            color: isSelected ? Colors.white : Colors.black,
+                          child: Text(
+                            _formatTimeSlot(timeSlot),
+                            style: TextStyle(
+                              fontSize: 12.sp,
+                              fontWeight:
+                                  isSelected ? FontWeight.w700 : FontWeight.w400,
+                              color: isSelected ? Colors.white : Colors.black,
+                            ),
+                            textAlign: TextAlign.center,
                           ),
-                          textAlign: TextAlign.center,
-                        ),
                       ),
                     );
                   });
@@ -198,9 +198,9 @@ class CustomAvailableTime extends GetView<SelectAppointmentTimeController> {
 
   // Format time slot to display start and end time
   String _formatTimeSlot(TimeSlot slot) {
-    final startTime = DateFormat('h:mm').format(slot.startTime);
-    final endTime = DateFormat('h:mm').format(slot.endTime);
-    return '$startTime - $endTime';
+    final startTime = DateFormat('HH:mm').format(slot.startTime);
+    final endTime = DateFormat('HH:mm').format(slot.endTime);
+    return '$startTime-$endTime';
   }
 
   // Group slots by morning, afternoon, evening
