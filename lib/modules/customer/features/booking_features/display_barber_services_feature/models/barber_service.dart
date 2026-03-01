@@ -55,6 +55,6 @@ class BarberServices {
     if (duration != null) {
       return duration!;
     }
-    return ((minTime + maxTime) ~/ 2) ~/ 60000;
+    return minTime ~/ 60000;
   }
 }
