@@ -11,6 +11,8 @@ import 'package:q_cut/core/services/shared_pref/shared_pref.dart';
 import 'package:q_cut/core/utils/network/api.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:connectivity_plus/connectivity_plus.dart';
+
 
 class SplashController extends GetxController
     with GetSingleTickerProviderStateMixin {
@@ -23,7 +25,6 @@ class SplashController extends GetxController
     _initAnimation();
     _configureSystemUI(true);
     _navigateAfterDelay();
-    print("SplashController initialized bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb");
   }
 
   @override
@@ -84,18 +85,19 @@ class SplashController extends GetxController
       String? phoneNumber = SharedPref().getString(PrefKeys.phoneNumber);
       String? password = SharedPref().getString(PrefKeys.password);
       bool? isUserRole = SharedPref().getBool(PrefKeys.userRole);
-      // Get FCM token before making the request
-      final fcmToken = await getFCMToken();
       String? token = SharedPref().getString(PrefKeys.accessToken);
-      print(
-          "Saved credentials: phoneNumber=$phoneNumber, password=${password != null ? '***' : null}, isUserRole=$isUserRole, saveMe=$saveMe");
-      // Verify ban status in background if we have credentials
-      if (phoneNumber != null &&
-          phoneNumber.isNotEmpty &&
-          password != null &&
-          password.isNotEmpty &&
-          saveMe) {
+
+      debugPrint("Splash: Checking connectivity before ban check...");
+      final connectivityResult = await Connectivity().checkConnectivity();
+      bool hasInternet = connectivityResult.any((result) => result != ConnectivityResult.none);
+
+      if (hasInternet && phoneNumber != null && phoneNumber.isNotEmpty &&
+          password != null && password.isNotEmpty && saveMe) {
         try {
+          debugPrint("Splash: Online, performing ban check...");
+          // Get FCM token only if online to avoid potential hangs
+          final fcmToken = await getFCMToken().timeout(const Duration(seconds: 2), onTimeout: () => '');
+          
           final response = await http
               .post(
                 Uri.parse(Variables.LOGIN),
@@ -106,35 +108,23 @@ class SplashController extends GetxController
                 body: jsonEncode({
                   'phoneNumber': phoneNumber,
                   'password': password,
-                  'userType':
-                      isUserRole != null && isUserRole ? 'user' : 'barber',
-                  "fcmToken": token,
+                  'userType': isUserRole != null && isUserRole ? 'user' : 'barber',
+                  "fcmToken": fcmToken,
                 }),
               )
               .timeout(const Duration(seconds: 5));
-          print(
-              "Ban check response: ${response.statusCode} - ${response.body}");
-          print("Ban check request body: ${jsonEncode({
-                'phoneNumber': phoneNumber,
-                'password': password,
-                'userType':
-                    isUserRole != null && isUserRole ? 'user' : 'barber',
-                "fcmToken": token,
-              })}");
 
           if (response.statusCode == 200) {
             final responseBody = jsonDecode(response.body);
             final bool isBanned = responseBody['isBanned'] ?? false;
             final String status = responseBody['status'] ?? '';
 
-            if (isBanned || status == "archived") {
+            if (hasInternet && (isBanned || status == "archived")) {
               String finalReason = "";
               if (status == "archived") {
                 final String reason = responseBody['archiveReason'] ?? '';
                 if (reason == "unpaid") {
-                  finalReason =
-                      "Your account has been archived due to unpaid subscription."
-                          .tr;
+                  finalReason = "Your account has been archived due to unpaid subscription.".tr;
                 } else if (reason == "banned") {
                   finalReason = responseBody['banReason']?.isNotEmpty == true
                       ? responseBody['banReason']
@@ -144,8 +134,7 @@ class SplashController extends GetxController
                       ? responseBody['deleteReason']
                       : "Your account has been deleted.".tr;
                 } else {
-                  finalReason =
-                      "Your account has been archived. Please contact support.".tr;
+                  finalReason = "Your account has been archived. Please contact support.".tr;
                 }
               } else {
                 finalReason = responseBody['banReason']?.isNotEmpty == true
@@ -163,17 +152,18 @@ class SplashController extends GetxController
                     "deleteDate": responseBody['deleteDate'],
                     "deleteReason": responseBody['deleteReason'],
                   });
-              return; // Stop further navigation
+              return;
             }
           }
         } catch (e) {
-          debugPrint("Background ban check failed: $e");
+          debugPrint("Background ban check failed or timed out: $e");
         }
+      } else {
+        debugPrint("Splash: Offline or no credentials, skipping ban check.");
       }
 
       if (saveMe && token != null && token.isNotEmpty) {
-        NavigationHelper.navigateToAndRemoveUntil(
-            AppRouter.bottomNavigationBar);
+        NavigationHelper.navigateToAndRemoveUntil(AppRouter.bottomNavigationBar);
       } else {
         if (!saveMe) {
           SharedPref().removePreference(PrefKeys.accessToken);

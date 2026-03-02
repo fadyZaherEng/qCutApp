@@ -10,7 +10,6 @@ class SplashView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print("SplashView built bvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv");
     // Initialize controller
     final SplashController controller = Get.put(SplashController());
 
