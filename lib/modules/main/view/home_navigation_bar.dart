@@ -76,12 +76,9 @@ class _HomeNavigationBarState extends State<HomeNavigationBar> {
       }
     }
 
-    if (saveMe && token != null && token.isNotEmpty) {
+    if (token != null && token.isNotEmpty) {
       // Do nothing, already on the home navigation bar
     } else {
-      if (!saveMe) {
-        SharedPref().removePreference(PrefKeys.accessToken);
-      }
       NavigationHelper.navigateToAndRemoveUntil(AppRouter.selectServicesPath);
     }
   }
@@ -91,7 +88,9 @@ class _HomeNavigationBarState extends State<HomeNavigationBar> {
   @override
   void initState() {
     super.initState();
-    _navigateAfterDelay();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _navigateAfterDelay();
+    });
   }
 
   @override
