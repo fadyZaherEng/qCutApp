@@ -132,9 +132,8 @@ class SplashController extends GetxController
               if (status == "archived") {
                 final String reason = responseBody['archiveReason'] ?? '';
                 if (reason == "unpaid") {
-                  finalReason =
-                      "Your account has been archived due to unpaid subscription."
-                          .tr;
+                  NavigationHelper.navigateToAndRemoveUntil(AppRouter.unpaidPath);
+                  return;
                 } else if (reason == "banned") {
                   finalReason = responseBody['banReason']?.isNotEmpty == true
                       ? responseBody['banReason']

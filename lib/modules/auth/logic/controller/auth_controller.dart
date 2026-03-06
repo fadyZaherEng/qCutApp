@@ -260,13 +260,16 @@ class AuthController extends GetxController {
         if (loginResponse.value?.isBanned == true ||
             loginResponse.value?.status == "archived") {
           final res = loginResponse.value!;
-
           String finalReason = "";
           if (res.status == "archived") {
             if (res.archiveReason == "unpaid") {
-              finalReason =
-                  "Your account has been archived due to unpaid subscription."
-                      .tr;
+              await saveLoginData(
+                  responseBody, loginResponse.value!, isChecked);
+              // Save password for background ban checks
+              await SharedPref()
+                  .setString(PrefKeys.password, passwordController.text);
+              Get.toNamed(AppRouter.unpaidPath);
+              return;
             } else if (res.archiveReason == "banned") {
               finalReason = res.banReason?.isNotEmpty == true
                   ? res.banReason!

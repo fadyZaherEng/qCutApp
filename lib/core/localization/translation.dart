@@ -703,6 +703,10 @@ class MyTranslation extends Translations {
           "Your account has been archived. Please contact support.": "تم أرشفة حسابك. يرجى التواصل مع الدعم.",
           "termsContent": "أهلاً بك في كيوكت. باستخدامك لتطبيقنا، فإنك توافق على الالتزام بالشروط والأحكام التالية: \n\n1. استخدام التطبيق: يجب استخدام التطبيق لأغراض مشروعة فقط.\n2. الحجوزات: يتم تنظيم الحجوزات بينك وبين الحلاق مباشرة.\n3. المسؤولية: كيوكت هو منصة وسيطة ولا يتحمل مسؤولية جودة الخدمات.\n4. الخصوصية: نحن نحترم خصوصيتك وبياناتك الشخصية.",
           "privacyContent": "سياسة الخصوصية في كيوكت: \n\n1. جمع البيانات: نقوم بجمع رقم الهاتف والاسم لتسهيل عملية الحجز.\n2. استخدام البيانات: تُستخدم بياناتك لربطك مع الحلاقين وتلقي الإشعارات.\n3. حماية البيانات: نستخدم معايير عالية لحماية بياناتك من الوصول غير المصرح به.\n4. مشاركة البيانات: لا نشارك بياناتك مع أطراف ثالثة لأغراض تسويقية.",
+          "payToQcut": "ادفع لـ كيوكت",
+          "unpaidAccountReason": "تم أرشفة حسابك لأنك لم تقم بسداد الرسوم الشهرية.",
+          "pleasePayToActivate": "يرجى الدفع حتى يصبح حسابك نشطاً",
+          "payToQcutBtn": "ادفع لـ كيوكت",
         },
         "en": {
           "pleaseWait": "Please wait",
@@ -1424,6 +1428,10 @@ class MyTranslation extends Translations {
           "contactSupportToRestore": "Please contact support to restore your account",
           "termsContent": "Welcome to QCut. By using our application, you agree to comply with the following terms and conditions: \n\n1. App Usage: The app must be used for lawful purposes only.\n2. Bookings: Bookings are organized directly between you and the barber.\n3. Responsibility: QCut is an intermediary platform and is not responsible for the quality of services.\n4. Privacy: We respect your privacy and personal data.",
           "privacyContent": "Privacy Policy at QCut: \n\n1. Data Collection: We collect phone numbers and names to facilitate the booking process.\n2. Data Usage: Your data is used to connect you with barbers and receive notifications.\n3. Data Protection: We use high standards to protect your data from unauthorized access.\n4. Data Sharing: We do not share your data with third parties for marketing purposes.",
+          "payToQcut": "Pay to QCUT",
+          "unpaidAccountReason": "Your account has been archived because you didn't pay your monthly fee.",
+          "pleasePayToActivate": "please pay so you become active",
+          "payToQcutBtn": "Pay to Qcut",
         },
         "he": {
           "emailreq": "דרוש אימייל",
@@ -2055,6 +2063,10 @@ class MyTranslation extends Translations {
           "contactSupportToRestore": "אנא צור קשר עם התמיכה כדי לשחזר את החשבון",
           "termsContent": "ברוכים הבאים ל-QCut. בשימוש באפליקציה שלנו, אתה מסכים לציית לתנאים ולהגבלות הבאים: \n\n1. שימוש באפליקציה: יש להשתמש באפליקציה למטרות חוקיות בלבד.\n2. הזמנות: ההזמנות מאורגנות ישירות בינך לבין הספר.\n3. אחריות: QCut היא פלטפורמה מתווכת ואינה אחראית על איכות השירותים.\n4. פרטיות: אנו מכבדים את הפרטיות והנתונים האישיים שלך.",
           "privacyContent": "מדיניות פרטיות ב-QCut: \n\n1. איסוף נתונים: אנו אוספים מספרי טלפון ושמות כדי להקל על תהליך ההזמנה.\n2. שימוש בנתונים: הנתונים שלך משמשים לחיבור בינך לבין הספרים ולקבלת התראות.\n3. הגנת נתונים: אנו משתמשים בסטנדרטים גבוהים כדי להגן על הנתונים שלך מפני גישה בלתי מורשית.\n4. שיתוף נתונים: איננו משתפים את הנתונים שלך עם צדדים שלישיים למטרות שיווק.",
+          "payToQcut": "שלם ל-QCUT",
+          "unpaidAccountReason": "חשבונך הועבר לארכיון מכיוון שלא שילמת את העמלה החודשית שלך.",
+          "pleasePayToActivate": "אנא שלם כדי להפוך לפעיל",
+          "payToQcutBtn": "שלם ל-Qcut",
         },
       };
 }
