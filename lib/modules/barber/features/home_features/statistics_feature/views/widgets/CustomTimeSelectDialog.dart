@@ -270,13 +270,17 @@ class _CustomTimeSelectDialogState extends State<CustomTimeSelectDialog> {
       context: context,
       initialTime: _selectedTime,
       builder: (context, child) {
-        return Theme(
-          data: ThemeData.light().copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: Color(0xFFC49A58),
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
+          child: Theme(
+            data: ThemeData.light().copyWith(
+              colorScheme: const ColorScheme.light(
+                primary: Color(0xFFC49A58),
+                onSurface: Colors.black,
+              ),
             ),
+            child: child!,
           ),
-          child: child!,
         );
       },
     );

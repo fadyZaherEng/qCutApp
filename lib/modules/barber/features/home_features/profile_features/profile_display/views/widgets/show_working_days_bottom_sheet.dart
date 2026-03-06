@@ -332,14 +332,17 @@ Widget _buildTimePickerField(
             context: context,
             initialTime: TimeOfDay(hour: hour.value, minute: minute.value),
             builder: (context, child) {
-              return Theme(
-                data: Theme.of(context).copyWith(
-                  colorScheme: const ColorScheme.dark(
-                    primary: ColorsData.primary,
-                    onSurface: Colors.white,
+              return MediaQuery(
+                data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
+                child: Theme(
+                  data: Theme.of(context).copyWith(
+                    colorScheme: const ColorScheme.light(
+                      primary: ColorsData.primary,
+                      onSurface: Colors.black,
+                    ),
                   ),
+                  child: child!,
                 ),
-                child: child!,
               );
             },
           );
