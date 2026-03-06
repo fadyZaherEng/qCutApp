@@ -130,7 +130,7 @@ class _SignUpViewState extends State<SignUpView> {
                       ),
                       SizedBox(height: 16.h),
                       CustomTextFormField(
-                        keyboardType: TextInputType.number,
+                        keyboardType: TextInputType.phone,
                         controller: _authController.phoneNumberController,
                         hintText: 'enterYourPhoneNumber'.tr,
                         validator: (value) =>

@@ -51,8 +51,7 @@ class CustomTextFormField extends StatelessWidget {
   Widget build(BuildContext context) {
     // Special handling for phone field
     final languageCode = Localizations.localeOf(context).languageCode;
-    if (keyboardType == TextInputType.phone ||
-        keyboardType == TextInputType.number) {
+    if (keyboardType == TextInputType.phone) {
       return Directionality(
         textDirection: textDirection ??
             (languageCode == 'ar' ? TextDirection.rtl : TextDirection.ltr),
@@ -134,11 +133,12 @@ class CustomTextFormField extends StatelessWidget {
           ? TextDirection.ltr
           : Directionality.of(context),
       child: TextFormField(
-        inputFormatters: keyboardType == TextInputType.visiblePassword
-            ? [
-                FilteringTextInputFormatter.allow(RegExp(r'[ -~]')),
-              ]
-            : null,
+        inputFormatters: inputFormatters ??
+            (keyboardType == TextInputType.visiblePassword
+                ? [
+                    FilteringTextInputFormatter.allow(RegExp(r'[ -~]')),
+                  ]
+                : null),
         onChanged: onChanged,
         onFieldSubmitted: onFieldSubmitted,
         onSaved: onSaved,

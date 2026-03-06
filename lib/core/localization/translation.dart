@@ -676,7 +676,7 @@ class MyTranslation extends Translations {
           "noData": "لا توجد بيانات",
           "pending": "قيد الانتظار",
           "noPreviousPaymentsFound": "لم يتم العثور على دفعات سابقة",
-          "currency": "شيكل",
+          "currency": "₪",
           "pleaseWait": "يرجى الانتظار",
           "preparingOffer": "كيوكت يقوم بتجهيز عرض خاص لك",
           "notifyWhenReady": "سنقوم بإخطارك فور جاهزية عرضك",

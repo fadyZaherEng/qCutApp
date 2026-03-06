@@ -251,7 +251,9 @@ class BProfileController extends GetxController {
     required String serviceId,
     required String serviceName,
     required String servicePrice,
-    required String serviceTime,
+    int? min,
+    int? max,
+    String? serviceTime,
     String? imageUrl,
   }) async {
     isUpdatingService.value = true;
@@ -264,8 +266,13 @@ class BProfileController extends GetxController {
         'price': int.tryParse(servicePrice) ?? 0,
         "imageUrl": imageUrl ??
             "https://qcute-test-bucket.s3.us-east-1.amazonaws.com/images/1738787141939",
-        // 'duration': int.tryParse(serviceTime) ?? 30, // Added duration field
       };
+
+      if (min != null) requestData['minTime'] = min * 60000;
+      if (max != null) requestData['maxTime'] = max * 60000;
+      if (serviceTime != null && min == null) {
+        requestData['duration'] = (int.tryParse(serviceTime) ?? 30) * 60000;
+      }
 
       // Ensure the URL is properly formatted with the API base URL
       const endpoint = Variables.UPDATE_BARBER_SERVICE;
@@ -274,11 +281,10 @@ class BProfileController extends GetxController {
       print('API URL: $url');
       print('Request data: ${jsonEncode(requestData)}');
 
-      // Make API call - passing the Map directly instead of pre-encoding it
-      // Let the network helper handle the JSON encoding
+      // Make API call
       final response = await _apiCall.editData(
         url,
-        requestData, // Pass the Map directly instead of encoding it here
+        requestData,
       );
 
       print("Response status: ${response.statusCode}");
@@ -291,11 +297,10 @@ class BProfileController extends GetxController {
         // Refresh services list after successful update
         await fetchBarberServices();
 
-        // Force UI updates with explicit IDs
+        // Force UI updates
         update(['barber_services']);
-        Get.forceAppUpdate(); // Force GetX to refresh the entire app's state
+        Get.forceAppUpdate();
 
-        // Check if the response is a valid JSON before decoding
         var responseBody;
         try {
           responseBody = json.decode(response.body);
@@ -309,12 +314,10 @@ class BProfileController extends GetxController {
           'data': responseBody
         };
       } else {
-        // Handle error response - safely parse response body
         var responseBody;
         try {
           responseBody = json.decode(response.body);
         } catch (e) {
-          // If response body isn't valid JSON (like HTML error page)
           responseBody = {
             'message': '${'Failed to update service'.tr}: ${response.statusCode}'
           };
@@ -428,8 +431,8 @@ class BProfileController extends GetxController {
       final Map<String, dynamic> requestData = {
         'name': serviceName,
         'price': int.tryParse(servicePrice) ?? 0,
-        'minTime': min,
-        'maxTime': max,
+        'minTime': min * 60000,
+        'maxTime': max * 60000,
         'imageUrl': imageUrl ??
             "https://qcute-test-bucket.s3.us-east-1.amazonaws.com/images/1738787141939"
       };

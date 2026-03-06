@@ -494,15 +494,15 @@ class _BProfileViewBodyState extends State<BProfileView>
           SizedBox(width: 12.w),
           ElevatedButton(
             onPressed: () {
+              setState(() {});
               showCustomEditNewServiceBottomSheet(
                 context,
                 serviceId: service.id,
                 serviceName: service.name,
                 servicePrice: service.price.toString(),
-                serviceTime: service.duration?.toString() ??
-                    ((service.minTime + service.maxTime) / 2)
-                        .round()
-                        .toString(),
+                minTime: (service.minTime / 60000).round(),
+                maxTime: (service.maxTime / 60000).round(),
+                serviceImagePath: service.imageUrl,
               );
             },
             style: ElevatedButton.styleFrom(

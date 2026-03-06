@@ -25,6 +25,7 @@ class _ChooseBreakDaysBottomSheetState
   DateTime _focusedDay = DateTime.now();
   RangeSelectionMode _rangeSelectionMode = RangeSelectionMode.toggledOn;
   List<Map<String, DateTime>> _breakRanges = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -36,9 +37,6 @@ class _ChooseBreakDaysBottomSheetState
     try {
       final response =
           await NetworkAPICall().getData("${Variables.BARBER}get-break-time");
-      print("Fetch breaks response: ${response.statusCode} - ${response.body}");
-      print("url: ${Variables.BARBER}get-break-time");
-
       if (response.statusCode == 200 && response.body != null) {
         final data =
             response.body is String ? jsonDecode(response.body) : response.body;
@@ -54,19 +52,32 @@ class _ChooseBreakDaysBottomSheetState
               "end": DateTime.fromMillisecondsSinceEpoch(end * 1000),
             };
           }).toList();
+
+          // Pre-select the latest/current break if available
+          if (_breakRanges.isNotEmpty) {
+            final latest = _breakRanges.last;
+            _rangeStart = latest["start"];
+            _rangeEnd = latest["end"];
+            _focusedDay = _rangeStart!;
+          }
+          _isLoading = false;
         });
+      } else {
+        setState(() => _isLoading = false);
       }
     } catch (e) {
       debugPrint("Error fetching breaks: $e");
+      setState(() => _isLoading = false);
     }
   }
 
-  bool _isDayInExistingBreak(DateTime day) {
+  bool _isDayInOtherBreak(DateTime day) {
     if (_breakRanges.isEmpty) return false;
-    
-    // Normalize to date only
     final date = DateTime(day.year, day.month, day.day);
     
+    // Check if day is in any break EXCEPT the currently selected one (if we want to show overlap)
+    // For now, let's just highlight all breaks that aren't the current selection if needed,
+    // but the user wanted it to "stay selected", so we pre-fill _rangeStart/End.
     return _breakRanges.any((range) {
       final start = DateTime(range['start']!.year, range['start']!.month, range['start']!.day);
       final end = DateTime(range['end']!.year, range['end']!.month, range['end']!.day);
@@ -78,220 +89,200 @@ class _ChooseBreakDaysBottomSheetState
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      child: SafeArea(
-        bottom: true,
-        top: false,
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 16.h),
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator(color: ColorsData.primary));
+    }
+
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      insetPadding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 40.h),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24.r),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.15),
+              blurRadius: 30,
+              offset: const Offset(0, 15),
+            )
+          ],
+        ),
+        child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Handle bar
+              // Header
               Container(
-                width: 40.w,
-                height: 4.h,
-                margin: EdgeInsets.only(bottom: 16.h),
+                padding: EdgeInsets.symmetric(vertical: 20.h, horizontal: 24.w),
                 decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(2),
+                  color: ColorsData.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(24.r),
+                    topRight: Radius.circular(24.r),
+                    bottomLeft: Radius.circular(24.r),
+                    bottomRight: Radius.circular(24.r),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.access_time_rounded,
+                      color: ColorsData.primary,
+                      size: 24.sp,
+                    ),
+                    SizedBox(width: 12.w),
+                    Text(
+                      "Choose break days".tr,
+                      style: Styles.textStyleS18W700(
+                        color: ColorsData.primary,
+                      ),
+                    ),
+                    const Spacer(),
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.close, color: Colors.grey),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    )
+                  ],
                 ),
               ),
-              
-              // Header
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "Choose break days".tr,
-                    style: Styles.textStyleS18W700(color: ColorsData.primary),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.close, color: Colors.grey),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ],
-              ),
-              
-              Flexible(
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      SizedBox(height: 8.h),
-                      Icon(Icons.access_time_rounded, size: 40.h, color: ColorsData.primary),
-                      SizedBox(height: 8.h),
-                      Text(
-                        "Select the days you want to take a break".tr,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      SizedBox(height: 16.h),
 
-                      TableCalendar(
-                        firstDay: DateTime.now().subtract(const Duration(days: 0)),
-                        lastDay: DateTime.now().add(const Duration(days: 365)),
-                        focusedDay: _focusedDay,
-                        rangeStartDay: _rangeStart,
-                        rangeEndDay: _rangeEnd,
-                        rangeSelectionMode: _rangeSelectionMode,
-                        rowHeight: 52.h,
-                        daysOfWeekHeight: 40.h,
-                        onRangeSelected: (start, end, focused) {
-                          setState(() {
-                            _rangeStart = start;
-                            _rangeEnd = end;
-                            _focusedDay = focused;
-                            _rangeSelectionMode = RangeSelectionMode.toggledOn;
-                          });
-                        },
-                        onPageChanged: (focused) {
-                          _focusedDay = focused;
-                        },
-                        calendarBuilders: CalendarBuilders(
-                          defaultBuilder: (context, day, focusedDay) {
-                            if (_isDayInExistingBreak(day)) {
-                              return Container(
-                                margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 6),
-                                alignment: Alignment.center,
-                                decoration: BoxDecoration(
-                                  color: Colors.red.withOpacity(0.08),
-                                  borderRadius: BorderRadius.circular(10.r),
-                                  border: Border.all(color: Colors.red.withOpacity(0.2)),
-                                ),
-                                child: Text(
-                                  '${day.day}',
-                                  style: TextStyle(
-                                    color: Colors.red.shade800,
-                                    fontSize: 13.sp,
-                                    fontWeight: FontWeight.w500
-                                  ),
-                                ),
-                              );
-                            }
-                            return null;
-                          },
-                          outsideBuilder: (context, day, focusedDay) {
-                             if (_isDayInExistingBreak(day)) {
-                              return Container(
-                                margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 6),
-                                alignment: Alignment.center,
-                                decoration: BoxDecoration(
-                                  color: Colors.red.withOpacity(0.03),
-                                  borderRadius: BorderRadius.circular(10.r),
-                                ),
-                                child: Text(
-                                  '${day.day}',
-                                  style: TextStyle(
-                                    color: Colors.red.withOpacity(0.3),
-                                    fontSize: 11.sp,
-                                  ),
-                                ),
-                              );
-                            }
-                            return null;
-                          },
-                        ),
-                        calendarStyle: CalendarStyle(
-                          defaultTextStyle: TextStyle(color: Colors.black, fontSize: 13.sp),
-                          weekendTextStyle: TextStyle(color: Colors.black, fontSize: 13.sp),
-                          outsideTextStyle: TextStyle(color: Colors.grey, fontSize: 11.sp),
-                          todayDecoration: BoxDecoration(
-                            color: ColorsData.primary.withOpacity(0.2),
-                            shape: BoxShape.circle,
-                          ),
-                          todayTextStyle: TextStyle(
-                            color: ColorsData.primary,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13.sp
-                          ),
-                          rangeStartDecoration: const BoxDecoration(
-                            color: ColorsData.primary,
-                            shape: BoxShape.circle,
-                          ),
-                          rangeEndDecoration: const BoxDecoration(
-                            color: ColorsData.primary,
-                            shape: BoxShape.circle,
-                          ),
-                          rangeHighlightColor: ColorsData.primary.withOpacity(0.15),
-                          withinRangeTextStyle: const TextStyle(
-                            color: Colors.black, 
-                            fontWeight: FontWeight.bold
-                          ),
-                        ),
-                        headerStyle: HeaderStyle(
-                          formatButtonVisible: false,
-                          titleCentered: true,
-                          headerPadding: EdgeInsets.symmetric(vertical: 8.h),
-                          headerMargin: EdgeInsets.only(bottom: 8.h),
-                          titleTextStyle: Styles.textStyleS16W700(color: Colors.black),
-                          leftChevronIcon: const Icon(Icons.chevron_left, color: ColorsData.primary),
-                          rightChevronIcon: const Icon(Icons.chevron_right, color: ColorsData.primary),
+              Padding(
+                padding: EdgeInsets.all(16.w),
+                child: TableCalendar(
+                  firstDay: DateTime.now().subtract(const Duration(days: 365)),
+                  lastDay: DateTime.now().add(const Duration(days: 365 * 2)),
+                  focusedDay: _focusedDay,
+                  rangeStartDay: _rangeStart,
+                  rangeEndDay: _rangeEnd,
+                  rangeSelectionMode: _rangeSelectionMode,
+                  onRangeSelected: (start, end, focused) {
+                    setState(() {
+                      _rangeStart = start;
+                      _rangeEnd = end;
+                      _focusedDay = focused;
+                      _rangeSelectionMode = RangeSelectionMode.toggledOn;
+                    });
+                  },
+                  onPageChanged: (focused) {
+                    _focusedDay = focused;
+                  },
+                  calendarStyle: CalendarStyle(
+                    defaultTextStyle: TextStyle(color: Colors.black, fontSize: 14.sp),
+                    weekendTextStyle: TextStyle(color: Colors.black, fontSize: 14.sp),
+                    outsideTextStyle: TextStyle(color: Colors.grey, fontSize: 12.sp),
+                    isTodayHighlighted: true,
+                    todayDecoration: BoxDecoration(
+                      color: ColorsData.primary.withOpacity(0.2),
+                      shape: BoxShape.circle,
+                    ),
+                    todayTextStyle: TextStyle(
+                      color: ColorsData.primary,
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.bold
+                    ),
+                    rangeStartDecoration: const BoxDecoration(
+                      color: ColorsData.primary,
+                      shape: BoxShape.circle,
+                    ),
+                    rangeEndDecoration: const BoxDecoration(
+                      color: ColorsData.primary,
+                      shape: BoxShape.circle,
+                    ),
+                    rangeHighlightColor: ColorsData.primary.withOpacity(0.15),
+                    withinRangeTextStyle: const TextStyle(
+                      color: Colors.black, 
+                      fontWeight: FontWeight.bold
+                    ),
+                    outsideDaysVisible: false,
+                  ),
+                  headerStyle: HeaderStyle(
+                    formatButtonVisible: false,
+                    titleCentered: true,
+                    titleTextStyle: Styles.textStyleS16W700(color: Colors.black),
+                    leftChevronIcon: const Icon(Icons.chevron_left, color: ColorsData.primary),
+                    rightChevronIcon: const Icon(Icons.chevron_right, color: ColorsData.primary),
+                  ),
+                  daysOfWeekStyle: DaysOfWeekStyle(
+                    weekdayStyle: Styles.textStyleS12W600(color: Colors.grey),
+                    weekendStyle: Styles.textStyleS12W600(color: Colors.grey.shade400),
+                  ),
+                ),
+              ),
+
+              // Selection Info
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 24.w),
+                child: Container(
+                  padding: EdgeInsets.all(12.r),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade50,
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.check_circle_outline,
+                          size: 18.sp, color: ColorsData.primary),
+                      SizedBox(width: 8.w),
+                      Expanded(
+                        child: Text(
+                          _rangeStart != null
+                              ? (_rangeEnd != null
+                                  ? "${DateFormat('MMM dd, yyyy', Get.locale?.languageCode).format(_rangeStart!)} - ${DateFormat('MMM dd, yyyy', Get.locale?.languageCode).format(_rangeEnd!)}"
+                                  : "${"From:".tr} ${DateFormat('MMM dd, yyyy', Get.locale?.languageCode).format(_rangeStart!)}")
+                              : "Select the days you want to take a break".tr,
+                          style: Styles.textStyleS14W600(color: Colors.black),
                         ),
                       ),
-                      
-                      if (_rangeStart != null) ...[
-                        SizedBox(height: 16.h),
-                        Container(
-                          padding: EdgeInsets.all(12.r),
-                          decoration: BoxDecoration(
-                            color: Colors.grey[100],
-                            borderRadius: BorderRadius.circular(12.r),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(Icons.info_outline, color: ColorsData.primary, size: 18.sp),
-                              SizedBox(width: 8.w),
-                              Expanded(
-                                child: Text(
-                                  _rangeEnd != null
-                                    ? "${DateFormat.yMMMd().format(_rangeStart!)} - ${DateFormat.yMMMd().format(_rangeEnd!)}"
-                                    : DateFormat.yMMMd().format(_rangeStart!),
-                                  style: Styles.textStyleS14W600(color: Colors.black),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                      SizedBox(height: 16.h),
                     ],
                   ),
                 ),
               ),
 
-              // Confirm Button
-              SizedBox(
-                width: double.infinity,
-                height: 50.h,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: ColorsData.primary,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+              SizedBox(height: 24.h),
+
+              // Action Buttons
+              Padding(
+                padding: EdgeInsets.only(left: 24.w, right: 24.w, bottom: 24.h),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: OutlinedButton.styleFrom(
+                          padding: EdgeInsets.symmetric(vertical: 14.h),
+                          side: BorderSide(color: Colors.grey.shade300),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.r),
+                          ),
+                        ),
+                        child: Text("cancel".tr,
+                            style: Styles.textStyleS14W600(color: Colors.grey)),
+                      ),
                     ),
-                    elevation: 0,
-                  ),
-                  onPressed: _addBreak,
-                  child: Text(
-                    "Confirm".tr,
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
+                    SizedBox(width: 12.w),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: _rangeStart == null ? null : _addBreak,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: ColorsData.primary,
+                          padding: EdgeInsets.symmetric(vertical: 14.h),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.r),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: Text(
+                          "Confirm".tr,
+                          style: Styles.textStyleS14W700(color: Colors.white),
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ),
-              SizedBox(height: 8.h),
             ],
           ),
         ),
@@ -311,7 +302,6 @@ class _ChooseBreakDaysBottomSheetState
     setState(() => isClicked = false);
 
     try {
-      // Normalize dates to start/end of day
       final start = DateTime(_rangeStart!.year, _rangeStart!.month, _rangeStart!.day, 0, 0, 0);
       final end = _rangeEnd != null 
           ? DateTime(_rangeEnd!.year, _rangeEnd!.month, _rangeEnd!.day, 23, 59, 59)
@@ -330,11 +320,9 @@ class _ChooseBreakDaysBottomSheetState
         "${Variables.BARBER}take-break",
         body,
       );
-      print("Add break response: ${response.statusCode} - ${response.body}");
-      print("url: ${Variables.BARBER}take-break");
 
       if (response.statusCode == 200 || response.statusCode == 204) {
-        Get.back();
+        Navigator.pop(context);
         Get.snackbar("Success".tr, "Break added successfully".tr,
             backgroundColor: Colors.green, colorText: Colors.white);
       } else {
@@ -353,10 +341,22 @@ class _ChooseBreakDaysBottomSheetState
 }
 
 void showChooseBreakDaysBottomSheet(BuildContext context) {
-  showModalBottomSheet(
+  showGeneralDialog(
     context: context,
-    isScrollControlled: true,
-    backgroundColor: Colors.transparent,
-    builder: (context) => const ChooseBreakDaysBottomSheet(),
+    barrierDismissible: true,
+    barrierLabel: '',
+    transitionDuration: const Duration(milliseconds: 400),
+    pageBuilder: (context, anim1, anim2) => const SizedBox.shrink(),
+    transitionBuilder: (context, anim1, anim2, child) {
+      return ScaleTransition(
+        scale: Tween<double>(begin: 0.8, end: 1.0).animate(
+          CurvedAnimation(parent: anim1, curve: Curves.easeOutBack),
+        ),
+        child: FadeTransition(
+          opacity: anim1,
+          child: const ChooseBreakDaysBottomSheet(),
+        ),
+      );
+    },
   );
 }
