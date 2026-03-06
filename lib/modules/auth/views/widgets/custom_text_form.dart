@@ -23,7 +23,7 @@ class CustomTextFormField extends StatelessWidget {
   final bool readOnly;
   final VoidCallback? onTap;
   final List<TextInputFormatter>? inputFormatters;
-  final TextDirection ?textDirection;
+  final TextDirection? textDirection;
 
   CustomTextFormField({
     super.key,
@@ -51,17 +51,20 @@ class CustomTextFormField extends StatelessWidget {
   Widget build(BuildContext context) {
     // Special handling for phone field
     final languageCode = Localizations.localeOf(context).languageCode;
-    if (keyboardType == TextInputType.phone) {
+    // if (keyboardType == TextInputType.phone) {
+    if (keyboardType == TextInputType.phone ||
+        keyboardType == TextInputType.number) {
       return Directionality(
         textDirection: textDirection ??
             (languageCode == 'ar' ? TextDirection.rtl : TextDirection.ltr),
         child: TextFormField(
           controller: controller,
           keyboardType: TextInputType.number,
-          inputFormatters:inputFormatters?? [
-            FilteringTextInputFormatter.digitsOnly,
-            LengthLimitingTextInputFormatter(9), // allow only 9 digits
-          ],
+          inputFormatters: inputFormatters ??
+              [
+                FilteringTextInputFormatter.digitsOnly,
+                LengthLimitingTextInputFormatter(9), // allow only 9 digits
+              ],
           validator: validator,
           onChanged: onChanged,
           onSaved: onSaved,

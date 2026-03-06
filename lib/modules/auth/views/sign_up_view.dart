@@ -332,8 +332,8 @@ class ArabicInputFormatter extends TextInputFormatter {
       return newValue;
     }
 
-    // Regex match (Arabic characters and spaces)
-    final validChars = RegExp(r'^[\u0600-\u06FF\s]+\$');
+    // Regex match (Arabic characters, spaces, and common Arabic symbols)
+    final validChars = RegExp(r'^[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF\s\d.,،؛!؟\-/]+$');
 
     // If the new text is fully valid, allow it
     if (validChars.hasMatch(newValue.text)) {

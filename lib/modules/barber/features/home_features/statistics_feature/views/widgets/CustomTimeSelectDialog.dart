@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:q_cut/core/utils/constants/colors_data.dart';
 import 'package:q_cut/core/utils/styles.dart';
+import 'package:q_cut/modules/barber/features/home_features/profile_features/profile_display/views/widgets/custom_24h_time_picker.dart';
 
 class CustomTimeSelectDialog extends StatefulWidget {
   final Function(DateTime)? onTimeSelected;
@@ -109,8 +110,6 @@ class _CustomTimeSelectDialogState extends State<CustomTimeSelectDialog> {
                 ),
                 SizedBox(width: 16.w),
                 _buildTimeSelector(),
-                SizedBox(width: 8.w),
-                _buildAmPmSelector(),
               ],
             ),
             SizedBox(height: 24.h),
@@ -242,8 +241,7 @@ class _CustomTimeSelectDialogState extends State<CustomTimeSelectDialog> {
   }
 
   Widget _buildTimeSelector() {
-    final formattedHour =
-        _selectedTime.hourOfPeriod == 0 ? 12 : _selectedTime.hourOfPeriod;
+    final formattedHour = _selectedTime.hour.toString().padLeft(2, '0');
 
     return GestureDetector(
       onTap: () => _showTimePickerBottomSheet(context),
@@ -266,23 +264,9 @@ class _CustomTimeSelectDialogState extends State<CustomTimeSelectDialog> {
   }
 
   void _showTimePickerBottomSheet(BuildContext context) async {
-    final TimeOfDay? time = await showTimePicker(
-      context: context,
+    final TimeOfDay? time = await showCustom24HTimePicker(
+      context,
       initialTime: _selectedTime,
-      builder: (context, child) {
-        return MediaQuery(
-          data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
-          child: Theme(
-            data: ThemeData.light().copyWith(
-              colorScheme: const ColorScheme.light(
-                primary: Color(0xFFC49A58),
-                onSurface: Colors.black,
-              ),
-            ),
-            child: child!,
-          ),
-        );
-      },
     );
 
     if (time != null) {

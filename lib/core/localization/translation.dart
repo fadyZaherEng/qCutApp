@@ -678,6 +678,8 @@ class MyTranslation extends Translations {
           "noPreviousPaymentsFound": "لم يتم العثور على دفعات سابقة",
           "currency": "₪",
           "pleaseWait": "يرجى الانتظار",
+          "selectHour": "اختر ساعة",
+          "selectMinute": "اختر دقيقة",
           "preparingOffer": "كيوكت يقوم بتجهيز عرض خاص لك",
           "notifyWhenReady": "سنقوم بإخطارك فور جاهزية عرضك",
           "reviewingApplication":
@@ -696,15 +698,21 @@ class MyTranslation extends Translations {
           "accountArchived": "الحساب مؤرشف",
           "deletionDate": "تاريخ الحذف",
           "contactSupportToRestore": "يرجى التواصل مع الدعم لاستعادة حسابك",
-          "contactSupportToRestoreDeleted": "يرجى التواصل مع الدعم لاستعادة الحساب المحذوف.",
-          "Your account has been archived due to unpaid subscription.": "تم أرشفة حسابك بسبب عدم دفع الاشتراك.",
+          "contactSupportToRestoreDeleted":
+              "يرجى التواصل مع الدعم لاستعادة الحساب المحذوف.",
+          "Your account has been archived due to unpaid subscription.":
+              "تم أرشفة حسابك بسبب عدم دفع الاشتراك.",
           "Your account has been banned.": "لقد تم حظر حسابك.",
           "Your account has been deleted.": "لقد تم حذف حسابك.",
-          "Your account has been archived. Please contact support.": "تم أرشفة حسابك. يرجى التواصل مع الدعم.",
-          "termsContent": "أهلاً بك في كيوكت. باستخدامك لتطبيقنا، فإنك توافق على الالتزام بالشروط والأحكام التالية: \n\n1. استخدام التطبيق: يجب استخدام التطبيق لأغراض مشروعة فقط.\n2. الحجوزات: يتم تنظيم الحجوزات بينك وبين الحلاق مباشرة.\n3. المسؤولية: كيوكت هو منصة وسيطة ولا يتحمل مسؤولية جودة الخدمات.\n4. الخصوصية: نحن نحترم خصوصيتك وبياناتك الشخصية.",
-          "privacyContent": "سياسة الخصوصية في كيوكت: \n\n1. جمع البيانات: نقوم بجمع رقم الهاتف والاسم لتسهيل عملية الحجز.\n2. استخدام البيانات: تُستخدم بياناتك لربطك مع الحلاقين وتلقي الإشعارات.\n3. حماية البيانات: نستخدم معايير عالية لحماية بياناتك من الوصول غير المصرح به.\n4. مشاركة البيانات: لا نشارك بياناتك مع أطراف ثالثة لأغراض تسويقية.",
+          "Your account has been archived. Please contact support.":
+              "تم أرشفة حسابك. يرجى التواصل مع الدعم.",
+          "termsContent":
+              "أهلاً بك في كيوكت. باستخدامك لتطبيقنا، فإنك توافق على الالتزام بالشروط والأحكام التالية: \n\n1. استخدام التطبيق: يجب استخدام التطبيق لأغراض مشروعة فقط.\n2. الحجوزات: يتم تنظيم الحجوزات بينك وبين الحلاق مباشرة.\n3. المسؤولية: كيوكت هو منصة وسيطة ولا يتحمل مسؤولية جودة الخدمات.\n4. الخصوصية: نحن نحترم خصوصيتك وبياناتك الشخصية.",
+          "privacyContent":
+              "سياسة الخصوصية في كيوكت: \n\n1. جمع البيانات: نقوم بجمع رقم الهاتف والاسم لتسهيل عملية الحجز.\n2. استخدام البيانات: تُستخدم بياناتك لربطك مع الحلاقين وتلقي الإشعارات.\n3. حماية البيانات: نستخدم معايير عالية لحماية بياناتك من الوصول غير المصرح به.\n4. مشاركة البيانات: لا نشارك بياناتك مع أطراف ثالثة لأغراض تسويقية.",
           "payToQcut": "ادفع لـ كيوكت",
-          "unpaidAccountReason": "تم أرشفة حسابك لأنك لم تقم بسداد الرسوم الشهرية.",
+          "unpaidAccountReason":
+              "تم أرشفة حسابك لأنك لم تقم بسداد الرسوم الشهرية.",
           "pleasePayToActivate": "يرجى الدفع حتى يصبح حسابك نشطاً",
           "payToQcutBtn": "ادفع لـ كيوكت",
         },
@@ -755,12 +763,16 @@ class MyTranslation extends Translations {
           "accountDeleted": "Account Deleted",
           "accountArchived": "Account Archived",
           "deletionDate": "Deletion Date",
-          "contactSupportToRestore": "Please contact support to restore your account",
-          "contactSupportToRestoreDeleted": "Please contact support to restore the deleted account.",
-          "Your account has been archived due to unpaid subscription.": "Your account has been archived due to unpaid subscription.",
+          "contactSupportToRestore":
+              "Please contact support to restore your account",
+          "contactSupportToRestoreDeleted":
+              "Please contact support to restore the deleted account.",
+          "Your account has been archived due to unpaid subscription.":
+              "Your account has been archived due to unpaid subscription.",
           "Your account has been banned.": "Your account has been banned.",
           "Your account has been deleted.": "Your account has been deleted.",
-          "Your account has been archived. Please contact support.": "Your account has been archived. Please contact support.",
+          "Your account has been archived. Please contact support.":
+              "Your account has been archived. Please contact support.",
           "emailreq": "Email is Required",
           "userreq": "Username is Required",
           "emailinvalid": "Invalid Email Address",
@@ -1425,11 +1437,15 @@ class MyTranslation extends Translations {
           "You must set at least one working day so customers know when you are available.":
               "You must set at least one working day so customers know when you are available.",
           "accountDeleted": "Account Deleted",
-          "contactSupportToRestore": "Please contact support to restore your account",
-          "termsContent": "Welcome to QCut. By using our application, you agree to comply with the following terms and conditions: \n\n1. App Usage: The app must be used for lawful purposes only.\n2. Bookings: Bookings are organized directly between you and the barber.\n3. Responsibility: QCut is an intermediary platform and is not responsible for the quality of services.\n4. Privacy: We respect your privacy and personal data.",
-          "privacyContent": "Privacy Policy at QCut: \n\n1. Data Collection: We collect phone numbers and names to facilitate the booking process.\n2. Data Usage: Your data is used to connect you with barbers and receive notifications.\n3. Data Protection: We use high standards to protect your data from unauthorized access.\n4. Data Sharing: We do not share your data with third parties for marketing purposes.",
+          "contactSupportToRestore":
+              "Please contact support to restore your account",
+          "termsContent":
+              "Welcome to QCut. By using our application, you agree to comply with the following terms and conditions: \n\n1. App Usage: The app must be used for lawful purposes only.\n2. Bookings: Bookings are organized directly between you and the barber.\n3. Responsibility: QCut is an intermediary platform and is not responsible for the quality of services.\n4. Privacy: We respect your privacy and personal data.",
+          "privacyContent":
+              "Privacy Policy at QCut: \n\n1. Data Collection: We collect phone numbers and names to facilitate the booking process.\n2. Data Usage: Your data is used to connect you with barbers and receive notifications.\n3. Data Protection: We use high standards to protect your data from unauthorized access.\n4. Data Sharing: We do not share your data with third parties for marketing purposes.",
           "payToQcut": "Pay to QCUT",
-          "unpaidAccountReason": "Your account has been archived because you didn't pay your monthly fee.",
+          "unpaidAccountReason":
+              "Your account has been archived because you didn't pay your monthly fee.",
           "pleasePayToActivate": "please pay so you become active",
           "payToQcutBtn": "Pay to Qcut",
         },
@@ -1548,8 +1564,7 @@ class MyTranslation extends Translations {
           "nearbySalons": "מספרות קרובות",
           "Instagram link is not set": "קישור לאינסטגרם לא הוגדר",
           "results": "תוצאות",
-          "Change Phone number":
-              "שנה מספר טלפון",
+          "Change Phone number": "שנה מספר טלפון",
           "seeAll": "ראה הכל",
           "searchBarber": "חפש שם ספר, מספרה",
           "No Instagram link available for this barber":
@@ -1638,12 +1653,16 @@ class MyTranslation extends Translations {
           "accountDeleted": "החשבון נמחק",
           "accountArchived": "חשבון בארכיון",
           "deletionDate": "תאריך מחיקה",
-          "contactSupportToRestore": "אנא צור קשר עם התמיכה כדי לשחזר את חשבונך",
-          "contactSupportToRestoreDeleted": "אנא צור קשר עם התמיכה כדי לשחזר את החשבון שנמחק.",
-          "Your account has been archived due to unpaid subscription.": "חשבונך הועבר לארכיון עקב אי-תשלום המנוי.",
+          "contactSupportToRestore":
+              "אנא צור קשר עם התמיכה כדי לשחזר את חשבונך",
+          "contactSupportToRestoreDeleted":
+              "אנא צור קשר עם התמיכה כדי לשחזר את החשבון שנמחק.",
+          "Your account has been archived due to unpaid subscription.":
+              "חשבונך הועבר לארכיון עקב אי-תשלום המנוי.",
           "Your account has been banned.": "חשבונך נחסם.",
           "Your account has been deleted.": "חשבונך נמחק.",
-          "Your account has been archived. Please contact support.": "חשבונך הועבר לארכיון. אנא צור קשר עם התמיכה.",
+          "Your account has been archived. Please contact support.":
+              "חשבונך הועבר לארכיון. אנא צור קשר עם התמיכה.",
           "paymentMethods": "אמצעי תשלום",
           "Service created successfully": "השירות נוצר בהצלחה",
           "Are you sure the customer didn’t come?":
@@ -1699,6 +1718,8 @@ class MyTranslation extends Translations {
           "showOfferDetails": "הצג פרטי הצעה",
           "changeLangauges": "שנה שפות",
           "reports": "דוחות",
+          "selectHour": "בחר שעה",
+          "selectMinute": "בחר דקה",
           "allBookingAppointments": "כל מינויי ההזמנה",
           "You have not set any working days yet": "לא הגדרת עדיין ימי עבודה",
           "previousBooking": "הזמנה קודמת",
@@ -2060,11 +2081,15 @@ class MyTranslation extends Translations {
           "expired": "פג תוקף",
           "archived": "בארכיון",
           "accountDeleted": "החשבון נמחק",
-          "contactSupportToRestore": "אנא צור קשר עם התמיכה כדי לשחזר את החשבון",
-          "termsContent": "ברוכים הבאים ל-QCut. בשימוש באפליקציה שלנו, אתה מסכים לציית לתנאים ולהגבלות הבאים: \n\n1. שימוש באפליקציה: יש להשתמש באפליקציה למטרות חוקיות בלבד.\n2. הזמנות: ההזמנות מאורגנות ישירות בינך לבין הספר.\n3. אחריות: QCut היא פלטפורמה מתווכת ואינה אחראית על איכות השירותים.\n4. פרטיות: אנו מכבדים את הפרטיות והנתונים האישיים שלך.",
-          "privacyContent": "מדיניות פרטיות ב-QCut: \n\n1. איסוף נתונים: אנו אוספים מספרי טלפון ושמות כדי להקל על תהליך ההזמנה.\n2. שימוש בנתונים: הנתונים שלך משמשים לחיבור בינך לבין הספרים ולקבלת התראות.\n3. הגנת נתונים: אנו משתמשים בסטנדרטים גבוהים כדי להגן על הנתונים שלך מפני גישה בלתי מורשית.\n4. שיתוף נתונים: איננו משתפים את הנתונים שלך עם צדדים שלישיים למטרות שיווק.",
+          "contactSupportToRestore":
+              "אנא צור קשר עם התמיכה כדי לשחזר את החשבון",
+          "termsContent":
+              "ברוכים הבאים ל-QCut. בשימוש באפליקציה שלנו, אתה מסכים לציית לתנאים ולהגבלות הבאים: \n\n1. שימוש באפליקציה: יש להשתמש באפליקציה למטרות חוקיות בלבד.\n2. הזמנות: ההזמנות מאורגנות ישירות בינך לבין הספר.\n3. אחריות: QCut היא פלטפורמה מתווכת ואינה אחראית על איכות השירותים.\n4. פרטיות: אנו מכבדים את הפרטיות והנתונים האישיים שלך.",
+          "privacyContent":
+              "מדיניות פרטיות ב-QCut: \n\n1. איסוף נתונים: אנו אוספים מספרי טלפון ושמות כדי להקל על תהליך ההזמנה.\n2. שימוש בנתונים: הנתונים שלך משמשים לחיבור בינך לבין הספרים ולקבלת התראות.\n3. הגנת נתונים: אנו משתמשים בסטנדרטים גבוהים כדי להגן על הנתונים שלך מפני גישה בלתי מורשית.\n4. שיתוף נתונים: איננו משתפים את הנתונים שלך עם צדדים שלישיים למטרות שיווק.",
           "payToQcut": "שלם ל-QCUT",
-          "unpaidAccountReason": "חשבונך הועבר לארכיון מכיוון שלא שילמת את העמלה החודשית שלך.",
+          "unpaidAccountReason":
+              "חשבונך הועבר לארכיון מכיוון שלא שילמת את העמלה החודשית שלך.",
           "pleasePayToActivate": "אנא שלם כדי להפוך לפעיל",
           "payToQcutBtn": "שלם ל-Qcut",
         },
