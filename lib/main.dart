@@ -10,6 +10,7 @@ import 'package:q_cut/modules/customer/features/home_features/home/models/barber
 import 'package:q_cut/qcut_app.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'core/services/shared_pref/pref_keys.dart';
+import 'package:q_cut/core/utils/network/network_controller.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 import 'firebase_options.dart';
@@ -51,7 +52,16 @@ void main() async {
   // 3. Date Formatting
   await initializeDateFormatting();
 
-  // 4. Firebase & Notifications
+  // 4. Firebase & Notifications (Integrated without blocking)
+  _initializeServices();
+
+  // 5. Initialize Locale & Run
+  Get.put(LocaleController(), permanent: true);
+  Get.put(NetworkController(), permanent: true);
+  runApp(const QCut());
+}
+
+Future<void> _initializeServices() async {
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
@@ -68,10 +78,6 @@ void main() async {
   } catch (error) {
     debugPrint('Firebase/Notification Init Error: $error');
   }
-
-  // 5. Initialize Locale & Run
-  Get.put(LocaleController(), permanent: true);
-  runApp(const QCut());
 }
 
 Barber _getDefaultBarber() {
