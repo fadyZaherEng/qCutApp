@@ -51,10 +51,8 @@ void main() async {
 
   // 3. Date Formatting
   await initializeDateFormatting();
-
   // 4. Firebase & Notifications (Integrated without blocking)
   _initializeServices();
-
   // 5. Initialize Locale & Run
   Get.put(LocaleController(), permanent: true);
   Get.put(NetworkController(), permanent: true);
