@@ -268,7 +268,11 @@ class AuthController extends GetxController {
               // Save password for background ban checks
               await SharedPref()
                   .setString(PrefKeys.password, passwordController.text);
-              Get.toNamed(AppRouter.unpaidPath);
+              Get.toNamed(AppRouter.unpaidPath)
+              ?.then((_) =>
+                  //clear all shared pref data
+                  SharedPref().clearPreferences()
+              );
               return;
             } else if (res.archiveReason == "banned") {
               finalReason = res.banReason?.isNotEmpty == true
@@ -292,7 +296,7 @@ class AuthController extends GetxController {
             "isArchived": res.status == "archived",
             "archiveReason": res.archiveReason,
             "banReason": finalReason,
-            "bannedUntil": res.bannedUntil ?? 17000000000000,
+            "bannedUntil": res.bannedUntil ?? "",
             "daysRemaining": res.daysRemaining,
             "deleteDate": res.deleteDate,
             "deleteReason": res.deleteReason,

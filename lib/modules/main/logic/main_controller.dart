@@ -925,7 +925,7 @@ class Deal {
       dealDateEnd: json['dealDateEnd'] ?? 0,
       qCuteSubscription: json['QCuteSubscription'] ?? 0,
       qCuteTax: json['QCuteTax'] ?? 0,
-      freeDaysNumber: json['freeDaysCount'] ?? json['freeDaysCount'] ?? calculatedFreeDays,
+      freeDaysNumber: json['FreeDaysCount'] ?? json['freeDaysCount'] ?? json['freeDaysNumber'] ?? calculatedFreeDays,
       status: json['status'] ?? '',
       barber: json['barber'] ?? '',
       createdAt: json['createdAt'] ?? '',
