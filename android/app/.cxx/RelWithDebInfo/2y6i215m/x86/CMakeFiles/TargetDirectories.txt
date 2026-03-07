@@ -1,2 +1,0 @@
-E:/QCutApp/android/app/.cxx/RelWithDebInfo/2y6i215m/x86/CMakeFiles/edit_cache.dir
-E:/QCutApp/android/app/.cxx/RelWithDebInfo/2y6i215m/x86/CMakeFiles/rebuild_cache.dir
