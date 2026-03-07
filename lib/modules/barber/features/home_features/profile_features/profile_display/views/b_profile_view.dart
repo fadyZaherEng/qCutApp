@@ -721,10 +721,9 @@ class _BProfileViewBodyState extends State<BProfileView>
                   serviceId: service.id,
                   serviceName: service.name,
                   servicePrice: service.price.toString(),
-                  serviceTime: service.duration?.toString() ??
-                      ((service.minTime + service.maxTime) / 2)
-                          .round()
-                          .toString(),
+                  minTime: (service.minTime / 60000).round(),
+                  maxTime: (service.maxTime / 60000).round(),
+                  serviceImagePath: service.imageUrl,
                 );
                 await Future.delayed(const Duration(seconds: 2), () {
                   isClicked = true;

@@ -74,7 +74,8 @@ class MainController extends GetxController {
 
   Future<void> _notificationListener() async {
     // Listen for notification clicks
-    _notificationClickSubscription = onNotificationClick?.stream.listen((event) {
+    _notificationClickSubscription =
+        onNotificationClick?.stream.listen((event) {
       if (event.isNotEmpty) {
         if (isCustomer == false) {
           fetchDealById();
@@ -87,8 +88,7 @@ class MainController extends GetxController {
     if (isCustomer == false) {
       _foregroundMessageSubscription =
           FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-        debugPrint(
-            "🔔 Foreground Deal Update: ${message.notification?.title}");
+        debugPrint("🔔 Foreground Deal Update: ${message.notification?.title}");
         fetchDealById();
       });
     }
@@ -101,16 +101,17 @@ class MainController extends GetxController {
   Future<void> fetchDealById() async {
     if (isLoadingDeal.value) return; // Prevent multiple simultaneous calls
 
-    debugPrint("🔄 Syncing Deal Status for barber [ID: ${SharedPref().getString(PrefKeys.id)}]");
+    debugPrint(
+        "🔄 Syncing Deal Status for barber [ID: ${SharedPref().getString(PrefKeys.id)}]");
     isLoadingDeal.value = true;
     dealError.value = '';
-    
+
     final id = SharedPref().getString(PrefKeys.id);
     final profileController = Get.find<BProfileController>();
 
     try {
       final response = await _apiCall.getData('${Variables.baseUrl}deal/$id');
-      
+
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = json.decode(response.body);
         dealResponse.value = DealResponse.fromJson(responseData);
@@ -119,7 +120,8 @@ class MainController extends GetxController {
         // Identify the latest pending deal
         Deal? pendingDeal;
         try {
-          final pendingDeals = deals.where((d) => d.status == "pending").toList();
+          final pendingDeals =
+              deals.where((d) => d.status == "pending").toList();
           if (pendingDeals.isNotEmpty) pendingDeal = pendingDeals.last;
         } catch (e) {
           debugPrint("Error sorting deals: $e");
@@ -155,12 +157,14 @@ class MainController extends GetxController {
     }
   }
 
-  Future<void> _handleNoPendingDeals(List<Deal> deals, BProfileController profileController) async {
+  Future<void> _handleNoPendingDeals(
+      List<Deal> deals, BProfileController profileController) async {
     final bool hasAccepted = deals.any((d) => d.status == "accepted");
 
     if (!hasAccepted) {
       // First-timer flow: no history of accepted deals
-      final bool isFirstTime = SharedPref().getBool(PrefKeys.isFirstDealFlow) ?? true;
+      final bool isFirstTime =
+          SharedPref().getBool(PrefKeys.isFirstDealFlow) ?? true;
       if (isFirstTime && !_isWaitingDialogOpen && !_isDealDialogOpen) {
         await showWaitingForOfferDialog();
       }
@@ -180,7 +184,8 @@ class MainController extends GetxController {
   }
 
   Future<void> _handleFetchFailure(BProfileController profileController) async {
-    final bool isFirstTime = SharedPref().getBool(PrefKeys.isFirstDealFlow) ?? true;
+    final bool isFirstTime =
+        SharedPref().getBool(PrefKeys.isFirstDealFlow) ?? true;
     if (isFirstTime && !_isWaitingDialogOpen && !_isDealDialogOpen) {
       await showWaitingForOfferDialog();
     }
@@ -230,264 +235,257 @@ class MainController extends GetxController {
         onWillPop: () async => false, // Prevent closing by back button
         child: Dialog(
           backgroundColor: Colors.transparent,
-        child: Container(
-          width: 335.w,
-          padding: EdgeInsets.symmetric(vertical: 24.h, horizontal: 20.w),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 10,
-                offset: Offset(0, 4),
-              ),
-            ],
-          ),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Image.asset(
-                  AssetsData.dealImage,
-                  width: 130.w,
-                  height: 130.h,
+          child: Container(
+            width: 335.w,
+            padding: EdgeInsets.symmetric(vertical: 24.h, horizontal: 20.w),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 10,
+                  offset: Offset(0, 4),
                 ),
-                SizedBox(height: 16.h),
-                Text(
-                  "Thank you for choosing us".tr,
-                  style: titleStyle.copyWith(
-                    fontSize: 18.sp,
-                    color: Color(0xFF333333),
+              ],
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Image.asset(
+                    AssetsData.dealImage,
+                    width: 130.w,
+                    height: 130.h,
                   ),
-                ),
-                SizedBox(height: 6.h),
-                Text(
-                  "QCut Special Offer".tr,
-                  style: subtitleStyle.copyWith(
-                    fontSize: 17.sp,
-                    color: Color(0xFFD1A439),
-                    fontWeight: FontWeight.w600,
+                  SizedBox(height: 16.h),
+                  Text(
+                    "Thank you for choosing us".tr,
+                    style: titleStyle.copyWith(
+                      fontSize: 18.sp,
+                      color: Color(0xFF333333),
+                    ),
                   ),
-                ),
-                SizedBox(height: 20.h),
-                Container(
-                  padding: EdgeInsets.all(16.w),
-                  decoration: BoxDecoration(
-                    color: Color(0xFFF9F9F9),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: Color(0xFFEEEEEE)),
+                  SizedBox(height: 6.h),
+                  Text(
+                    "QCut Special Offer".tr,
+                    style: subtitleStyle.copyWith(
+                      fontSize: 17.sp,
+                      color: Color(0xFFD1A439),
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(Icons.celebration,
-                              color: Color(0xFFD1A439), size: 20.sp),
-                          SizedBox(width: 8.w),
-                          Text("Exclusive Offer".tr, style: boldGoldStyle),
-                        ],
-                      ),
-                      Divider(height: 24.h, color: Color(0xFFEEEEEE)),
-                      offerDetailRow(
-                        Icons.date_range,
-                        "${"Valid Period".tr}: $startDate - $endDate",
-                      ),
-                      // SizedBox(height: 10.h),
-                      // offerDetailRow(
-                      //   Icons.money_off,
-                      //   "${"QCut Tax:".tr} ${deal.qCuteTax}% per booking",
-                      // ),
-                      SizedBox(height: 10.h),
-                      offerDetailRow(
-                        Icons.payment,
-                        "${"Subscription".tr}: \$${deal.qCuteSubscription}",
-                      ),
-                      SizedBox(height: 10.h),
-                      if (deal.freeDaysNumber > 0)
+                  SizedBox(height: 20.h),
+                  Container(
+                    padding: EdgeInsets.all(16.w),
+                    decoration: BoxDecoration(
+                      color: Color(0xFFF9F9F9),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: Color(0xFFEEEEEE)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.celebration,
+                                color: Color(0xFFD1A439), size: 20.sp),
+                            SizedBox(width: 8.w),
+                            Text("Exclusive Offer".tr, style: boldGoldStyle),
+                          ],
+                        ),
+                        Divider(height: 24.h, color: Color(0xFFEEEEEE)),
+                        offerDetailRow(
+                          Icons.date_range,
+                          "${"Valid Period".tr}: $startDate - $endDate",
+                        ),
+                        SizedBox(height: 10.h),
+                        offerDetailRow(
+                          Icons.payment,
+                          "${"Subscription".tr}: ${deal.qCuteSubscription} ${"currency".tr}",
+                        ),
+                        SizedBox(height: 10.h),
                         offerDetailRow(
                           Icons.card_giftcard,
                           "${"Free Trial".tr}: ${deal.freeDaysNumber} days",
                         ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-                SizedBox(height: 24.h),
-                Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () async {
-                          _isDealDialogOpen = false;
-                          Get.back();
+                  SizedBox(height: 24.h),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            _isDealDialogOpen = false;
+                            Get.back();
 
-                          Get.dialog(
-                            Center(
-                              child: TweenAnimationBuilder<double>(
-                                tween: Tween(begin: 0.0, end: 1.0),
-                                duration: const Duration(milliseconds: 350),
-                                curve: Curves.easeOutBack,
-                                builder: (context, value, child) {
-                                  return Transform.scale(
-                                    scale: 0.8 + (0.2 * value),
-                                    child: Opacity(
-                                      opacity: value.clamp(0.0, 1.0),
-                                      child: child,
-                                    ),
-                                  );
-                                },
-                                child: Container(
-                                  padding: EdgeInsets.symmetric(
-                                      vertical: 28.h, horizontal: 32.w),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(16),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color:
-                                            Color(0xFFD1A439).withOpacity(0.2),
-                                        blurRadius: 20,
-                                        spreadRadius: 2,
+                            Get.dialog(
+                              Center(
+                                child: TweenAnimationBuilder<double>(
+                                  tween: Tween(begin: 0.0, end: 1.0),
+                                  duration: const Duration(milliseconds: 350),
+                                  curve: Curves.easeOutBack,
+                                  builder: (context, value, child) {
+                                    return Transform.scale(
+                                      scale: 0.8 + (0.2 * value),
+                                      child: Opacity(
+                                        opacity: value.clamp(0.0, 1.0),
+                                        child: child,
                                       ),
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.08),
-                                        blurRadius: 10,
-                                        offset: Offset(0, 4),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Container(
-                                        width: 56.w,
-                                        height: 56.w,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          gradient: LinearGradient(
-                                            colors: [
-                                              Color(0xFFFAF6E9),
-                                              Color(0xFFF5EDD6),
-                                            ],
-                                          ),
+                                    );
+                                  },
+                                  child: Container(
+                                    padding: EdgeInsets.symmetric(
+                                        vertical: 28.h, horizontal: 32.w),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(16),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Color(0xFFD1A439)
+                                              .withOpacity(0.2),
+                                          blurRadius: 20,
+                                          spreadRadius: 2,
                                         ),
-                                        child: Center(
-                                          child: SizedBox(
-                                            width: 28.w,
-                                            height: 28.w,
-                                            child: CircularProgressIndicator(
-                                              color: Color(0xFFD1A439),
-                                              strokeWidth: 3,
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.08),
+                                          blurRadius: 10,
+                                          offset: Offset(0, 4),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Container(
+                                          width: 56.w,
+                                          height: 56.w,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            gradient: LinearGradient(
+                                              colors: [
+                                                Color(0xFFFAF6E9),
+                                                Color(0xFFF5EDD6),
+                                              ],
+                                            ),
+                                          ),
+                                          child: Center(
+                                            child: SizedBox(
+                                              width: 28.w,
+                                              height: 28.w,
+                                              child: CircularProgressIndicator(
+                                                color: Color(0xFFD1A439),
+                                                strokeWidth: 3,
+                                              ),
                                             ),
                                           ),
                                         ),
-                                      ),
-                                      SizedBox(height: 18.h),
-                                      Text(
-                                        "Processing...".tr,
-                                        style: TextStyle(
-                                          fontSize: 15.sp,
-                                          fontWeight: FontWeight.w600,
-                                          color: Color(0xFF333333),
+                                        SizedBox(height: 18.h),
+                                        Text(
+                                          "Processing...".tr,
+                                          style: TextStyle(
+                                            fontSize: 15.sp,
+                                            fontWeight: FontWeight.w600,
+                                            color: Color(0xFF333333),
+                                          ),
                                         ),
-                                      ),
-                                      SizedBox(height: 6.h),
-                                      Text(
-                                        "Please wait a moment".tr,
-                                        style: TextStyle(
-                                          fontSize: 12.sp,
-                                          color: Color(0xFF999999),
+                                        SizedBox(height: 6.h),
+                                        Text(
+                                          "Please wait a moment".tr,
+                                          style: TextStyle(
+                                            fontSize: 12.sp,
+                                            color: Color(0xFF999999),
+                                          ),
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
+                              barrierColor: Colors.black.withOpacity(0.3),
+                              barrierDismissible: false,
+                            );
+
+                            var response = await NetworkAPICall().editData(
+                              '${Variables.baseUrl}deal',
+                              {"status": "accepted"},
+                            );
+
+                            if (response.statusCode == 200) {
+                              final BProfileController profileController =
+                                  Get.put(BProfileController());
+                              await profileController.fetchProfileData();
+                              Get.back(); // Close processing dialog
+                              ShowToast.showSuccessSnackBar(
+                                message: "Offer accepted successfully".tr,
+                              );
+
+                              // Mark that we are past the first deal flow
+                              await SharedPref()
+                                  .setBool(PrefKeys.isFirstDealFlow, false);
+
+                              // Trigger enforcement (Services -> Working Days)
+                              await _enforceBarberProfile(profileController);
+                            } else {
+                              Get.back(); // Close processing dialog
+                              ShowToast.showError(
+                                message: "Failed to accept the offer".tr,
+                              );
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFD1A439),
+                            foregroundColor: Colors.white,
+                            padding: EdgeInsets.symmetric(vertical: 12.h),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
                             ),
-                            barrierColor: Colors.black.withOpacity(0.3),
-                            barrierDismissible: false,
-                          );
-
-                          var response = await NetworkAPICall().editData(
-                            '${Variables.baseUrl}deal',
-                            {"status": "accepted"},
-                          );
-
-                          if (response.statusCode == 200) {
-                            final BProfileController profileController =
-                                Get.put(BProfileController());
-                            await profileController.fetchProfileData();
-                            Get.back(); // Close processing dialog
-                            ShowToast.showSuccessSnackBar(
-                              message: "Offer accepted successfully".tr,
-                            );
-
-                            // Mark that we are past the first deal flow
-                            await SharedPref()
-                                .setBool(PrefKeys.isFirstDealFlow, false);
-
-                            // Trigger enforcement (Services -> Working Days)
-                            await _enforceBarberProfile(profileController);
-                          } else {
-                            Get.back(); // Close processing dialog
-                            ShowToast.showError(
-                              message: "Failed to accept the offer".tr,
-                            );
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFD1A439),
-                          foregroundColor: Colors.white,
-                          padding: EdgeInsets.symmetric(vertical: 12.h),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                            elevation: 2,
                           ),
-                          elevation: 2,
-                        ),
-                        child: Text(
-                          "Accept Offer".tr,
-                          style: TextStyle(
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.bold,
+                          child: Text(
+                            "Accept Offer".tr,
+                            style: TextStyle(
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    SizedBox(width: 12.w),
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => {
-                          _isDealDialogOpen = false,
-                          Get.back(),
-                          //navigate to chat with support
-                          Get.toNamed(AppRouter.chatWithUsPath)
-                        },
-                        style: OutlinedButton.styleFrom(
-                          side: BorderSide(color: Color(0xFF757575)),
-                          padding: EdgeInsets.symmetric(vertical: 12.h),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                      SizedBox(width: 12.w),
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () {
+                            // Keep the dialog open and push the chat screen over it
+                            // When the user comes back, the dialog will still be there
+                            Get.toNamed(AppRouter.chatWithUsPath);
+                          },
+                          style: OutlinedButton.styleFrom(
+                            side: BorderSide(color: Color(0xFF757575)),
+                            padding: EdgeInsets.symmetric(vertical: 12.h),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
                           ),
-                        ),
-                        child: Text(
-                          "Contact Us".tr,
-                          style: TextStyle(
-                            color: Color(0xFF757575),
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w500,
+                          child: Text(
+                            "Contact Us".tr,
+                            style: TextStyle(
+                              color: Color(0xFF757575),
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),
       ),
-    ),
       barrierDismissible: false,
     );
   }
@@ -511,115 +509,115 @@ class MainController extends GetxController {
         onWillPop: () async => false,
         child: Dialog(
           backgroundColor: Colors.transparent,
-        child: Container(
-          width: 335.w,
-          padding: EdgeInsets.symmetric(vertical: 24.h, horizontal: 20.w),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 10,
-                offset: Offset(0, 4),
-              ),
-            ],
-          ),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 130.w,
-                  height: 130.h,
-                  decoration: BoxDecoration(
-                    color: Color(0xFFFAF6E9),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Center(
-                    child: Icon(
-                      Icons.access_time,
-                      size: 60.sp,
-                      color: Color(0xFFD1A439),
+          child: Container(
+            width: 335.w,
+            padding: EdgeInsets.symmetric(vertical: 24.h, horizontal: 20.w),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 10,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 130.w,
+                    height: 130.h,
+                    decoration: BoxDecoration(
+                      color: Color(0xFFFAF6E9),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Center(
+                      child: Icon(
+                        Icons.access_time,
+                        size: 60.sp,
+                        color: Color(0xFFD1A439),
+                      ),
                     ),
                   ),
-                ),
-                SizedBox(height: 24.h),
-                Text(
-                  "pleaseWait".tr,
-                  style: titleStyle,
-                ),
-                SizedBox(height: 10.h),
-                Text(
-                  "preparingOffer".tr,
-                  textAlign: TextAlign.center,
-                  style: subtitleStyle,
-                ),
-                SizedBox(height: 8.h),
-                Text(
-                  "notifyWhenReady".tr,
-                  textAlign: TextAlign.center,
-                  style: subtitleStyle.copyWith(
-                    fontSize: 14.sp,
-                    color: Color(0xFF888888),
+                  SizedBox(height: 24.h),
+                  Text(
+                    "pleaseWait".tr,
+                    style: titleStyle,
                   ),
-                ),
-                SizedBox(height: 24.h),
-                Container(
-                  padding: EdgeInsets.all(16.w),
-                  decoration: BoxDecoration(
-                    color: Color(0xFFF9F9F9),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: Color(0xFFEEEEEE)),
+                  SizedBox(height: 10.h),
+                  Text(
+                    "preparingOffer".tr,
+                    textAlign: TextAlign.center,
+                    style: subtitleStyle,
                   ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.info_outline,
-                        color: Color(0xFFD1A439),
-                        size: 24.sp,
-                      ),
-                      SizedBox(width: 12.w),
-                      Expanded(
-                        child: Text(
-                          "reviewingApplication".tr,
-                          style: TextStyle(
-                            fontSize: 14.sp,
-                            color: Color(0xFF555555),
+                  SizedBox(height: 8.h),
+                  Text(
+                    "notifyWhenReady".tr,
+                    textAlign: TextAlign.center,
+                    style: subtitleStyle.copyWith(
+                      fontSize: 14.sp,
+                      color: Color(0xFF888888),
+                    ),
+                  ),
+                  SizedBox(height: 24.h),
+                  Container(
+                    padding: EdgeInsets.all(16.w),
+                    decoration: BoxDecoration(
+                      color: Color(0xFFF9F9F9),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: Color(0xFFEEEEEE)),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.info_outline,
+                          color: Color(0xFFD1A439),
+                          size: 24.sp,
+                        ),
+                        SizedBox(width: 12.w),
+                        Expanded(
+                          child: Text(
+                            "reviewingApplication".tr,
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              color: Color(0xFF555555),
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-                SizedBox(height: 24.h),
-                // ElevatedButton(
-                //   onPressed: () => Get.back(),
-                //   style: ElevatedButton.styleFrom(
-                //     backgroundColor: Color(0xFFD1A439),
-                //     foregroundColor: Colors.white,
-                //     padding:
-                //         EdgeInsets.symmetric(vertical: 12.h, horizontal: 30.w),
-                //     shape: RoundedRectangleBorder(
-                //       borderRadius: BorderRadius.circular(8),
-                //     ),
-                //     minimumSize: Size(double.infinity, 50.h),
-                //     elevation: 2,
-                //   ),
-                //   child: Text(
-                //     "gotIt".tr,
-                //     style: TextStyle(
-                //       fontSize: 16.sp,
-                //       fontWeight: FontWeight.bold,
-                //     ),
-                //   ),
-                // ),
-              ],
+                  SizedBox(height: 24.h),
+                  // ElevatedButton(
+                  //   onPressed: () => Get.back(),
+                  //   style: ElevatedButton.styleFrom(
+                  //     backgroundColor: Color(0xFFD1A439),
+                  //     foregroundColor: Colors.white,
+                  //     padding:
+                  //         EdgeInsets.symmetric(vertical: 12.h, horizontal: 30.w),
+                  //     shape: RoundedRectangleBorder(
+                  //       borderRadius: BorderRadius.circular(8),
+                  //     ),
+                  //     minimumSize: Size(double.infinity, 50.h),
+                  //     elevation: 2,
+                  //   ),
+                  //   child: Text(
+                  //     "gotIt".tr,
+                  //     style: TextStyle(
+                  //       fontSize: 16.sp,
+                  //       fontWeight: FontWeight.bold,
+                  //     ),
+                  //   ),
+                  // ),
+                ],
+              ),
             ),
           ),
         ),
       ),
-    ),
       barrierDismissible: false,
     );
     _isWaitingDialogOpen = false;
@@ -627,8 +625,9 @@ class MainController extends GetxController {
 
   // Helper method to format timestamp to readable date
   String _formatDate(int timestamp) {
+    if (timestamp == 0) return "notJoinedYet".tr;
     DateTime date = DateTime.fromMillisecondsSinceEpoch(timestamp);
-    return DateFormat('MM/dd/yyyy').format(date);
+    return DateFormat('dd/MM/yyyy').format(date);
   }
 
   void changePage(int index) {
@@ -910,19 +909,23 @@ class Deal {
   });
 
   factory Deal.fromJson(Map<String, dynamic> json) {
+    int start = json['dealDateStart'] ?? 0;
+    int freeUntil = json['freeUntilDate'] ?? start;
+    
+    int calculatedFreeDays = 0;
+    if (freeUntil > start) {
+      calculatedFreeDays = DateTime.fromMillisecondsSinceEpoch(freeUntil)
+          .difference(DateTime.fromMillisecondsSinceEpoch(start))
+          .inDays;
+    }
+
     return Deal(
       id: json['_id'] ?? json['id'] ?? '',
-      dealDateStart: json['dealDateStart'] ?? 0,
+      dealDateStart: start,
       dealDateEnd: json['dealDateEnd'] ?? 0,
       qCuteSubscription: json['QCuteSubscription'] ?? 0,
       qCuteTax: json['QCuteTax'] ?? 0,
-      freeDaysNumber: json['freeDaysNumber'] ??
-          (json['freeUntilDate'] != null
-              ? DateTime.fromMillisecondsSinceEpoch(json['freeUntilDate'])
-                  .difference(DateTime.fromMillisecondsSinceEpoch(
-                      json['dealDateStart'] ?? 0))
-                  .inDays
-              : 0),
+      freeDaysNumber: json['FreeDaysCount'] ?? json['freeDaysCount'] ?? json['freeDaysNumber'] ?? calculatedFreeDays,
       status: json['status'] ?? '',
       barber: json['barber'] ?? '',
       createdAt: json['createdAt'] ?? '',
@@ -938,10 +941,16 @@ class DealResponse {
   DealResponse({required this.success, required this.deals});
 
   factory DealResponse.fromJson(Map<String, dynamic> json) {
+    List<Deal> dealsList = [];
+    if (json['deals'] != null) {
+      dealsList = (json['deals'] as List).map((deal) => Deal.fromJson(deal)).toList();
+    } else if (json['userOffer'] != null) {
+      dealsList = [Deal.fromJson(json['userOffer'])];
+    }
+    
     return DealResponse(
-      success: json['success'],
-      deals:
-          (json['deals'] as List).map((deal) => Deal.fromJson(deal)).toList(),
+      success: json['success'] ?? true,
+      deals: dealsList,
     );
   }
 }

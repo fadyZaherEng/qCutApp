@@ -12,6 +12,7 @@ import '../../../home_features/home/models/working_hours_range_model.dart';
 class SelectAppointmentTimeController extends GetxController {
   final NetworkAPICall _apiCall = NetworkAPICall();
   final RxList<TimeSlot> timeSlots = <TimeSlot>[].obs;
+  final RxInt totalMinTime = 0.obs; // Total min duration in minutes
 
   final RxList<int> availableDaysTimestamps = <int>[].obs;
   final RxList<WalkInRecord> walkInRanges = <WalkInRecord>[].obs;
@@ -265,6 +266,11 @@ class SelectAppointmentTimeController extends GetxController {
 
   void setSelectedServices(List<Map<String, dynamic>> services) {
     selectedServices.value = services;
+  }
+
+  void setTotalMinTime(int minTime) {
+    totalMinTime.value = minTime;
+    update(['timeSlots']);
   }
 
   bool hasSlotsForDay(int day) {

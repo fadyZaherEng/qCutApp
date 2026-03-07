@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
@@ -301,6 +302,10 @@ class _CustomAddNewServiceBottomSheetState
 
             /// Service Price Input
             CustomTextFormField(
+              keyboardType: TextInputType.number,
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+              ],
               style: Styles.textStyleS14W400(
                 color: ColorsData.secondary,
               ),

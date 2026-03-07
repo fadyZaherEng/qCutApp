@@ -17,7 +17,9 @@ class BannedView extends StatelessWidget {
     final String banReason = args['banReason'] ?? (isArchived 
         ? "Your account has been deleted. Please contact support for more details.".tr
         : "Your account has been banned for misuse of the app.".tr);
-    final int? bannedUntilMs = args['bannedUntil'];
+    final dynamic bannedUntilRaw = args['bannedUntil'];
+    final int? bannedUntilMs =
+        (bannedUntilRaw is int) ? bannedUntilRaw : null;
     final int? daysRemaining = args['daysRemaining'];
 
     String bannedUntilFormatted = "";

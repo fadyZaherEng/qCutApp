@@ -158,14 +158,15 @@ class _LoginViewState extends State<LoginView> {
                         ),
                         const Spacer(),
                         InkWell(
-                            onTap: () {
-                              Get.toNamed(AppRouter.forgetPasswordPath);
-                            },
-                            child: Text(
-                              'forgetPassword'.tr,
-                              style: Styles.textStyleS14W400(
-                                  color: ColorsData.primary),
-                            )),
+                          onTap: () {
+                            Get.toNamed(AppRouter.forgetPasswordPath);
+                          },
+                          child: Text(
+                            'forgetPassword'.tr,
+                            style: Styles.textStyleS14W400(
+                                color: ColorsData.primary),
+                          ),
+                        ),
                       ],
                     ),
                     SizedBox(height: 16.h),
@@ -182,25 +183,6 @@ class _LoginViewState extends State<LoginView> {
                             ),
                     ),
                     SizedBox(height: 16.h),
-                    // Row(
-                    //   mainAxisAlignment: MainAxisAlignment.center,
-                    //   children: [
-                    //     Text(
-                    //       'continue'.tr,
-                    //       style: Styles.textStyleS14W400(),
-                    //     ),
-                    //     SizedBox(width: 5.w),
-                    //     InkWell(
-                    //         onTap: () {
-                    //           Get.offAllNamed(AppRouter.homPath);
-                    //         },
-                    //         child: Text(
-                    //           'asAGuest'.tr,
-                    //           style: Styles.textStyleS14W400(
-                    //               color: ColorsData.primary),
-                    //         )),
-                    //   ],
-                    // ),
                   ],
                 ),
               ),

@@ -130,7 +130,7 @@ class _SignUpViewState extends State<SignUpView> {
                       ),
                       SizedBox(height: 16.h),
                       CustomTextFormField(
-                        keyboardType: TextInputType.number,
+                        keyboardType: TextInputType.phone,
                         controller: _authController.phoneNumberController,
                         hintText: 'enterYourPhoneNumber'.tr,
                         validator: (value) =>
@@ -169,22 +169,10 @@ class _SignUpViewState extends State<SignUpView> {
                       (SharedPref().getBool(PrefKeys.userRole)) == false
                           ? CustomTextFormField(
                               controller: _authController.city,
-                              hintText: 'pleaseEnterCityNameInArabic'.tr,
-                              textDirection: TextDirection.rtl,
-                              // Set text direction to RTL for Arabic
-                              // Use custom formatter to allow only Arabic characters and show toast
-                              inputFormatters: [
-                                ArabicInputFormatter(),
-                              ],
+                              hintText: 'City'.tr,
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
                                   return 'Please enter your City'.tr;
-                                }
-                                // Validate that city name is in Arabic
-                                final arabicValidation =
-                                    validateArabicText(value);
-                                if (arabicValidation != null) {
-                                  return arabicValidation;
                                 }
                                 return null;
                               },
@@ -319,41 +307,5 @@ class _SignUpViewState extends State<SignUpView> {
         ),
       ),
     );
-  }
-}
-
-class ArabicInputFormatter extends TextInputFormatter {
-  @override
-  TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue,
-    TextEditingValue newValue,
-  ) {
-    if (newValue.text.isEmpty) {
-      return newValue;
-    }
-
-    // Regex match (Arabic characters and spaces)
-    final validChars = RegExp(r'^[\u0600-\u06FF\s]+\$');
-
-    // If the new text is fully valid, allow it
-    if (validChars.hasMatch(newValue.text)) {
-      return newValue;
-    }
-
-    // Check if we are adding text
-    if (newValue.text.length > oldValue.text.length) {
-      // Check if the NEWLY added characters are invalid
-      // For simplicity, just check if the new text has ANY invalid char (which it does, otherwise the previous check would pass)
-
-      // Show toast error
-      ShowToast.showError(message: 'pleaseEnterCityNameInArabic'.tr);
-      return oldValue; // Reject change
-    }
-
-    // If we are here, it might be deletion or complex change, allow valid subset if feasible or assume blocking was handled above.
-    // However, if validChars failed, it means there are invalid chars.
-    // If it was a paste, we reject it. If it was typing, we reject it.
-
-    return oldValue;
   }
 }

@@ -63,6 +63,17 @@ class _OnHoldAppointmentViewState extends State<OnHoldAppointmentView> {
 
         controller.setSelectedServices(servicesList);
         print("Set services for on-hold: ${controller.selectedServices}");
+
+        // Calculate total min duration for display (using 'from' time, not average)
+        if (selectedServices!.barberServices != null) {
+          int totalMin = 0;
+          for (int i = 0; i < selectedServices!.barberServices!.length; i++) {
+            final service = selectedServices!.barberServices![i];
+            final quantity = selectedServices!.services[i].numberOfUsers;
+            totalMin += (service.minTime ~/ 60000) * quantity;
+          }
+          controller.setTotalMinTime(totalMin);
+        }
       } else {
         print("Warning: No services selected in on-hold view");
       }
@@ -204,8 +215,19 @@ class _OnHoldAppointmentViewState extends State<OnHoldAppointmentView> {
                             appointmentDate: controller
                                 .selectedTimeSlot.value!.dayName
                                 .toString(),
-                            appointmentTime: startTime,
-                            serviceDuration: "20");
+                            appointmentTime: (() {
+                              final slot = controller.selectedTimeSlot.value!;
+                              final startTimeStr = DateFormat('HH:mm').format(slot.startTime);
+                              final DateTime endTimeAdjusted =
+                                  controller.totalMinTime.value > 0
+                                      ? slot.startTime.add(Duration(
+                                          minutes:
+                                              controller.totalMinTime.value))
+                                      : slot.endTime;
+                              final endTimeStr = DateFormat('HH:mm').format(endTimeAdjusted);
+                              return "$startTimeStr-$endTimeStr";
+                            })(),
+                            serviceDuration: "${controller.totalMinTime.value}");
 
                     Get.toNamed(AppRouter.bookAppointmentWithPaymentMethodsPath,
                         arguments: {

@@ -7,6 +7,7 @@ import 'package:q_cut/core/utils/network/network_helper.dart';
 import 'package:q_cut/core/utils/styles.dart';
 import 'package:q_cut/modules/barber/features/home_features/profile_features/profile_display/logic/b_profile_controller.dart';
 import 'package:q_cut/modules/barber/features/home_features/profile_features/profile_display/models/barber_profile_model.dart';
+import 'package:q_cut/modules/barber/features/home_features/profile_features/profile_display/views/widgets/custom_24h_time_picker.dart';
 import 'package:q_cut/modules/customer/features/home/presentation/views/widgets/working_days_bottom_sheet.dart';
 
 void showWorkingDaysBottomSheet(BuildContext context) {
@@ -328,20 +329,9 @@ Widget _buildTimePickerField(
       SizedBox(height: 8.h),
       InkWell(
         onTap: () async {
-          final picked = await showTimePicker(
-            context: context,
+          final picked = await showCustom24HTimePicker(
+            context,
             initialTime: TimeOfDay(hour: hour.value, minute: minute.value),
-            builder: (context, child) {
-              return Theme(
-                data: Theme.of(context).copyWith(
-                  colorScheme: const ColorScheme.dark(
-                    primary: ColorsData.primary,
-                    onSurface: Colors.white,
-                  ),
-                ),
-                child: child!,
-              );
-            },
           );
           if (picked != null) {
             hour.value = picked.hour;

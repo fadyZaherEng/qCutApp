@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'package:get/get.dart';
+import 'package:q_cut/core/services/shared_pref/pref_keys.dart';
+import 'package:q_cut/core/services/shared_pref/shared_pref.dart';
 import 'package:q_cut/core/utils/app_router.dart';
 import 'package:q_cut/core/utils/network/api.dart';
 import 'package:q_cut/core/utils/network/network_helper.dart';
@@ -21,7 +23,8 @@ class QCutServicesController extends GetxController {
     errorMessage.value = '';
     try {
       final response;
-      if (barberId.isEmpty) {
+      if (barberId.isEmpty ||
+          SharedPref().getBool(PrefKeys.userRole) == false) {
         final String apiUrl = Variables.GET_BARBER_SERVICES;
         response = await _apiCall.getData(apiUrl);
       } else {

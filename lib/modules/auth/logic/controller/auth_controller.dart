@@ -260,13 +260,20 @@ class AuthController extends GetxController {
         if (loginResponse.value?.isBanned == true ||
             loginResponse.value?.status == "archived") {
           final res = loginResponse.value!;
-
           String finalReason = "";
           if (res.status == "archived") {
             if (res.archiveReason == "unpaid") {
-              finalReason =
-                  "Your account has been archived due to unpaid subscription."
-                      .tr;
+              // Force isChecked to false to prevent auto-login on refresh (restart)
+              await saveLoginData(
+                  responseBody, loginResponse.value!, false);
+              
+              // Save password for background ban checks
+              await SharedPref()
+                  .setString(PrefKeys.password, passwordController.text);
+              
+              // Use offNamed to replace login screen and prevent swiping back
+              Get.offNamed(AppRouter.unpaidPath);
+              return;
             } else if (res.archiveReason == "banned") {
               finalReason = res.banReason?.isNotEmpty == true
                   ? res.banReason!
@@ -289,7 +296,7 @@ class AuthController extends GetxController {
             "isArchived": res.status == "archived",
             "archiveReason": res.archiveReason,
             "banReason": finalReason,
-            "bannedUntil": res.bannedUntil ?? 17000000000000,
+            "bannedUntil": res.bannedUntil ?? "",
             "daysRemaining": res.daysRemaining,
             "deleteDate": res.deleteDate,
             "deleteReason": res.deleteReason,

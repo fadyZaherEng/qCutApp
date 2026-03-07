@@ -120,9 +120,32 @@ class CitySelectionView extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'cityList'.tr,
-                    style: Styles.textStyleS16W700(),
+                  Row(
+                    children: [
+                      Text(
+                        'cityList'.tr,
+                        style: Styles.textStyleS16W700(),
+                      ),
+                      if (isSelectionMode) ...[
+                        const SizedBox(width: 8),
+                        Obx(() => GestureDetector(
+                          onTap: () => controller.toggleSelectAll(),
+                          child: Row(
+                            children: [
+                              Text(
+                                "(${'selectAll'.tr})",
+                                style: Styles.textStyleS14W400(color: ColorsData.primary),
+                              ),
+                              Checkbox(
+                                value: controller.isAllSelected(),
+                                onChanged: (val) => controller.toggleSelectAll(),
+                                activeColor: ColorsData.primary,
+                              ),
+                            ],
+                          ),
+                        )),
+                      ],
+                    ],
                   ),
                   Obx(() => Container(
                         padding: const EdgeInsets.all(8.0),

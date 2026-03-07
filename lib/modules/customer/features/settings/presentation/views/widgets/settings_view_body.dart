@@ -48,8 +48,7 @@ class _SettingViewBodyState extends State<SettingViewBody> {
                 children: [
                   Container(
                     padding:
-                        EdgeInsets.only(top: 16.h, left: 16.w, right: 16.w),
-                    height: 161.h,
+                        EdgeInsets.all(16.r),
                     width: double.infinity,
                     decoration: BoxDecoration(
                       border: Border.all(color: ColorsData.cardStrock),
