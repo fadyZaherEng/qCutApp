@@ -263,16 +263,16 @@ class AuthController extends GetxController {
           String finalReason = "";
           if (res.status == "archived") {
             if (res.archiveReason == "unpaid") {
+              // Force isChecked to false to prevent auto-login on refresh (restart)
               await saveLoginData(
-                  responseBody, loginResponse.value!, isChecked);
+                  responseBody, loginResponse.value!, false);
+              
               // Save password for background ban checks
               await SharedPref()
                   .setString(PrefKeys.password, passwordController.text);
-              Get.toNamed(AppRouter.unpaidPath)
-              ?.then((_) =>
-                  //clear all shared pref data
-                  SharedPref().clearPreferences()
-              );
+              
+              // Use offNamed to replace login screen and prevent swiping back
+              Get.offNamed(AppRouter.unpaidPath);
               return;
             } else if (res.archiveReason == "banned") {
               finalReason = res.banReason?.isNotEmpty == true
