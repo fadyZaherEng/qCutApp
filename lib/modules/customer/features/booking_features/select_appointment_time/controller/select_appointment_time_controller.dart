@@ -270,6 +270,7 @@ class SelectAppointmentTimeController extends GetxController {
 
   void setTotalMinTime(int minTime) {
     totalMinTime.value = minTime;
+    update(['timeSlots']);
   }
 
   bool hasSlotsForDay(int day) {

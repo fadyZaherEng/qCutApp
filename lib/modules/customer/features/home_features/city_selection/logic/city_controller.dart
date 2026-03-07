@@ -168,6 +168,21 @@ class CityController extends GetxController {
     return selectedCities.any((c) => c.name == city.name);
   }
 
+  bool isAllSelected() {
+    if (filteredCities.isEmpty) return false;
+    return filteredCities.every((city) => isCitySelected(city));
+  }
+
+  void toggleSelectAll() async {
+    if (isAllSelected()) {
+      selectedCities.clear();
+    } else {
+      selectedCities.addAll(filteredCities);
+    }
+    selectedCities.refresh();
+    await saveSelectedCities();
+  }
+
   void toggleCitySelection(City city) async {
     if (isCitySelected(city)) {
       selectedCities.removeWhere((c) => c.name == city.name);

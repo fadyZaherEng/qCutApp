@@ -56,17 +56,6 @@ class BookAppointmentView extends GetView<SelectAppointmentTimeController> {
 
         controller.setSelectedServices(servicesList);
         print("${"setServices".tr}: ${controller.selectedServices}");
-
-        // Calculate total min duration for display
-        if (selectedServices.barberServices != null) {
-          int totalMin = 0;
-          for (int i = 0; i < selectedServices.barberServices!.length; i++) {
-            final service = selectedServices.barberServices![i];
-            final quantity = selectedServices.services[i].numberOfUsers;
-            totalMin += (service.minTime ~/ 60000) * quantity;
-          }
-          controller.setTotalMinTime(totalMin);
-        }
       } else {
         print("warningNoServices".tr);
       }
@@ -245,16 +234,8 @@ class BookAppointmentView extends GetView<SelectAppointmentTimeController> {
                               final slot = controller.selectedTimeSlot.value!;
                               final startTime =
                                   DateFormat('HH:mm').format(slot.startTime);
-
-                              final DateTime endTimeAdjusted =
-                                  controller.totalMinTime.value > 0
-                                      ? slot.startTime.add(Duration(
-                                          minutes:
-                                              controller.totalMinTime.value))
-                                      : slot.endTime;
-
                               final endTime =
-                                  DateFormat('HH:mm').format(endTimeAdjusted);
+                                  DateFormat('HH:mm').format(slot.endTime);
                               final timeRange = "$startTime-$endTime";
 
                               // 🟢 جهز بيانات الخدمات مرة واحدة

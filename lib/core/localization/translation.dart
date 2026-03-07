@@ -565,6 +565,7 @@ class MyTranslation extends Translations {
           "searchCity": "ابحث عن مدينة",
           "cityList": "قائمة المدن",
           "noCitiesAvailable": "لا توجد مدن متاحة حالياً",
+          "selectAll": "اختيار الكل",
           "Not Attended": "لم يحضر",
           "Completed": "مكتمل",
           "status": "حالة الحجز",
@@ -1448,6 +1449,7 @@ class MyTranslation extends Translations {
               "Your account has been archived because you didn't pay your monthly fee.",
           "pleasePayToActivate": "please pay so you become active",
           "payToQcutBtn": "Pay to Qcut",
+          "selectAll": "Select All",
         },
         "he": {
           "emailreq": "דרוש אימייל",
@@ -2092,6 +2094,7 @@ class MyTranslation extends Translations {
               "חשבונך הועבר לארכיון מכיוון שלא שילמת את העמלה החודשית שלך.",
           "pleasePayToActivate": "אנא שלם כדי להפוך לפעיל",
           "payToQcutBtn": "שלם ל-Qcut",
+          "selectAll": "בחר הכל",
         },
       };
 }
