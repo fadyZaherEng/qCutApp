@@ -456,11 +456,10 @@ class MainController extends GetxController {
                       SizedBox(width: 12.w),
                       Expanded(
                         child: OutlinedButton(
-                          onPressed: () => {
-                            _isDealDialogOpen = false,
-                            Get.back(),
-                            //navigate to chat with support
-                            Get.toNamed(AppRouter.chatWithUsPath)
+                          onPressed: () {
+                            // Keep the dialog open and push the chat screen over it
+                            // When the user comes back, the dialog will still be there
+                            Get.toNamed(AppRouter.chatWithUsPath);
                           },
                           style: OutlinedButton.styleFrom(
                             side: BorderSide(color: Color(0xFF757575)),
@@ -926,7 +925,7 @@ class Deal {
       dealDateEnd: json['dealDateEnd'] ?? 0,
       qCuteSubscription: json['QCuteSubscription'] ?? 0,
       qCuteTax: json['QCuteTax'] ?? 0,
-      freeDaysNumber: json['freeDaysNumber'] ?? calculatedFreeDays,
+      freeDaysNumber: json['freeDaysCount'] ?? json['freeDaysCount'] ?? calculatedFreeDays,
       status: json['status'] ?? '',
       barber: json['barber'] ?? '',
       createdAt: json['createdAt'] ?? '',
