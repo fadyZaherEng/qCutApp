@@ -1,5 +1,5 @@
 # q_cut
-Flutter SDK 3.29.3
+## Flutter SDK 3.29.3
 
  Q Cut – Barber & Client Mobile Application
 Developed a cross-platform mobile application connecting barbers with clients for booking, scheduling, and service management. Implemented features for real-time appointment booking, service selection, pricing display, and client reviews. Integrated push notifications, secure authentication, and a responsive UI for both barber and customer roles. Built using Flutter, Firebase, and REST APIs.
